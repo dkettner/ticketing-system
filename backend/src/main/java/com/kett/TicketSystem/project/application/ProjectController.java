@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.project.application;
 
+import com.kett.TicketSystem.TicketSystemService;
 import com.kett.TicketSystem.project.domain.Project;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,16 +15,16 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/projects")
 public class ProjectController {
-    private final ProjectService projectService;
+    private final TicketSystemService ticketSystemService;
 
     @Autowired
-    public ProjectController(ProjectService projectService) {
-        this.projectService = projectService;
+    public ProjectController(TicketSystemService ticketSystemService) {
+        this.ticketSystemService = ticketSystemService;
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Project> getProjectById(@PathVariable UUID id) {
-        Project project = projectService.getProjectById(id);
+        Project project = ticketSystemService.getProjectById(id);
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 }
