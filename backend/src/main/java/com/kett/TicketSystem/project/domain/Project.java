@@ -56,11 +56,10 @@ public class Project {
         this.name = name;
         this.description = description;
         this.creatorId = creatorId;
-        this.memberIds.addAll(memberIds);
         this.creationTime = LocalDateTime.now();
-        this.memberIds.addAll(memberIds);
-        if (memberIds.contains(creatorId)) {
-            memberIds.add(creatorId);
+        this.memberIds.addAll(memberIds); // TODO: Check for duplicates?
+        if (!this.memberIds.contains(creatorId)) {
+            this.memberIds.add(creatorId);
         }
     }
 }
