@@ -26,8 +26,8 @@ public class Project {
     @Setter
     private String description;
 
-    @Getter(AccessLevel.PROTECTED)
-    @Setter
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
     private UUID creatorId;
 
     @Getter
