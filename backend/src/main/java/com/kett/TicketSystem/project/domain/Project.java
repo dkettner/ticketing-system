@@ -58,5 +58,9 @@ public class Project {
         this.creatorId = creatorId;
         this.memberIds.addAll(memberIds);
         this.creationTime = LocalDateTime.now();
+        this.memberIds.addAll(memberIds);
+        if (memberIds.contains(creatorId)) {
+            memberIds.add(creatorId);
+        }
     }
 }
