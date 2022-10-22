@@ -1,6 +1,5 @@
-package com.kett.TicketSystem.project.application;
+package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.TicketSystemService;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;

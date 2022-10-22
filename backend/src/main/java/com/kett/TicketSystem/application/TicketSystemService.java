@@ -1,4 +1,4 @@
-package com.kett.TicketSystem;
+package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.domain.Project;
