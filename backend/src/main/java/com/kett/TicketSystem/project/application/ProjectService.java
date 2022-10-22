@@ -17,6 +17,8 @@ public class ProjectService {
     }
 
     public Project getProjectById(UUID id) {
-        throw new UnsupportedOperationException();
+        return projectRepository
+                .findById(id)
+                .orElseThrow(() -> new RuntimeException("project not found"));
     }
 }
