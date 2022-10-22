@@ -3,7 +3,7 @@ package com.kett.TicketSystem.project.application;
 import com.kett.TicketSystem.TicketSystemService;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.ProjectException;
-import com.kett.TicketSystem.project.domain.ProjectNotFoundException;
+import com.kett.TicketSystem.project.domain.NoProjectFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,15 +27,14 @@ public class ProjectController {
         return new ResponseEntity<>(project, HttpStatus.OK);
     }
 
-    // Exception Handlers
 
     @ExceptionHandler(ProjectException.class)
     public ResponseEntity<String> handleProjectException(ProjectException projectException) {
         return new ResponseEntity<>(projectException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ProjectNotFoundException.class)
-    public ResponseEntity<String> handleProjectNotFoundException(ProjectNotFoundException projectNotFoundException) {
-        return new ResponseEntity<>(projectNotFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    @ExceptionHandler(NoProjectFoundException.class)
+    public ResponseEntity<String> handleNoProjectFoundException(NoProjectFoundException noProjectFoundException) {
+        return new ResponseEntity<>(noProjectFoundException.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
