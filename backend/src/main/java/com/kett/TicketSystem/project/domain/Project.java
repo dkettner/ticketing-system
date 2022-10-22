@@ -40,6 +40,19 @@ public class Project {
     private List<UUID> memberIds = new ArrayList<>();
 
     public Project(String name, String description, UUID creatorId, List<UUID> memberIds) {
+        if (name == null || name.isEmpty()) {
+            throw new ProjectException("name must not be null or empty");
+        }
+        if (description == null || description.isEmpty()) {
+            throw new ProjectException("description must not be null or empty");
+        }
+        if (creatorId == null) {
+            throw new ProjectException("creatorId must not be null");
+        }
+        if (memberIds == null) {
+            throw new ProjectException("memberIds must not be null");
+        }
+
         this.name = name;
         this.description = description;
         this.creatorId = creatorId;
