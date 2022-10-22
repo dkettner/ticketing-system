@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.application.dto.ProjectDto;
+import com.kett.TicketSystem.application.dto.ProjectResponseDto;
 
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
@@ -22,9 +22,9 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectDto> getProjectDtoById(@PathVariable UUID id) {
-        ProjectDto projectDto = ticketSystemService.fetchProjectDtoById(id);
-        return new ResponseEntity<>(projectDto, HttpStatus.OK);
+    public ResponseEntity<ProjectResponseDto> getProjectDtoById(@PathVariable UUID id) {
+        ProjectResponseDto projectResponseDto = ticketSystemService.fetchProjectResponseDtoById(id);
+        return new ResponseEntity<>(projectResponseDto, HttpStatus.OK);
     }
 
 

@@ -7,17 +7,17 @@ public class DtoMapper {
     private final ModelMapper modelMapper = new ModelMapper();
 
     public DtoMapper() {
-        modelMapper.typeMap(Project.class, ProjectDto.class).addMappings(mapper -> {
-            mapper.map(Project::getId, ProjectDto::setId);
-            mapper.map(Project::getName, ProjectDto::setName);
-            mapper.map(Project::getDescription, ProjectDto::setDescription);
-            mapper.map(Project::getCreatorId, ProjectDto::setCreatorId);
-            mapper.map(Project::getCreationTime, ProjectDto::setCreationTime);
-            mapper.map(Project::getMemberIds, ProjectDto::setMemberIds);
+        modelMapper.typeMap(Project.class, ProjectResponseDto.class).addMappings(mapper -> {
+            mapper.map(Project::getId, ProjectResponseDto::setId);
+            mapper.map(Project::getName, ProjectResponseDto::setName);
+            mapper.map(Project::getDescription, ProjectResponseDto::setDescription);
+            mapper.map(Project::getCreatorId, ProjectResponseDto::setCreatorId);
+            mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
+            mapper.map(Project::getMemberIds, ProjectResponseDto::setMemberIds);
         });
     }
 
-    public ProjectDto mapProjectToProjectDto(Project project) {
-        return modelMapper.map(project, ProjectDto.class);
+    public ProjectResponseDto mapProjectToProjectResponseDto(Project project) {
+        return modelMapper.map(project, ProjectResponseDto.class);
     }
 }
