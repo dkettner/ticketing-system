@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.project.domain;
+package com.kett.TicketSystem.application.dto;
 
 import lombok.*;
 import java.time.LocalDateTime;
