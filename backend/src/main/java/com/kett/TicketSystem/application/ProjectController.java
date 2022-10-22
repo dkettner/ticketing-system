@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.project.domain.Project;
+import com.kett.TicketSystem.application.dto.ProjectDto;
+
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,9 +22,9 @@ public class ProjectController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Project> getProjectById(@PathVariable UUID id) {
-        Project project = ticketSystemService.getProjectById(id);
-        return new ResponseEntity<>(project, HttpStatus.OK);
+    public ResponseEntity<ProjectDto> getProjectDtoById(@PathVariable UUID id) {
+        ProjectDto projectDto = ticketSystemService.fetchProjectDtoById(id);
+        return new ResponseEntity<>(projectDto, HttpStatus.OK);
     }
 
 
