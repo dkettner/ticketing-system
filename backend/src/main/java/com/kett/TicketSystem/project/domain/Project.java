@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.project.domain;
 
+import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import lombok.*;
 
 import javax.persistence.*;

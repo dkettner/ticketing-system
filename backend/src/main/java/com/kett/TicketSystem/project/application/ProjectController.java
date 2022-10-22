@@ -2,8 +2,8 @@ package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.TicketSystemService;
 import com.kett.TicketSystem.project.domain.Project;
-import com.kett.TicketSystem.project.domain.ProjectException;
-import com.kett.TicketSystem.project.domain.NoProjectFoundException;
+import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
+import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

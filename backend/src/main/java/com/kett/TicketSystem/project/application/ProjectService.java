@@ -1,7 +1,7 @@
 package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.project.domain.Project;
-import com.kett.TicketSystem.project.domain.NoProjectFoundException;
+import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
