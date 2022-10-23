@@ -42,6 +42,7 @@ public class Ticket {
 
     @Getter
     @Setter
+    @Enumerated(EnumType.STRING)
     private TicketStatus ticketStatus;
 
     @Getter
