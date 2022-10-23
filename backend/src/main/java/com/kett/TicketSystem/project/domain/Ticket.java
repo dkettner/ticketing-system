@@ -13,10 +13,10 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Ticket {
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Setter(AccessLevel.PROTECTED)
-    @Getter
     private UUID id;
 
     @Getter
@@ -54,9 +54,9 @@ public class Ticket {
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> assigneeIds = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Getter
     @Setter
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Ticket> tickets = new ArrayList<>();
 
     public Ticket(String title, String description, LocalDateTime dueTime, UUID creatorId, List<UUID> assigneeIds) {
