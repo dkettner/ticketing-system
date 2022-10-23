@@ -21,6 +21,11 @@ public class Ticket {
 
     @Getter
     @Setter
+    @Column(unique = true)
+    private UUID ticketNumber;
+
+    @Getter
+    @Setter
     private String title;
 
     @Getter
@@ -68,6 +73,7 @@ public class Ticket {
             throw new TicketException("memberIds must not be null");
         }
 
+        this.ticketNumber = UUID.randomUUID();
         this.title = title;
         this.description = title;
         this.creationTime = LocalDateTime.now();
