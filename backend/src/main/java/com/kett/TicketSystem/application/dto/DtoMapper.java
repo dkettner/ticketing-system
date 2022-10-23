@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.application.dto;
 
 import com.kett.TicketSystem.project.domain.Project;
+import com.kett.TicketSystem.project.domain.Ticket;
 import org.modelmapper.ModelMapper;
 
 public class DtoMapper {
@@ -15,9 +16,24 @@ public class DtoMapper {
             mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
             mapper.map(Project::getMemberIds, ProjectResponseDto::setMemberIds);
         });
+
+        modelMapper.typeMap(Ticket.class, TicketResponseDto.class).addMappings(mapper -> {
+            mapper.map(Ticket::getTicketNumber, TicketResponseDto::setTicketNumber);
+            mapper.map(Ticket::getTitle, TicketResponseDto::setTitle);
+            mapper.map(Ticket::getDescription, TicketResponseDto::setDescription);
+            mapper.map(Ticket::getCreationTime, TicketResponseDto::setCreationTime);
+            mapper.map(Ticket::getDueTime, TicketResponseDto::setCreationTime);
+            mapper.map(Ticket::getTicketStatus, TicketResponseDto:: setTicketStatus);
+            mapper.map(Ticket::getCreatorId, TicketResponseDto::setCreatorId);
+            mapper.map(Ticket::getAssigneeIds, TicketResponseDto::setAssigneeIds);
+        });
     }
 
     public ProjectResponseDto mapProjectToProjectResponseDto(Project project) {
         return modelMapper.map(project, ProjectResponseDto.class);
+    }
+
+    public TicketResponseDto mapTicketToTicketResponseDto(Ticket ticket) {
+        return modelMapper.map(ticket, TicketResponseDto.class);
     }
 }
