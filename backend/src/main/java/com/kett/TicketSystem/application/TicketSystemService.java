@@ -32,4 +32,9 @@ public class TicketSystemService {
         List<Ticket> tickets = projectService.getTicketsByProjectId(id);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
+
+    public TicketResponseDto fetchTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
+        Ticket ticket = projectService.getTicketByProjectIdAndTicketNumber(id, ticketNumber);
+        return dtoMapper.mapTicketToTicketResponseDto(ticket);
+    }
 }

@@ -39,6 +39,12 @@ public class ProjectController {
         return new ResponseEntity<>(ticketDtos, HttpStatus.OK);
     }
 
+    @GetMapping("/{id}/tickets/{ticketNumber}")
+    public ResponseEntity<TicketResponseDto> getTicketByProjectIdAndTicketNumber(@PathVariable UUID id, @PathVariable UUID ticketNumber) {
+        TicketResponseDto ticketDto = ticketSystemService.fetchTicketByProjectIdAndTicketNumber(id, ticketNumber);
+        return new ResponseEntity<>(ticketDto, HttpStatus.OK);
+    }
+
     // exception handlers
 
     @ExceptionHandler(ProjectException.class)
