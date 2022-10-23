@@ -27,7 +27,8 @@ public class DtoMapper {
             mapper.map(Project::getCreatorId, ProjectResponseDto::setCreatorId);
             mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
             mapper.map(Project::getMemberIds, ProjectResponseDto::setMemberIds);
-            mapper.map(src -> mapTicketListToTicketResponseDtoList(src.getTickets()), ProjectResponseDto::setTickets);
+            mapper.map(project ->
+                    mapTicketListToTicketResponseDtoList(project.getTickets()), ProjectResponseDto::setTickets);
         });
     }
 
