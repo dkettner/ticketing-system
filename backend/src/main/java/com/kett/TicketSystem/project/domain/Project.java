@@ -40,6 +40,11 @@ public class Project {
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> memberIds = new ArrayList<>();
 
+    @Getter
+    @Setter
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Ticket> tickets = new ArrayList<>();
+
     public Project(String name, String description, UUID creatorId, List<UUID> memberIds) {
         if (name == null || name.isEmpty()) {
             throw new ProjectException("name must not be null or empty");
