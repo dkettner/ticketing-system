@@ -54,6 +54,11 @@ public class Ticket {
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> assigneeIds = new ArrayList<>();
 
+    @OneToMany
+    @Getter
+    @Setter
+    private List<Ticket> tickets = new ArrayList<>();
+
     public Ticket(String title, String description, LocalDateTime dueTime, UUID creatorId, List<UUID> assigneeIds) {
         if (title == null || title.isEmpty()) {
             throw new TicketException("title must not be null or empty");
