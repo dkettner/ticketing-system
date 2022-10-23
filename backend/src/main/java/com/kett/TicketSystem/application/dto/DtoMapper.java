@@ -4,6 +4,8 @@ import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.Ticket;
 import org.modelmapper.ModelMapper;
 
+import java.util.List;
+
 public class DtoMapper {
     private final ModelMapper modelMapper = new ModelMapper();
 
@@ -15,6 +17,7 @@ public class DtoMapper {
             mapper.map(Project::getCreatorId, ProjectResponseDto::setCreatorId);
             mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
             mapper.map(Project::getMemberIds, ProjectResponseDto::setMemberIds);
+            mapper.map(src -> mapTicketListToTicketResponseDto(src.getTickets()), ProjectResponseDto::setTickets);
         });
 
         modelMapper.typeMap(Ticket.class, TicketResponseDto.class).addMappings(mapper -> {
@@ -35,5 +38,12 @@ public class DtoMapper {
 
     public TicketResponseDto mapTicketToTicketResponseDto(Ticket ticket) {
         return modelMapper.map(ticket, TicketResponseDto.class);
+    }
+
+    public List<TicketResponseDto> mapTicketListToTicketResponseDto(List<Ticket> tickets) {
+        return tickets
+                .stream()
+                .map(ticket -> modelMapper.map(ticket, TicketResponseDto.class))
+                .toList();
     }
 }

@@ -17,4 +17,5 @@ public class ProjectResponseDto {
     private UUID creatorId;
     private LocalDateTime creationTime;
     private List<UUID> memberIds = new ArrayList<>();
+    private List<TicketResponseDto> tickets = new ArrayList<>();
 }
