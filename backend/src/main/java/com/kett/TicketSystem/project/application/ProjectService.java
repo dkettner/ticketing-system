@@ -2,6 +2,7 @@ package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.Ticket;
+import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
@@ -51,5 +52,16 @@ public class ProjectService {
 
     public Project addProject(Project project) {
         return projectRepository.save(project);
+    }
+
+    public void deleteProjectById(UUID id) {
+        Long numOfDeletedProjects = projectRepository.removeById(id);
+
+        if (numOfDeletedProjects == 0) {
+            throw new NoProjectFoundException("could not delete because there was no project with id: " + id);
+        } else if (numOfDeletedProjects > 1) {
+            throw new ImpossibleException("!!! This should not happen. " +
+                    "Multiple projects were deleted when deleting project with id: " + id);
+        }
     }
 }

@@ -4,10 +4,7 @@ import com.kett.TicketSystem.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.application.dto.ProjectResponseDto;
 
 import com.kett.TicketSystem.application.dto.TicketResponseDto;
-import com.kett.TicketSystem.project.domain.exceptions.NoTicketFoundException;
-import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
-import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
-import com.kett.TicketSystem.project.domain.exceptions.TicketException;
+import com.kett.TicketSystem.project.domain.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -62,6 +59,12 @@ public class ProjectController {
                 .body(projectResponseDto);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteProject(@PathVariable UUID id) { // TODO: What to use instead of Object?
+        ticketSystemService.deleteProjectById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     // exception handlers
 
     @ExceptionHandler(ProjectException.class)
@@ -82,5 +85,10 @@ public class ProjectController {
     @ExceptionHandler(NoTicketFoundException.class)
     public ResponseEntity<String> handleNoTicketFoundException(NoTicketFoundException noTicketFoundException) {
         return new ResponseEntity<>(noTicketFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ImpossibleException.class)
+    public ResponseEntity<String> handleImpossibleException(ImpossibleException impossibleException) {
+        return new ResponseEntity<>(impossibleException.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

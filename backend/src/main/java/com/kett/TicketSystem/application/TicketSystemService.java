@@ -45,4 +45,8 @@ public class TicketSystemService {
         );
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
+
+    public void deleteProjectById(UUID id) {
+        projectService.deleteProjectById(id);
+    }
 }
