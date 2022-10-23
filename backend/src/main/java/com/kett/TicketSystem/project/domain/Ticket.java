@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.project.domain;
 
+import com.kett.TicketSystem.project.domain.exceptions.TicketException;
 import lombok.*;
 
 import javax.persistence.*;
@@ -47,25 +48,24 @@ public class Ticket {
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> assigneeIds = new ArrayList<>();
 
-
     public Ticket(String title, String description, LocalDateTime dueTime, UUID creatorId, List<UUID> assigneeIds) {
         if (title == null || title.isEmpty()) {
-            throw new RuntimeException("title must not be null or empty");
+            throw new TicketException("title must not be null or empty");
         }
         if (description == null || description.isEmpty()) {
-            throw new RuntimeException("description must not be null or empty");
+            throw new TicketException("description must not be null or empty");
         }
         if (dueTime == null) {
-            throw new RuntimeException("dueTime must not be null");
+            throw new TicketException("dueTime must not be null");
         }
         if (dueTime.isBefore(LocalDateTime.now())) {
-            throw new RuntimeException("dueTime cannot be in the past");
+            throw new TicketException("dueTime cannot be in the past");
         }
         if (creatorId == null) {
-            throw new RuntimeException("creatorId must not be null");
+            throw new TicketException("creatorId must not be null");
         }
         if (assigneeIds == null) {
-            throw new RuntimeException("memberIds must not be null");
+            throw new TicketException("memberIds must not be null");
         }
 
         this.title = title;
