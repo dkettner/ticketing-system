@@ -54,7 +54,7 @@ public class Ticket {
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> assigneeIds = new ArrayList<>();
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Getter
     @Setter
     private List<Ticket> tickets = new ArrayList<>();
