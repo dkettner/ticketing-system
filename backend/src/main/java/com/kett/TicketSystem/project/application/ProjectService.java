@@ -48,4 +48,8 @@ public class ProjectService {
                 .findByTicketNumber(ticketNumber)
                 .orElseThrow(() -> new NoTicketFoundException("could not find ticket with ticketNumber: " + ticketNumber));
     }
+
+    public Project addProject(Project project) {
+        return projectRepository.save(project);
+    }
 }

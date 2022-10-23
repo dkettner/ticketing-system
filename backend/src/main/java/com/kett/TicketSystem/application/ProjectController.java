@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.application.dto.ProjectResponseDto;
 
 import com.kett.TicketSystem.application.dto.TicketResponseDto;
@@ -11,7 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +46,20 @@ public class ProjectController {
     public ResponseEntity<TicketResponseDto> getTicketByProjectIdAndTicketNumber(@PathVariable UUID id, @PathVariable UUID ticketNumber) {
         TicketResponseDto ticketDto = ticketSystemService.fetchTicketByProjectIdAndTicketNumber(id, ticketNumber);
         return new ResponseEntity<>(ticketDto, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<ProjectResponseDto> postProject(@RequestBody ProjectPostDto projectPostDto) {
+        ProjectResponseDto projectResponseDto = ticketSystemService.addProject(projectPostDto);
+        URI returnURI = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(projectResponseDto.getId())
+                .toUri();
+
+        return ResponseEntity
+                .created(returnURI)
+                .body(projectResponseDto);
     }
 
     // exception handlers

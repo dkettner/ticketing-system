@@ -46,4 +46,13 @@ public class DtoMapper {
     public ProjectResponseDto mapProjectToProjectResponseDto(Project project) {
         return modelMapper.map(project, ProjectResponseDto.class);
     }
+
+    public Project mapProjectPostDtoToProject(ProjectPostDto projectPostDto) {
+        return new Project(
+                projectPostDto.getName(),
+                projectPostDto.getDescription(),
+                projectPostDto.getCreatorId(),
+                projectPostDto.getMemberIds()
+        );
+    }
 }

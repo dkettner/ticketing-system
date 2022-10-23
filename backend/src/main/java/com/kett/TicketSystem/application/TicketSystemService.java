@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.application.dto.DtoMapper;
+import com.kett.TicketSystem.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.application.dto.ProjectResponseDto;
 import com.kett.TicketSystem.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.project.application.ProjectService;
@@ -36,5 +37,12 @@ public class TicketSystemService {
     public TicketResponseDto fetchTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
         Ticket ticket = projectService.getTicketByProjectIdAndTicketNumber(id, ticketNumber);
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
+    }
+
+    public ProjectResponseDto addProject(ProjectPostDto projectPostDto) {
+        Project project = projectService.addProject(
+                dtoMapper.mapProjectPostDtoToProject(projectPostDto)
+        );
+        return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 }
