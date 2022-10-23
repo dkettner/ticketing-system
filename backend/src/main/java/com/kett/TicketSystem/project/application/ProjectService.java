@@ -1,7 +1,9 @@
 package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.project.domain.Project;
+import com.kett.TicketSystem.project.domain.Ticket;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.project.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.project.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,5 +26,11 @@ public class ProjectService {
         return projectRepository
                 .findById(id)
                 .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
+    }
+
+    public Ticket getTicketById(UUID id) {
+        return ticketRepository
+                .findById(id)
+                .orElseThrow(() -> new NoTicketFoundException("could not find ticket with id: " + id));
     }
 }
