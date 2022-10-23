@@ -37,7 +37,7 @@ public class Ticket {
 
     @Getter
     @Setter
-    private String cardStatus;
+    private TicketStatus ticketStatus;
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
@@ -72,7 +72,7 @@ public class Ticket {
         this.description = title;
         this.creationTime = LocalDateTime.now();
         this.dueTime = dueTime;
-        this.cardStatus = "TO_DO";
+        this.ticketStatus = TicketStatus.TO_DO;
         this.creatorId = creatorId;
         this.assigneeIds.addAll(assigneeIds); // TODO: Check for duplicates?
         if (!this.assigneeIds.contains(creatorId)) {
