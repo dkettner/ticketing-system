@@ -2,6 +2,7 @@ package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.application.dto.ProjectResponseDto;
 
+import com.kett.TicketSystem.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.project.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
@@ -11,6 +12,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,6 +31,12 @@ public class ProjectController {
     public ResponseEntity<ProjectResponseDto> getProjectDtoById(@PathVariable UUID id) {
         ProjectResponseDto projectResponseDto = ticketSystemService.fetchProjectResponseDtoById(id);
         return new ResponseEntity<>(projectResponseDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/tickets")
+    public ResponseEntity<List<TicketResponseDto>> getTicketDtosByProjectId(@PathVariable UUID id) {
+        List<TicketResponseDto> ticketDtos = ticketSystemService.fetchTicketDtosByProjectId(id);
+        return new ResponseEntity<>(ticketDtos, HttpStatus.OK);
     }
 
     // exception handlers

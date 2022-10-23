@@ -9,6 +9,7 @@ import com.kett.TicketSystem.project.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -32,5 +33,12 @@ public class ProjectService {
         return ticketRepository
                 .findById(id)
                 .orElseThrow(() -> new NoTicketFoundException("could not find ticket with id: " + id));
+    }
+
+    public List<Ticket> getTicketsByProjectId(UUID id) {
+        return projectRepository
+                .findById(id)
+                .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id))
+                .getTickets();
     }
 }
