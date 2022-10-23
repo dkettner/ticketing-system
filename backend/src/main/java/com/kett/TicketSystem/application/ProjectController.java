@@ -28,14 +28,14 @@ public class ProjectController {
     // rest endpoints
 
     @GetMapping("/{id}")
-    public ResponseEntity<ProjectResponseDto> getProjectDtoById(@PathVariable UUID id) {
-        ProjectResponseDto projectResponseDto = ticketSystemService.fetchProjectResponseDtoById(id);
+    public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable UUID id) {
+        ProjectResponseDto projectResponseDto = ticketSystemService.fetchProjectById(id);
         return new ResponseEntity<>(projectResponseDto, HttpStatus.OK);
     }
 
     @GetMapping("/{id}/tickets")
-    public ResponseEntity<List<TicketResponseDto>> getTicketDtosByProjectId(@PathVariable UUID id) {
-        List<TicketResponseDto> ticketDtos = ticketSystemService.fetchTicketDtosByProjectId(id);
+    public ResponseEntity<List<TicketResponseDto>> getTicketByProjectId(@PathVariable UUID id) {
+        List<TicketResponseDto> ticketDtos = ticketSystemService.fetchTicketByProjectId(id);
         return new ResponseEntity<>(ticketDtos, HttpStatus.OK);
     }
 

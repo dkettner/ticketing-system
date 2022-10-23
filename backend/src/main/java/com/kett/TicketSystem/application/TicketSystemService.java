@@ -23,12 +23,12 @@ public class TicketSystemService {
         this.dtoMapper = new DtoMapper();
     }
 
-    public ProjectResponseDto fetchProjectResponseDtoById(UUID id) {
+    public ProjectResponseDto fetchProjectById(UUID id) {
         Project project = projectService.getProjectById(id);
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
-    public List<TicketResponseDto> fetchTicketDtosByProjectId(UUID id) {
+    public List<TicketResponseDto> fetchTicketByProjectId(UUID id) {
         List<Ticket> tickets = projectService.getTicketsByProjectId(id);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
