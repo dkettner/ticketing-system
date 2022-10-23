@@ -35,7 +35,7 @@ public class ProjectController {
 
     @GetMapping("/{id}/tickets")
     public ResponseEntity<List<TicketResponseDto>> getTicketByProjectId(@PathVariable UUID id) {
-        List<TicketResponseDto> ticketDtos = ticketSystemService.fetchTicketByProjectId(id);
+        List<TicketResponseDto> ticketDtos = ticketSystemService.fetchTicketsByProjectId(id);
         return new ResponseEntity<>(ticketDtos, HttpStatus.OK);
     }
 

@@ -28,7 +28,7 @@ public class TicketSystemService {
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
-    public List<TicketResponseDto> fetchTicketByProjectId(UUID id) {
+    public List<TicketResponseDto> fetchTicketsByProjectId(UUID id) {
         List<Ticket> tickets = projectService.getTicketsByProjectId(id);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
