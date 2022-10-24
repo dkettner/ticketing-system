@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.application.dto.ProjectPatchDto;
 import com.kett.TicketSystem.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.application.dto.ProjectResponseDto;
 
@@ -59,6 +60,12 @@ public class ProjectController {
         return ResponseEntity
                 .created(returnURI)
                 .body(projectResponseDto);
+    }
+
+    @PatchMapping("/projects/{id}")
+    public ResponseEntity<Object> patchProjectById(@PathVariable UUID id, @RequestBody ProjectPatchDto projectPatchDto) {
+        ticketSystemService.patchProjectById(id, projectPatchDto);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")

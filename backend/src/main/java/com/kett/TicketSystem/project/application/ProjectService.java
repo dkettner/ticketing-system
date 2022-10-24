@@ -64,4 +64,13 @@ public class ProjectService {
                     "Multiple projects were deleted when deleting project with id: " + id);
         }
     }
+
+    public void patchProjectById(UUID id, Project patchData) {
+        Project existingProject =
+                projectRepository
+                        .findById(id)
+                        .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
+
+
+    }
 }

@@ -1,9 +1,6 @@
 package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.application.dto.DtoMapper;
-import com.kett.TicketSystem.application.dto.ProjectPostDto;
-import com.kett.TicketSystem.application.dto.ProjectResponseDto;
-import com.kett.TicketSystem.application.dto.TicketResponseDto;
+import com.kett.TicketSystem.application.dto.*;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.Ticket;
@@ -48,5 +45,11 @@ public class TicketSystemService {
 
     public void deleteProjectById(UUID id) {
         projectService.deleteProjectById(id);
+    }
+
+    public void patchProjectById(UUID id, ProjectPatchDto projectPatchDto) {
+        projectService.patchProjectById(
+                id,
+                dtoMapper.mapProjectPatchDtoToProject(projectPatchDto));
     }
 }
