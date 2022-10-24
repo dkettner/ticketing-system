@@ -62,7 +62,7 @@ public class ProjectController {
                 .body(projectResponseDto);
     }
 
-    @PatchMapping("/projects/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<Object> patchProjectById(@PathVariable UUID id, @RequestBody ProjectPatchDto projectPatchDto) {
         ticketSystemService.patchProjectById(id, projectPatchDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
