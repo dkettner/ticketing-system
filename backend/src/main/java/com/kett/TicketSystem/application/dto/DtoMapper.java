@@ -58,8 +58,4 @@ public class DtoMapper {
                 projectPostDto.getMemberIds()
         );
     }
-
-    public Object mapProjectPatchDtoToProject(ProjectPatchDto projectPatchDto) {
-        throw new UnsupportedOperationException();
-    }
 }

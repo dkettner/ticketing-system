@@ -5,6 +5,7 @@ import com.kett.TicketSystem.project.domain.Ticket;
 import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.NoTicketFoundException;
+import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.project.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,12 +66,28 @@ public class ProjectService {
         }
     }
 
-    public void patchProjectById(UUID id, Project patchData) {
+    // TODO: This is too dirty. How to handle patch request better?
+    public void patchProjectById(UUID id, String newName, String newDescription, List<UUID> newMemberIds) {
+        if (newMemberIds != null && newMemberIds.isEmpty()) {
+            throw new ProjectException("Cannot patch memberIds with empty list. " +
+                    "If you do not want to patch memberIds, use null instead of empty list");
+        }
+
         Project existingProject =
                 projectRepository
                         .findById(id)
                         .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
 
+        if (newName != null) {
+            existingProject.setName(newName);
+        }
+        if (newDescription != null) {
+            existingProject.setDescription(newDescription);
+        }
+        if (newMemberIds != null) {
+            existingProject.setMemberIds(newMemberIds);
+        }
 
+        projectRepository.save(existingProject);
     }
 }

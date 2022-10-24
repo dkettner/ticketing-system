@@ -47,9 +47,11 @@ public class TicketSystemService {
         projectService.deleteProjectById(id);
     }
 
+    // TODO: clean this up
     public void patchProjectById(UUID id, ProjectPatchDto projectPatchDto) {
         projectService.patchProjectById(
-                id,
-                dtoMapper.mapProjectPatchDtoToProject(projectPatchDto));
+                id, projectPatchDto.getName(),
+                projectPatchDto.getDescription(),
+                projectPatchDto.getMemberIds());
     }
 }
