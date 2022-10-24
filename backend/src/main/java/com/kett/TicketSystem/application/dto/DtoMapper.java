@@ -58,4 +58,14 @@ public class DtoMapper {
                 projectPostDto.getMemberIds()
         );
     }
+
+    public Ticket mapTicketPostDtoToTicket(TicketPostDto ticketPostDto) {
+        return new Ticket(
+                ticketPostDto.getTitle(),
+                ticketPostDto.getDescription(),
+                ticketPostDto.getDueTime(),
+                ticketPostDto.getCreatorId(),
+                ticketPostDto.getAssigneeIds()
+        );
+    }
 }

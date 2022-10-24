@@ -54,4 +54,9 @@ public class TicketSystemService {
                 projectPatchDto.getDescription(),
                 projectPatchDto.getMemberIds());
     }
+
+    public TicketResponseDto addTicketToProject(UUID id, TicketPostDto ticketPostDto) {
+        Ticket ticket = projectService.addTicketToProject(id, dtoMapper.mapTicketPostDtoToTicket(ticketPostDto));
+        return dtoMapper.mapTicketToTicketResponseDto(ticket);
+    }
 }

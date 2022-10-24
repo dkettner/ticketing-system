@@ -90,4 +90,19 @@ public class ProjectService {
 
         projectRepository.save(existingProject);
     }
+
+    public Ticket addTicketToProject(UUID id, Ticket ticket) {
+        Project project =
+                projectRepository
+                        .findById(id)
+                        .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
+
+        // TODO: Check if this structure is needed or if addTicket could just use the "ticket"-parameter.
+        project.addTicket(
+                ticketRepository.save(ticket)
+        );
+        projectRepository.save(project);
+
+        return ticket;
+    }
 }

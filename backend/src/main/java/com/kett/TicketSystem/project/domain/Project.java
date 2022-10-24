@@ -46,6 +46,10 @@ public class Project {
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Ticket> tickets = new ArrayList<>();
 
+    public void addTicket(Ticket ticket) {
+        tickets.add(ticket);
+    }
+
     public Project(String name, String description, UUID creatorId, List<UUID> memberIds) {
         if (name == null || name.isEmpty()) {
             throw new ProjectException("name must not be null or empty");
