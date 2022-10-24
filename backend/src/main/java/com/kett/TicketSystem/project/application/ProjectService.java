@@ -31,11 +31,6 @@ public class ProjectService {
                 .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
     }
 
-    public Ticket getTicketById(UUID id) {
-        return ticketRepository
-                .findById(id)
-                .orElseThrow(() -> new NoTicketFoundException("could not find ticket with id: " + id));
-    }
 
     public List<Ticket> getTicketsByProjectId(UUID id) {
         return projectRepository
