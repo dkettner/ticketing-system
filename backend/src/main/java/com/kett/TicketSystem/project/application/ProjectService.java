@@ -44,8 +44,21 @@ public class ProjectService {
                 .getTickets();
     }
 
+    // TODO: kinda dirty
     public Ticket getTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
-        // TODO: id is not needed, because ticketNumber is unique. Maybe ticket should be its own aggregate.
+        Boolean projectHasTicket =
+                projectRepository
+                        .findById(id)
+                        .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id))
+                        .hasTicketWithTicketNumber(ticketNumber);
+
+        if (!projectHasTicket) {
+            throw new NoTicketFoundException(
+                    "could not find ticket with ticketNumber: " + ticketNumber +
+                    " in project with id: " + id
+            );
+        }
+
         return ticketRepository
                 .findByTicketNumber(ticketNumber)
                 .orElseThrow(() -> new NoTicketFoundException("could not find ticket with ticketNumber: " + ticketNumber));
