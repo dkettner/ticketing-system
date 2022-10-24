@@ -32,20 +32,13 @@ public class ProjectService {
     }
 
     public List<Ticket> getTicketsByProjectId(UUID id) {
-        return projectRepository
-                .findById(id)
-                .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id))
-                .getTickets();
+        return getProjectById(id).getTickets();
     }
+
 
     // TODO: kinda dirty
     public Ticket getTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
-        Boolean projectHasTicket =
-                projectRepository
-                        .findById(id)
-                        .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id))
-                        .hasTicketWithTicketNumber(ticketNumber);
-
+        Boolean projectHasTicket = getProjectById(id).hasTicketWithTicketNumber(ticketNumber);
         if (!projectHasTicket) {
             throw new NoTicketFoundException(
                     "could not find ticket with ticketNumber: " + ticketNumber +
