@@ -27,8 +27,7 @@ public class DtoMapper {
             mapper.map(Project::getCreatorId, ProjectResponseDto::setCreatorId);
             mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
             mapper.map(Project::getMemberIds, ProjectResponseDto::setMemberIds);
-            mapper.map(project ->
-                    mapTicketListToTicketResponseDtoList(project.getTickets()), ProjectResponseDto::setTickets);
+            // TODO: add proper mapping for List<Ticket> -> List<TicketResponseDto>
         });
     }
 
@@ -44,7 +43,11 @@ public class DtoMapper {
     }
 
     public ProjectResponseDto mapProjectToProjectResponseDto(Project project) {
-        return modelMapper.map(project, ProjectResponseDto.class);
+        ProjectResponseDto projectResponseDto = modelMapper.map(project, ProjectResponseDto.class);
+        projectResponseDto.setTickets(
+                mapTicketListToTicketResponseDtoList(project.getTickets())
+        );
+        return projectResponseDto;
     }
 
     public Project mapProjectPostDtoToProject(ProjectPostDto projectPostDto) {
