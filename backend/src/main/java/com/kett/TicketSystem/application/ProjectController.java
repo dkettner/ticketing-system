@@ -85,6 +85,12 @@ public class ProjectController {
                 .body(ticketResponseDto);
     }
 
+    @DeleteMapping("/{id}/tickets/{ticketNumber}")
+    public ResponseEntity<Object> deleteTicket(@PathVariable UUID id, @PathVariable UUID ticketNumber) {
+        ticketSystemService.deleteTicketByProjectIdAndTicketNumber(id, ticketNumber);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 
     // exception handlers
 

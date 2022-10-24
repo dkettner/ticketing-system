@@ -59,4 +59,8 @@ public class TicketSystemService {
         Ticket ticket = projectService.addTicketToProject(id, dtoMapper.mapTicketPostDtoToTicket(ticketPostDto));
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
+
+    public void deleteTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
+        projectService.deleteTicketByProjectIdAndTicketNumber(id, ticketNumber);
+    }
 }

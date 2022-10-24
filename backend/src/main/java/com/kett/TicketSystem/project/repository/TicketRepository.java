@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     Optional<Ticket> findByTicketNumber(UUID ticketNumber);
+    Long deleteByTicketNumber(UUID ticketNumber);
 }

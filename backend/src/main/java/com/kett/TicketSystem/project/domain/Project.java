@@ -1,5 +1,7 @@
 package com.kett.TicketSystem.project.domain;
 
+import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
+import com.kett.TicketSystem.project.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import lombok.*;
 
@@ -48,6 +50,33 @@ public class Project {
 
     public void addTicket(Ticket ticket) {
         tickets.add(ticket);
+    }
+
+    public Boolean hasTicketWithTicketNumber(UUID ticketNumber) {
+        return tickets
+                .stream()
+                .anyMatch(ticket ->
+                        ticket.getTicketNumber().equals(ticketNumber));
+    }
+
+    public void removeTicketWithTicketNumber(UUID ticketNumber) {
+        if (!this.hasTicketWithTicketNumber(ticketNumber)) {
+            throw new NoTicketFoundException(
+                    "could not find ticket with ticketNumber: " + ticketNumber +
+                    " in project with id: " + this.getId()
+            );
+        }
+
+        Boolean isTicketRemoved = tickets.removeIf(ticket ->
+                ticket.getTicketNumber().equals(ticketNumber));
+        if (!isTicketRemoved) {
+            throw new ImpossibleException(
+                    "!!! This should not happen. " +
+                    "The ticket with ticketNumber: " + ticketNumber +
+                    " was not removed from the project with id: " + this.getId() +
+                    " even though the check if the project holds the ticket was successful."
+            );
+        }
     }
 
     public Project(String name, String description, UUID creatorId, List<UUID> memberIds) {

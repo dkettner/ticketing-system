@@ -105,4 +105,21 @@ public class ProjectService {
 
         return ticket;
     }
+
+    public void deleteTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
+        Project project =
+                projectRepository
+                        .findById(id)
+                        .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
+        project.removeTicketWithTicketNumber(ticketNumber);
+        projectRepository.save(project);
+
+        Long numOfDeletedTickets = ticketRepository.deleteByTicketNumber(ticketNumber);
+        if (numOfDeletedTickets == 0 || numOfDeletedTickets > 1) {
+            throw new ImpossibleException( // overkill?
+                    "!!! This should not happen. " +
+                    "While trying to delete Ticket with ticketNumber: " + ticketNumber +
+                    " the number of deleted tickets was: " + numOfDeletedTickets);
+        }
+    }
 }
