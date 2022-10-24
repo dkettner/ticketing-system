@@ -13,15 +13,16 @@ import java.util.UUID;
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Ticket {
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @Getter
+    @Setter(AccessLevel.PROTECTED)
+    @Column(length = 16)
     private UUID id;
 
     @Getter
     @Setter
-    @Column(unique = true)
+    @Column(unique = true, length = 16)
     private UUID ticketNumber;
 
     @Getter
