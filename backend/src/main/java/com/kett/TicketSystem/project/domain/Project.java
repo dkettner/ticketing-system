@@ -17,6 +17,7 @@ public class Project {
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Getter
     @Setter(AccessLevel.PROTECTED)
+    @Column(length = 16)
     private UUID id;
 
     @Getter
