@@ -77,7 +77,7 @@ public class Ticket {
 
         this.ticketNumber = UUID.randomUUID();
         this.title = title;
-        this.description = title;
+        this.description = description;
         this.creationTime = LocalDateTime.now();
         this.dueTime = dueTime;
         this.ticketStatus = TicketStatus.TO_DO;
