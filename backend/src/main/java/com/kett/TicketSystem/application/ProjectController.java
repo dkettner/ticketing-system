@@ -36,18 +36,6 @@ public class ProjectController {
         return new ResponseEntity<>(projectResponseDto, HttpStatus.OK);
     }
 
-    @GetMapping("/{id}/tickets")
-    public ResponseEntity<List<TicketResponseDto>> getTicketByProjectId(@PathVariable UUID id) {
-        List<TicketResponseDto> ticketDtos = ticketSystemService.fetchTicketsByProjectId(id);
-        return new ResponseEntity<>(ticketDtos, HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}/tickets/{ticketNumber}")
-    public ResponseEntity<TicketResponseDto> getTicketByProjectIdAndTicketNumber(@PathVariable UUID id, @PathVariable UUID ticketNumber) {
-        TicketResponseDto ticketDto = ticketSystemService.fetchTicketByProjectIdAndTicketNumber(id, ticketNumber);
-        return new ResponseEntity<>(ticketDto, HttpStatus.OK);
-    }
-
     @PostMapping
     public ResponseEntity<ProjectResponseDto> postProject(@RequestBody ProjectPostDto projectPostDto) {
         ProjectResponseDto projectResponseDto = ticketSystemService.addProject(projectPostDto);
@@ -72,6 +60,18 @@ public class ProjectController {
     public ResponseEntity<Object> deleteProject(@PathVariable UUID id) { // TODO: What to use instead of Object?
         ticketSystemService.deleteProjectById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @GetMapping("/{id}/tickets/{ticketNumber}")
+    public ResponseEntity<TicketResponseDto> getTicketByProjectIdAndTicketNumber(@PathVariable UUID id, @PathVariable UUID ticketNumber) {
+        TicketResponseDto ticketDto = ticketSystemService.fetchTicketByProjectIdAndTicketNumber(id, ticketNumber);
+        return new ResponseEntity<>(ticketDto, HttpStatus.OK);
+    }
+
+    @GetMapping("/{id}/tickets")
+    public ResponseEntity<List<TicketResponseDto>> getTicketByProjectId(@PathVariable UUID id) {
+        List<TicketResponseDto> ticketDtos = ticketSystemService.fetchTicketsByProjectId(id);
+        return new ResponseEntity<>(ticketDtos, HttpStatus.OK);
     }
 
     // exception handlers
