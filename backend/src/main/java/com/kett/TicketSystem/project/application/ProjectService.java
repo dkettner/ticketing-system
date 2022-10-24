@@ -31,7 +31,6 @@ public class ProjectService {
                 .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
     }
 
-
     public List<Ticket> getTicketsByProjectId(UUID id) {
         return projectRepository
                 .findById(id)
