@@ -21,7 +21,7 @@ public class Ticket {
     private UUID id;
 
     @Getter
-    @Setter
+    @Setter(AccessLevel.PROTECTED)
     @Column(unique = true, length = 16)
     private UUID ticketNumber;
 
