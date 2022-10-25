@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
+import SignInView from '../views/SignInView.vue'
 import NotFoundComponent from '../views/NotFoundView.vue'
 
 const router = createRouter({
@@ -7,13 +7,12 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView
+      redirect: '/signin'
     },
     {
       path: '/signin',
       name: 'signin',
-      component: () => import('../views/SignInView.vue')
+      component: SignInView
     },
     {
       path: '/:pathMatch(.*)',

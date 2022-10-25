@@ -6,7 +6,6 @@
   <header>
     <div class="wrapper">
       <nav>
-        <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/signin">SignIn</RouterLink>
       </nav>
     </div>
