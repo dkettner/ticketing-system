@@ -1,6 +1,17 @@
 <script setup>
+  import { useRouter } from 'vue-router';
   import { NCard, NTabs, NTabPane, NForm, NFormItemRow, NInput, NButton, NIcon } from 'naive-ui';
   import { GlassesOutline, Glasses } from "@vicons/ionicons5";
+
+  const router = useRouter()
+
+  function handleSignInClick(clickEvent) {
+    router.push('/dashboard')
+  }
+  
+  function handleSignUpClick(clickEvent) {
+    router.push('/dashboard')
+  }
 </script>
 
 <template>
@@ -34,7 +45,7 @@
               </n-input>
             </n-form-item-row>
           </n-form>
-          <n-button type="primary" block secondary strong>
+          <n-button @click="handleSignInClick" type="primary" block secondary strong>
             Sign In
           </n-button>
         </n-tab-pane>
@@ -74,7 +85,7 @@
               </n-input>
             </n-form-item-row>
           </n-form>
-          <n-button type="primary" block secondary strong>
+          <n-button @click="handleSignUpClick" type="primary" block secondary strong>
             Sign Up
           </n-button>
         </n-tab-pane>
