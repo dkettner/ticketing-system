@@ -72,6 +72,7 @@ public class TicketSystemService {
                 ticketPatchDto.getTitle(),
                 ticketPatchDto.getDescription(),
                 ticketPatchDto.getDueTime(),
+                ticketPatchDto.getTicketStatus(),
                 ticketPatchDto.getAssigneeIds()
         );
     }

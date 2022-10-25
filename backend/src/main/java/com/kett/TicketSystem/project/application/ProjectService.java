@@ -2,6 +2,7 @@ package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.Ticket;
+import com.kett.TicketSystem.project.domain.TicketStatus;
 import com.kett.TicketSystem.project.domain.exceptions.*;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.project.repository.TicketRepository;
@@ -128,8 +129,15 @@ public class ProjectService {
     }
 
     // TODO: clean this up
-    public void patchTicket(UUID id, UUID ticketNumber,
-                            String newTitle, String newDescription, LocalDateTime newDueTime, List<UUID> newAssigneeIds) {
+    public void patchTicket(
+            UUID id,
+            UUID ticketNumber,
+            String newTitle,
+            String newDescription,
+            LocalDateTime newDueTime,
+            TicketStatus newTicketStatus,
+            List<UUID> newAssigneeIds
+    ) {
         if (newAssigneeIds != null && newAssigneeIds.isEmpty()) {
             throw new TicketException(
                     "Cannot patch assigneeIds with empty list. " +
@@ -154,6 +162,9 @@ public class ProjectService {
         }
         if (newDueTime != null) {
             existingTicket.setDueTime(newDueTime);
+        }
+        if (newTicketStatus != null) {
+            existingTicket.setTicketStatus(newTicketStatus);
         }
         if (newAssigneeIds != null) {
             existingTicket.setAssigneeIds(newAssigneeIds);
