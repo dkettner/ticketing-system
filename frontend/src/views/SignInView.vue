@@ -1,8 +1,11 @@
 <script setup>
+  import { NSpace } from 'naive-ui';
+  import SignInForm from '../components/atomic-naive-ui/SignInForm.vue';
 </script>
 
 <template>
-  <div class="signin">
-    <h1>Sign In Page</h1>
-  </div>
+  <n-space justify="center">
+    <img src="../assets/ticketsystem-logo.png">
+    <SignInForm />
+  </n-space>
 </template>
