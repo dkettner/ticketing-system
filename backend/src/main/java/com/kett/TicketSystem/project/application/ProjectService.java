@@ -2,15 +2,13 @@ package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.Ticket;
-import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
-import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
-import com.kett.TicketSystem.project.domain.exceptions.NoTicketFoundException;
-import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
+import com.kett.TicketSystem.project.domain.exceptions.*;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.project.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +23,7 @@ public class ProjectService {
         this.ticketRepository = ticketRepository;
     }
 
-    public Project getProjectById(UUID id) {
+    public Project getProjectById(UUID id) throws NoProjectFoundException {
         return projectRepository
                 .findById(id)
                 .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
@@ -121,5 +119,45 @@ public class ProjectService {
                     "While trying to delete Ticket with ticketNumber: " + ticketNumber +
                     " the number of deleted tickets was: " + numOfDeletedTickets);
         }
+    }
+
+    private Ticket getTicketByTicketNumber(UUID ticketNumber) throws NoTicketFoundException {
+        return ticketRepository
+                .findByTicketNumber(ticketNumber)
+                .orElseThrow(() -> new NoTicketFoundException("could not find ticket with ticketNumber: " + ticketNumber));
+    }
+
+    // TODO: clean this up
+    public void patchTicket(UUID id, UUID ticketNumber,
+                            String newTitle, String newDescription, LocalDateTime newDueTime, List<UUID> newAssigneeIds) {
+        if (newAssigneeIds != null && newAssigneeIds.isEmpty()) {
+            throw new TicketException(
+                    "Cannot patch assigneeIds with empty list. " +
+                    "If you do not want to patch assigneeIds, use null instead of empty list."
+            );
+        }
+
+        Project project = getProjectById(id);
+        if (!project.hasTicketWithTicketNumber(ticketNumber)) {
+            throw new NoTicketFoundException(
+                    "could not find ticket with ticketNumber: " + ticketNumber +
+                    " in project with id: " + id
+            );
+        }
+
+        Ticket existingTicket = getTicketByTicketNumber(ticketNumber);
+        if (newTitle != null) {
+            existingTicket.setTitle(newTitle);
+        }
+        if (newDescription != null) {
+            existingTicket.setDescription(newDescription);
+        }
+        if (newDueTime != null) {
+            existingTicket.setDueTime(newDueTime);
+        }
+        if (newAssigneeIds != null) {
+            existingTicket.setAssigneeIds(newAssigneeIds);
+        }
+        ticketRepository.save(existingTicket);
     }
 }

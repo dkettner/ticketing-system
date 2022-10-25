@@ -85,6 +85,13 @@ public class ProjectController {
                 .body(ticketResponseDto);
     }
 
+    @PatchMapping("/{id}/tickets/{ticketNumber}")
+    public ResponseEntity<Object> patchTicket(@PathVariable UUID id, @PathVariable UUID ticketNumber,
+                                              @RequestBody TicketPatchDto ticketPatchDto) {
+        ticketSystemService.patchTicket(id, ticketNumber, ticketPatchDto);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
     @DeleteMapping("/{id}/tickets/{ticketNumber}")
     public ResponseEntity<Object> deleteTicket(@PathVariable UUID id, @PathVariable UUID ticketNumber) {
         ticketSystemService.deleteTicketByProjectIdAndTicketNumber(id, ticketNumber);

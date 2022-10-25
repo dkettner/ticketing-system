@@ -38,7 +38,6 @@ public class Ticket {
     private LocalDateTime creationTime;
 
     @Getter
-    @Setter
     private LocalDateTime dueTime;
 
     @Getter
@@ -55,6 +54,13 @@ public class Ticket {
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> assigneeIds = new ArrayList<>();
 
+    public void setDueTime(LocalDateTime newDueTime) {
+        if (newDueTime.isBefore(LocalDateTime.now())) {
+            throw new TicketException("dueTime cannot be in the past");
+        }
+        this.dueTime = newDueTime;
+    }
+
     public Ticket(String title, String description, LocalDateTime dueTime, UUID creatorId, List<UUID> assigneeIds) {
         if (title == null || title.isEmpty()) {
             throw new TicketException("title must not be null or empty");
@@ -64,9 +70,6 @@ public class Ticket {
         }
         if (dueTime == null) {
             throw new TicketException("dueTime must not be null");
-        }
-        if (dueTime.isBefore(LocalDateTime.now())) {
-            throw new TicketException("dueTime cannot be in the past");
         }
         if (creatorId == null) {
             throw new TicketException("creatorId must not be null");
@@ -79,7 +82,7 @@ public class Ticket {
         this.title = title;
         this.description = description;
         this.creationTime = LocalDateTime.now();
-        this.dueTime = dueTime;
+        this.setDueTime(dueTime);
         this.ticketStatus = TicketStatus.TO_DO;
         this.creatorId = creatorId;
         this.assigneeIds.addAll(assigneeIds); // TODO: Check for duplicates?

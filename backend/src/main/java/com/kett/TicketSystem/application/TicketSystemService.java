@@ -63,4 +63,16 @@ public class TicketSystemService {
     public void deleteTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
         projectService.deleteTicketByProjectIdAndTicketNumber(id, ticketNumber);
     }
+
+    // TODO: clean this up
+    public void patchTicket(UUID id, UUID ticketNumber, TicketPatchDto ticketPatchDto) {
+        projectService.patchTicket(
+                id,
+                ticketNumber,
+                ticketPatchDto.getTitle(),
+                ticketPatchDto.getDescription(),
+                ticketPatchDto.getDueTime(),
+                ticketPatchDto.getAssigneeIds()
+        );
+    }
 }
