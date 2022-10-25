@@ -24,6 +24,12 @@ public class ProjectService {
         this.ticketRepository = ticketRepository;
     }
 
+    private Ticket getTicketByTicketNumber(UUID ticketNumber) throws NoTicketFoundException {
+        return ticketRepository
+                .findByTicketNumber(ticketNumber)
+                .orElseThrow(() -> new NoTicketFoundException("could not find ticket with ticketNumber: " + ticketNumber));
+    }
+
     public Project getProjectById(UUID id) throws NoProjectFoundException {
         return projectRepository
                 .findById(id)
@@ -33,9 +39,8 @@ public class ProjectService {
     public List<Ticket> getTicketsByProjectId(UUID id) {
         return getProjectById(id).getTickets();
     }
+    // TODO: clean this up
 
-
-    // TODO: kinda dirty
     public Ticket getTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
         Boolean projectHasTicket = getProjectById(id).hasTicketWithTicketNumber(ticketNumber);
         if (!projectHasTicket) {
@@ -44,10 +49,7 @@ public class ProjectService {
                     " in project with id: " + id
             );
         }
-
-        return ticketRepository
-                .findByTicketNumber(ticketNumber)
-                .orElseThrow(() -> new NoTicketFoundException("could not find ticket with ticketNumber: " + ticketNumber));
+        return getTicketByTicketNumber(ticketNumber);
     }
 
     public Project addProject(Project project) {
@@ -60,23 +62,23 @@ public class ProjectService {
         if (numOfDeletedProjects == 0) {
             throw new NoProjectFoundException("could not delete because there was no project with id: " + id);
         } else if (numOfDeletedProjects > 1) {
-            throw new ImpossibleException("!!! This should not happen. " +
-                    "Multiple projects were deleted when deleting project with id: " + id);
+            throw new ImpossibleException(
+                    "!!! This should not happen. " +
+                    "Multiple projects were deleted when deleting project with id: " + id
+            );
         }
     }
 
-    // TODO: This is too dirty. How to handle patch request better?
+    // TODO: clean this up
     public void patchProjectById(UUID id, String newName, String newDescription, List<UUID> newMemberIds) {
         if (newMemberIds != null && newMemberIds.isEmpty()) {
-            throw new ProjectException("Cannot patch memberIds with empty list. " +
-                    "If you do not want to patch memberIds, use null instead of empty list");
+            throw new ProjectException(
+                    "Cannot patch memberIds with empty list. " +
+                    "If you do not want to patch memberIds, use null instead of empty list"
+            );
         }
 
-        Project existingProject =
-                projectRepository
-                        .findById(id)
-                        .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
-
+        Project existingProject = getProjectById(id);
         if (newName != null) {
             existingProject.setName(newName);
         }
@@ -86,15 +88,11 @@ public class ProjectService {
         if (newMemberIds != null) {
             existingProject.setMemberIds(newMemberIds);
         }
-
         projectRepository.save(existingProject);
     }
 
     public Ticket addTicketToProject(UUID id, Ticket ticket) {
-        Project project =
-                projectRepository
-                        .findById(id)
-                        .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
+        Project project = getProjectById(id);
 
         // TODO: Check if this structure is needed or if addTicket could just use the "ticket"-parameter.
         project.addTicket(
@@ -106,26 +104,18 @@ public class ProjectService {
     }
 
     public void deleteTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
-        Project project =
-                projectRepository
-                        .findById(id)
-                        .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
+        Project project = getProjectById(id);
         project.removeTicketWithTicketNumber(ticketNumber);
         projectRepository.save(project);
 
         Long numOfDeletedTickets = ticketRepository.deleteByTicketNumber(ticketNumber);
         if (numOfDeletedTickets == 0 || numOfDeletedTickets > 1) {
-            throw new ImpossibleException( // overkill?
+            throw new ImpossibleException(
                     "!!! This should not happen. " +
                     "While trying to delete Ticket with ticketNumber: " + ticketNumber +
-                    " the number of deleted tickets was: " + numOfDeletedTickets);
+                    " the number of deleted tickets was: " + numOfDeletedTickets
+            );
         }
-    }
-
-    private Ticket getTicketByTicketNumber(UUID ticketNumber) throws NoTicketFoundException {
-        return ticketRepository
-                .findByTicketNumber(ticketNumber)
-                .orElseThrow(() -> new NoTicketFoundException("could not find ticket with ticketNumber: " + ticketNumber));
     }
 
     // TODO: clean this up
@@ -145,8 +135,8 @@ public class ProjectService {
             );
         }
 
-        Project project = getProjectById(id);
-        if (!project.hasTicketWithTicketNumber(ticketNumber)) {
+        Boolean projectHasTicket = getProjectById(id).hasTicketWithTicketNumber(ticketNumber);
+        if (!projectHasTicket) {
             throw new NoTicketFoundException(
                     "could not find ticket with ticketNumber: " + ticketNumber +
                     " in project with id: " + id
