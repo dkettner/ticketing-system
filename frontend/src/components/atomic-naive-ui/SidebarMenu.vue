@@ -25,21 +25,32 @@
           :options="menuOptions"
         />
       </n-layout-sider>
-      <n-layout>
-        <span>Content</span>
+      <n-layout v-if="!currentSelectedProjectId" content-style="padding-top: 50px; padding-left: 100px;">
+        <n-card style="width: 330px; background-color: whitesmoke;">
+          {{defaultContentString}}
+        </n-card>
+      </n-layout>
+      <n-layout v-else>
+        {{currentSelectedProjectId.value}}
       </n-layout>
     </n-layout>
   </n-space>
 </template>
 
 <script setup>
-  import { ref, h } from "vue";
-  import { NSpace, NLayout, NLayoutSider, NMenu, NModal } from "naive-ui";
+  import { ref, h, onMounted } from "vue";
+  import { NSpace, NLayout, NLayoutSider, NMenu, NModal, NCard } from "naive-ui";
+  import axios from "axios";
   import NewProjectForm from "./NewProjectForm.vue";
 
+  const defaultContentString = "Please choose a project or create a new one.";
+  const defaultCreatorId = "a9cac26a-943c-494c-ba68-99af078ab24f";
+  const currentProjectsIdsWithNames = ref([]);
+  const getProjectsResult = ref(null);
+  const currentSelectedProjectId = ref(null);
   const activateProjectForm = ref(false);
   const collapsed = ref(false);
-  const menuOptions = [
+  const menuOptions = ref([
     {
       label: () => h(
         "div",
@@ -62,16 +73,36 @@
     },
     {
       label: "Project 2",
-      key: "project2",
+      key: "project2"
     }
-  ];
+  ]);
+
+  onMounted( async () => {
+    getProjectsResult.value = await axios.get(`http://localhost:8080/projects`);
+  });
 
   function handleProjectCreationCancelled() {
     activateProjectForm.value = false;
   }
   function handleProjectDataCollected(newProjectName, newProjectDescription) {
-    console.log("new project name: " + newProjectName);
-    console.log("new project description: " + newProjectDescription);
+    postProject(newProjectName, newProjectDescription, defaultCreatorId, [])
+    menuOptions.value.push({label: newProjectName, key: newProjectName});
     activateProjectForm.value = false;
+    updateProjects();
+  }
+  async function updateProjects() {
+    const result = await axios.get(`http://localhost:8080/projects`);
+    getProjectsResult.value = result;
+    console.log(result);
+
+  }
+  async function postProject(name, descrption, creatorId, memberIds) {
+    const jsonProjectDto = JSON.stringify({ name: name, descrption: descrption, creatorId: creatorId, memberIds: memberIds});
+    const result = await axios.post(`http://localhost:8080/projects`, { name: name, descrption: descrption, creatorId: creatorId, memberIds: memberIds});
+    updateProjects();
   }
 </script>
+
+<style>
+
+</style>

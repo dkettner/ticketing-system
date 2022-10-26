@@ -3,6 +3,6 @@
 </script>
 
 <template>
-  <h1>Dashboard</h1>
+  <h1 style="padding-left: 25px;">Dashboard</h1>
   <SidebarMenuVue />
 </template>
