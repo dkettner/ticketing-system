@@ -44,10 +44,11 @@
 
 <script setup>
   import { ref, h, onMounted } from "vue";
-  import { NSpace, NLayout, NLayoutSider, NMenu, NModal, NCard, NButton } from "naive-ui";
+  import { NSpace, NLayout, NLayoutSider, NMenu, NModal, NCard, NButton, useNotification } from "naive-ui";
   import axios from "axios";
   import NewProjectForm from "./NewProjectForm.vue";
 
+  const notification = useNotification();
   const defaultContentString = "Please choose a project or create a new one.";
   const defaultCreatorId = "a9cac26a-943c-494c-ba68-99af078ab24f";
   const currentProjectsIdsWithNames = ref([]);
@@ -110,6 +111,13 @@
     menuOptions.value.push({label: newProjectName, key: newProjectName});
     activateProjectForm.value = false;
     updateProjects();
+    sendNotification(newProjectName);
+  }
+  function sendNotification(message) {
+    notification.create({
+      title: 'New Project added',
+      content: message
+    });
   }
   async function updateProjects() {
     const result = await axios.get(`http://localhost:8080/projects`);
