@@ -38,45 +38,45 @@
 </template>
 
 <script setup>
-import { ref, defineEmits } from "vue";
-import { NForm, NButton, NGi, NInput, NFormItemGi, NGrid} from "naive-ui";
+  import { ref, defineEmits } from "vue";
+  import { NForm, NButton, NGi, NInput, NFormItemGi, NGrid} from "naive-ui";
 
-const emit = defineEmits(['projectDataCollected', 'projectCreationCancelled']);
-const formRef = ref(null);
-const model = ref({
-  projectName: null,
-  projectDescription: null
-});
-const rules =  {
-  projectName: {
-    required: true,
-    trigger: ["blur", "input"],
-    message: "Please input project name"
-  },
-  projectDescription: {
-    required: true,
-    trigger: ["blur", "input"],
-    message: "Please input description"
-  }
-};
-
-function handleCreateButtonClick(e) {
-  e.preventDefault();
-  formRef.value?.validate((errors) => {
-    if (!errors) {
-      emit('projectDataCollected', model.value.projectName, model.value.projectDescription);
-      model.value.projectName = null;
-      model.value.projectDescription = null;
-    } else {
-      console.log(errors);
-      console.log("could not create new project");
-    }
+  const emit = defineEmits(['projectDataCollected', 'projectCreationCancelled']);
+  const formRef = ref(null);
+  const model = ref({
+    projectName: null,
+    projectDescription: null
   });
-  
-};
-function handleCancelButtonClick(e) {
-  model.value.projectName = null;
-  model.value.projectDescription = null;
-  emit('projectCreationCancelled');
-};
+  const rules =  {
+    projectName: {
+      required: true,
+      trigger: ["blur", "input"],
+      message: "Please input project name"
+    },
+    projectDescription: {
+      required: true,
+      trigger: ["blur", "input"],
+      message: "Please input description"
+    }
+  };
+
+  function handleCreateButtonClick(e) {
+    e.preventDefault();
+    formRef.value?.validate((errors) => {
+      if (!errors) {
+        emit('projectDataCollected', model.value.projectName, model.value.projectDescription);
+        model.value.projectName = null;
+        model.value.projectDescription = null;
+      } else {
+        console.log(errors);
+        console.log("could not create new project");
+      }
+    });
+    
+  };
+  function handleCancelButtonClick(e) {
+    model.value.projectName = null;
+    model.value.projectDescription = null;
+    emit('projectCreationCancelled');
+  };
 </script>
