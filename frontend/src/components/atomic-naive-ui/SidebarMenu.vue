@@ -25,11 +25,23 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, h } from "vue";
 import { NSpace, NLayout, NLayoutSider, NMenu} from "naive-ui";
 
 const collapsed = ref(false);
 const menuOptions = [
+  {
+    label: () => h(
+      "div",
+      {
+        onClick: () => {
+          console.log("adding a new project");
+        },
+      },
+      "+ New Project"
+    ),
+    key: "addnewproject"
+  },
   {
     label: "Project 0",
     key: "project0"
