@@ -1,4 +1,9 @@
 <template>
+  <div class="projectform">
+  <n-modal v-model:show="showModal" :trap-focus="false">
+    <NewProjectForm @projectCreationCancelled="handleProjectCreationCancelled" @projectDataCollected ="handleProjectDataCollected"/>
+  </n-modal>
+  </div>
   <n-space vertical>
     <n-layout has-sider>
       <n-layout-sider
@@ -26,7 +31,20 @@
 
 <script setup>
 import { ref, h } from "vue";
-import { NSpace, NLayout, NLayoutSider, NMenu} from "naive-ui";
+import { NSpace, NLayout, NLayoutSider, NMenu, NModal } from "naive-ui";
+import NewProjectForm from "./NewProjectForm.vue";
+
+const showModal = ref(false);
+
+function handleProjectCreationCancelled() {
+  showModal.value = false;
+}
+
+function handleProjectDataCollected(newProjectName, newProjectDescription) {
+  console.log("new project name: " + newProjectName);
+  console.log("new project description: " + newProjectDescription);
+  showModal.value = false;
+}
 
 const collapsed = ref(false);
 const menuOptions = [
@@ -35,7 +53,7 @@ const menuOptions = [
       "div",
       {
         onClick: () => {
-          console.log("adding a new project");
+          showModal.value = true;
         },
       },
       "+ New Project"
