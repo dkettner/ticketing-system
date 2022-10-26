@@ -11,19 +11,24 @@
     <n-layout has-sider>
       <n-layout-sider
         bordered
-        collapse-mode="width"
-        :collapsed-width="64"
-        :width="240"
+        collapse-mode="transform"
+        :collapsed-width="10"
+        :width="200"
         show-trigger
         :collapsed="collapsed"
         @collapse="collapsed = true"
         @expand="collapsed = false"
       >
-        <n-menu
-          :collapsed="collapsed"
-          :collapsed-width="64"
-          :options="menuOptions"
-        />
+        <div style="padding-left: 10px; padding-right: 10px;">
+          <n-button @click="handleNewProjectButtonClicked" type="primary" block primary strong>
+            + New Project
+          </n-button>
+          <n-menu
+            :collapsed="collapsed"
+            :collapsed-width="10"
+            :options="menuOptions"
+          />
+        </div>
       </n-layout-sider>
       <n-layout v-if="!currentSelectedProjectId" content-style="padding-top: 50px; padding-left: 100px;">
         <n-card style="width: 330px; background-color: whitesmoke;">
@@ -31,7 +36,7 @@
         </n-card>
       </n-layout>
       <n-layout v-else>
-        {{currentSelectedProjectId.value}}
+        {{currentSelectedProjectId}}
       </n-layout>
     </n-layout>
   </n-space>
@@ -39,7 +44,7 @@
 
 <script setup>
   import { ref, h, onMounted } from "vue";
-  import { NSpace, NLayout, NLayoutSider, NMenu, NModal, NCard } from "naive-ui";
+  import { NSpace, NLayout, NLayoutSider, NMenu, NModal, NCard, NButton } from "naive-ui";
   import axios from "axios";
   import NewProjectForm from "./NewProjectForm.vue";
 
@@ -56,23 +61,35 @@
         "div",
         {
           onClick: () => {
-            activateProjectForm.value = true;
+            currentSelectedProjectId.value = "Project 0 plus details";
           },
         },
-        "+ New Project"
+        "Project 0"
       ),
-      key: "addnewproject"
-    },
-    {
-      label: "Project 0",
       key: "project0"
     },
     {
-      label: "Project 1",
+      label: () => h(
+        "div",
+        {
+          onClick: () => {
+            currentSelectedProjectId.value = "Project 1 plus details";
+          },
+        },
+        "Project 1"
+      ),
       key: "project1"
     },
     {
-      label: "Project 2",
+      label: () => h(
+        "div",
+        {
+          onClick: () => {
+            currentSelectedProjectId.value = "Project 2 plus details";
+          },
+        },
+        "Project 2"
+      ),
       key: "project2"
     }
   ]);
@@ -81,6 +98,10 @@
     getProjectsResult.value = await axios.get(`http://localhost:8080/projects`);
   });
 
+
+  function handleNewProjectButtonClicked() {
+    activateProjectForm.value = true;
+  }
   function handleProjectCreationCancelled() {
     activateProjectForm.value = false;
   }
@@ -94,7 +115,6 @@
     const result = await axios.get(`http://localhost:8080/projects`);
     getProjectsResult.value = result;
     console.log(result);
-
   }
   async function postProject(name, descrption, creatorId, memberIds) {
     const jsonProjectDto = JSON.stringify({ name: name, descrption: descrption, creatorId: creatorId, memberIds: memberIds});

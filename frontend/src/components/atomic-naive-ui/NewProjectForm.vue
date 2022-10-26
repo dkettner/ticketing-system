@@ -5,7 +5,7 @@
     :rules="rules"
     :size="medium"
     label-placement="top"
-    style="min-width: 300px; width: 40%; max-width: 500px; background-color: whitesmoke; padding: 20px;"
+    style="min-width: 300px; width: 40%; max-width: 500px; background-color: #EEEEEE; padding: 20px;"
   >
     <n-grid :span="24" :x-gap="24" :cols ="1">
       <n-form-item-gi :span="24" label="Project Name" path="projectName">
@@ -28,6 +28,7 @@
           <n-button type="error" @click="handleCancelButtonClick">
             Cancel
           </n-button>
+          &nbsp;
           <n-button type="primary" @click="handleCreateButtonClick">
             Create New Project
           </n-button>

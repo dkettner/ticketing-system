@@ -44,7 +44,7 @@
             </n-input>
           </n-form-item-row>
         </n-form>
-        <n-button @click="handleSignInClick" type="primary" block secondary strong>
+        <n-button @click="handleSignInClick" type="primary" block primary strong>
           Sign In
         </n-button>
       </n-tab-pane>
@@ -84,7 +84,7 @@
             </n-input>
           </n-form-item-row>
         </n-form>
-        <n-button @click="handleSignUpClick" type="primary" block secondary strong>
+        <n-button @click="handleSignUpClick" type="primary" block primary strong>
           Sign Up
         </n-button>
       </n-tab-pane>
