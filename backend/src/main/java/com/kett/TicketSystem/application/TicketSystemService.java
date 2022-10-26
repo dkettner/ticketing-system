@@ -76,4 +76,12 @@ public class TicketSystemService {
                 ticketPatchDto.getAssigneeIds()
         );
     }
+
+    public List<ProjectResponseDto> fetchAllProjects() {
+        List<Project> allProjects = projectService.getAllProjects();
+        return allProjects
+                .stream()
+                .map(dtoMapper::mapProjectToProjectResponseDto)
+                .toList();
+    }
 }

@@ -161,4 +161,8 @@ public class ProjectService {
         }
         ticketRepository.save(existingTicket);
     }
+
+    public List<Project> getAllProjects() {
+        return projectRepository.findAll();
+    }
 }

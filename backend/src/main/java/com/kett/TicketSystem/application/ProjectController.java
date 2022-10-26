@@ -27,6 +27,13 @@ public class ProjectController {
 
     // rest endpoints
 
+    // TODO: delete this endpoint, it is only for testing purposes
+    @GetMapping
+    public ResponseEntity<List<ProjectResponseDto>> getProjectById() {
+        List<ProjectResponseDto> projectResponseDto = ticketSystemService.fetchAllProjects();
+        return new ResponseEntity<>(projectResponseDto, HttpStatus.OK);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable UUID id) {
         ProjectResponseDto projectResponseDto = ticketSystemService.fetchProjectById(id);
