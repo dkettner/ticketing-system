@@ -1,7 +1,10 @@
 <template>
   <div class="projectform">
-  <n-modal v-model:show="showModal" :trap-focus="false">
-    <NewProjectForm @projectCreationCancelled="handleProjectCreationCancelled" @projectDataCollected ="handleProjectDataCollected"/>
+  <n-modal v-model:show=activateProjectForm :trap-focus="false">
+    <NewProjectForm 
+      @projectCreationCancelled="handleProjectCreationCancelled" 
+      @projectDataCollected ="handleProjectDataCollected"
+    />
   </n-modal>
   </div>
   <n-space vertical>
@@ -30,47 +33,45 @@
 </template>
 
 <script setup>
-import { ref, h } from "vue";
-import { NSpace, NLayout, NLayoutSider, NMenu, NModal } from "naive-ui";
-import NewProjectForm from "./NewProjectForm.vue";
+  import { ref, h } from "vue";
+  import { NSpace, NLayout, NLayoutSider, NMenu, NModal } from "naive-ui";
+  import NewProjectForm from "./NewProjectForm.vue";
 
-const showModal = ref(false);
-
-function handleProjectCreationCancelled() {
-  showModal.value = false;
-}
-
-function handleProjectDataCollected(newProjectName, newProjectDescription) {
-  console.log("new project name: " + newProjectName);
-  console.log("new project description: " + newProjectDescription);
-  showModal.value = false;
-}
-
-const collapsed = ref(false);
-const menuOptions = [
-  {
-    label: () => h(
-      "div",
-      {
-        onClick: () => {
-          showModal.value = true;
+  const activateProjectForm = ref(false);
+  const collapsed = ref(false);
+  const menuOptions = [
+    {
+      label: () => h(
+        "div",
+        {
+          onClick: () => {
+            activateProjectForm.value = true;
+          },
         },
-      },
-      "+ New Project"
-    ),
-    key: "addnewproject"
-  },
-  {
-    label: "Project 0",
-    key: "project0"
-  },
-  {
-    label: "Project 1",
-    key: "project1"
-  },
-  {
-    label: "Project 2",
-    key: "project2",
+        "+ New Project"
+      ),
+      key: "addnewproject"
+    },
+    {
+      label: "Project 0",
+      key: "project0"
+    },
+    {
+      label: "Project 1",
+      key: "project1"
+    },
+    {
+      label: "Project 2",
+      key: "project2",
+    }
+  ];
+
+  function handleProjectCreationCancelled() {
+    activateProjectForm.value = false;
   }
-];
+  function handleProjectDataCollected(newProjectName, newProjectDescription) {
+    console.log("new project name: " + newProjectName);
+    console.log("new project description: " + newProjectDescription);
+    activateProjectForm.value = false;
+  }
 </script>
