@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.user.domain;
 
+import com.kett.TicketSystem.domainprimitives.EMailAddress;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import lombok.*;
 
@@ -24,17 +25,21 @@ public class User {
     @Getter
     @Setter
     @Column(unique = true)
-    private String mailAddress;
+    private EMailAddress eMailAddress;
 
-    public User(String name, String mailAddress) {
+    public User(String name, EMailAddress eMailAddress) {
         if (name == null || name.isEmpty()) {
             throw new UserException("name must not be null or empty");
         }
-        if (mailAddress == null || mailAddress.isEmpty()) {
+        if (eMailAddress == null) {
             throw new UserException("mailAddress must not be null or empty");
         }
 
         this.name = name;
-        this.mailAddress = mailAddress;
+        this.eMailAddress = eMailAddress;
+    }
+
+    public User(String name, String eMailAddress) {
+        this(name, EMailAddress.fromString(eMailAddress));
     }
 }
