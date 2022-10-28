@@ -16,10 +16,10 @@ public class EMailAddress {
 
     protected EMailAddress(String localPart, String domain) {
         if (localPart == null || localPart.isEmpty()) {
-            throw  new RuntimeException("localPart must not be null or empty");
+            throw  new EMailAddressException("localPart must not be null or empty");
         }
         if (domain == null || domain.isEmpty()) {
-            throw  new RuntimeException("domain must not be null or empty");
+            throw  new EMailAddressException("domain must not be null or empty");
         }
 
         this.localPart = localPart;
@@ -28,10 +28,10 @@ public class EMailAddress {
 
     public static EMailAddress fromString(String eMailAddressCandidate) {
         if (eMailAddressCandidate == null || eMailAddressCandidate.isEmpty()) {
-            throw  new RuntimeException("eMailAddressCandidate must not be null or empty");
+            throw new EMailAddressException("eMailAddressCandidate must not be null or empty");
         }
         if (!EmailValidator.getInstance().isValid(eMailAddressCandidate)) {
-            throw new RuntimeException("eMailAddressCandidate is not in a valid format: " + eMailAddressCandidate);
+            throw new EMailAddressException("eMailAddressCandidate is not in a valid format: " + eMailAddressCandidate);
         }
 
         String[] addressParts = eMailAddressCandidate.split("@", 2);
