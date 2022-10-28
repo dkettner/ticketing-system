@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.user.domain;
 
+import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import lombok.*;
 
 import javax.persistence.*;
@@ -27,10 +28,10 @@ public class User {
 
     public User(String name, String mailAddress) {
         if (name == null || name.isEmpty()) {
-            throw new RuntimeException("name must not be null or empty");
+            throw new UserException("name must not be null or empty");
         }
         if (mailAddress == null || mailAddress.isEmpty()) {
-            throw new RuntimeException("mailAddress must not be null or empty");
+            throw new UserException("mailAddress must not be null or empty");
         }
 
         this.name = name;
