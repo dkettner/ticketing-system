@@ -4,6 +4,7 @@ import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.Ticket;
+import com.kett.TicketSystem.user.application.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,11 +14,13 @@ import java.util.UUID;
 @Service
 public class TicketSystemService {
     private final ProjectService projectService;
+    private final UserService userService;
     private final DtoMapper dtoMapper;
 
     @Autowired
-    public TicketSystemService (ProjectService projectService) {
+    public TicketSystemService (ProjectService projectService, UserService userService) {
         this.projectService = projectService;
+        this.userService = userService;
         this.dtoMapper = new DtoMapper();
     }
 
