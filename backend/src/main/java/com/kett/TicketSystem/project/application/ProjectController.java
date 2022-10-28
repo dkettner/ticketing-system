@@ -1,7 +1,8 @@
-package com.kett.TicketSystem.application;
+package com.kett.TicketSystem.project.application;
 
-import com.kett.TicketSystem.application.dto.*;
+import com.kett.TicketSystem.application.TicketSystemService;
 
+import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
