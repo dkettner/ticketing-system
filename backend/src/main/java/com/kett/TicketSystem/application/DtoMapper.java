@@ -6,6 +6,8 @@ import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.application.dto.ProjectResponseDto;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.Ticket;
+import com.kett.TicketSystem.user.application.dto.UserResponseDto;
+import com.kett.TicketSystem.user.domain.User;
 import org.modelmapper.ModelMapper;
 
 import java.util.List;
@@ -32,6 +34,11 @@ public class DtoMapper {
             mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
             mapper.map(Project::getMemberIds, ProjectResponseDto::setMemberIds);
             // TODO: add proper mapping for List<Ticket> -> List<TicketResponseDto>
+        });
+        modelMapper.typeMap(User.class, UserResponseDto.class).addMappings(mapper -> {
+            mapper.map(User::getId, UserResponseDto::setId);
+            mapper.map(User::getName, UserResponseDto::setName);
+            mapper.map(user -> user.getEMailAddress().toString(), UserResponseDto::setEMailAddress);
         });
     }
 
