@@ -79,4 +79,8 @@ public class DtoMapper {
                 ticketPostDto.getAssigneeIds()
         );
     }
+
+    public UserResponseDto mapUserToUserResponseDto(User user) {
+        return modelMapper.map(user, UserResponseDto.class);
+    }
 }

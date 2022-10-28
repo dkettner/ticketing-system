@@ -5,6 +5,8 @@ import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.Ticket;
 import com.kett.TicketSystem.user.application.UserService;
+import com.kett.TicketSystem.user.application.dto.UserResponseDto;
+import com.kett.TicketSystem.user.domain.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -86,5 +88,10 @@ public class TicketSystemService {
                 .stream()
                 .map(dtoMapper::mapProjectToProjectResponseDto)
                 .toList();
+    }
+
+    public UserResponseDto getUserById(UUID id) {
+        User user = userService.getUserById(id);
+        return dtoMapper.mapUserToUserResponseDto(user);
     }
 }
