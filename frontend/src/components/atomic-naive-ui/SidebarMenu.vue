@@ -32,11 +32,11 @@
       </n-layout-sider>
       <n-layout v-if="!currentSelectedProjectId" content-style="padding-top: 50px; padding-left: 100px;">
         <n-card style="width: 330px; background-color: whitesmoke;">
-          {{defaultContentString}}
+          Please choose a project or create a new one.
         </n-card>
       </n-layout>
       <n-layout v-else>
-        {{currentSelectedProjectId}}
+        {{projects[currentSelectedProjectId]}}
       </n-layout>
     </n-layout>
   </n-space>
@@ -48,57 +48,18 @@
   import axios from "axios";
   import NewProjectForm from "./NewProjectForm.vue";
 
-  const notification = useNotification();
-  const defaultContentString = "Please choose a project or create a new one.";
-  const defaultCreatorId = "a9cac26a-943c-494c-ba68-99af078ab24f";
-  const currentProjectsIdsWithNames = ref([]);
-  const getProjectsResult = ref(null);
-  const currentSelectedProjectId = ref(null);
-  const activateProjectForm = ref(false);
   const collapsed = ref(false);
-  const menuOptions = ref([
-    {
-      label: () => h(
-        "div",
-        {
-          onClick: () => {
-            currentSelectedProjectId.value = "Project 0 plus details";
-          },
-        },
-        "Project 0"
-      ),
-      key: "project0"
-    },
-    {
-      label: () => h(
-        "div",
-        {
-          onClick: () => {
-            currentSelectedProjectId.value = "Project 1 plus details";
-          },
-        },
-        "Project 1"
-      ),
-      key: "project1"
-    },
-    {
-      label: () => h(
-        "div",
-        {
-          onClick: () => {
-            currentSelectedProjectId.value = "Project 2 plus details";
-          },
-        },
-        "Project 2"
-      ),
-      key: "project2"
-    }
-  ]);
+  const activateProjectForm = ref(false);
+
+  const projects = ref({});  
+  const menuOptions = ref([]);
+  const currentSelectedProjectId = ref(null);
+
+  const notificationAgent = useNotification();
 
   onMounted( async () => {
-    getProjectsResult.value = await axios.get(`http://localhost:8080/projects`);
+    updateProjects();
   });
-
 
   function handleNewProjectButtonClicked() {
     activateProjectForm.value = true;
@@ -106,28 +67,65 @@
   function handleProjectCreationCancelled() {
     activateProjectForm.value = false;
   }
-  function handleProjectDataCollected(newProjectName, newProjectDescription) {
-    postProject(newProjectName, newProjectDescription, defaultCreatorId, [])
-    menuOptions.value.push({label: newProjectName, key: newProjectName});
+  async function handleProjectDataCollected(newProjectName, newProjectDescription) {
     activateProjectForm.value = false;
-    updateProjects();
-    sendNotification(newProjectName);
+
+    const defaultCreatorId = "a9cac26a-943c-494c-ba68-99af078ab24f";
+    const defaultMemberIds = [];
+    await postProject(newProjectName, newProjectDescription, defaultCreatorId, defaultMemberIds);
+    await updateProjects();
   }
-  function sendNotification(message) {
-    notification.create({
-      title: 'New Project added',
-      content: message
+  function updateProjectMenu() {
+    const newMenuOptions = [];
+    for (let key in projects.value) {
+      newMenuOptions.push(buildMenuOptionEntry(projects.value[key].name, key))
+    }
+    menuOptions.value = newMenuOptions;
+  }
+  function buildMenuOptionEntry(projectName, projectId) {
+    return ( {
+      label: () => h(
+        "div",
+        { onClick: () => { currentSelectedProjectId.value = projectId; } },
+        projectName
+      ),
+      key: "project" + projectId
+    });
+  }
+  function sendNotification(_title, _content) {
+    notificationAgent.create({
+      title: _title,
+      content: _content
     });
   }
   async function updateProjects() {
     const result = await axios.get(`http://localhost:8080/projects`);
-    getProjectsResult.value = result;
-    console.log(result);
+    if (result.status == 200) {
+      const projectArray = result.data;
+
+      projects.value = {};
+      for (let index in projectArray) {
+        projects.value[projectArray[index].id] = projectArray[index];
+      }
+
+      updateProjectMenu();
+    } else {
+      sendNotification("Error", "Failed to get projects from backend.");
+    }
   }
-  async function postProject(name, descrption, creatorId, memberIds) {
-    const jsonProjectDto = JSON.stringify({ name: name, descrption: descrption, creatorId: creatorId, memberIds: memberIds});
-    const result = await axios.post(`http://localhost:8080/projects`, { name: name, descrption: descrption, creatorId: creatorId, memberIds: memberIds});
-    updateProjects();
+  async function postProject(name, description, creatorId, memberIds) {    
+    const result = await axios.post(`http://localhost:8080/projects`, { name: name, description: description, creatorId: creatorId, memberIds: memberIds});
+    if (result.status == 201) {
+      sendNotification(
+        "Success", 
+        "Created Project with name: " + name
+      );
+    } else {
+      sendNotification(
+        "Error", 
+        "Failed to create project with name: " + name
+      );
+    }
   }
 </script>
 
