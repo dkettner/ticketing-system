@@ -14,6 +14,7 @@
         collapse-mode="transform"
         :collapsed-width="10"
         :width="200"
+        
         show-trigger
         :collapsed="collapsed"
         @collapse="collapsed = true"
@@ -23,11 +24,14 @@
           <n-button @click="handleNewProjectButtonClicked" type="primary" block primary strong>
             + New Project
           </n-button>
+
+          <n-scrollbar style="max-height: 80vh; margin-top: 5px;">
           <n-menu
             :collapsed="collapsed"
             :collapsed-width="10"
             :options="menuOptions"
           />
+        </n-scrollbar>
         </div>
       </n-layout-sider>
       <n-layout v-if="!currentSelectedProjectId" content-style="padding-top: 50px; padding-left: 100px;">
@@ -44,7 +48,7 @@
 
 <script setup>
   import { ref, h, onMounted } from "vue";
-  import { NSpace, NLayout, NLayoutSider, NMenu, NModal, NCard, NButton, useNotification } from "naive-ui";
+  import { NSpace, NLayout, NLayoutSider, NMenu, NModal, NCard, NButton, useNotification, NScrollbar } from "naive-ui";
   import axios from "axios";
   import NewProjectForm from "./NewProjectForm.vue";
 
