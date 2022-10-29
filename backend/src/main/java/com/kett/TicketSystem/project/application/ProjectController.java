@@ -4,11 +4,6 @@ import com.kett.TicketSystem.application.TicketSystemService;
 
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.exceptions.*;
-import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
-import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
-import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
-import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
-import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +27,10 @@ public class ProjectController {
         this.ticketSystemService = ticketSystemService;
     }
 
+
     // rest endpoints
 
-    // TODO: delete this endpoint, it is only for testing purposes
+    // TODO: only for testing
     @GetMapping
     public ResponseEntity<List<ProjectResponseDto>> getProjectById() {
         List<ProjectResponseDto> projectResponseDto = ticketSystemService.fetchAllProjects();
@@ -73,45 +69,6 @@ public class ProjectController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @GetMapping("/{id}/tickets")
-    public ResponseEntity<List<TicketResponseDto>> getTicketsByProjectId(@PathVariable UUID id) {
-        List<TicketResponseDto> ticketDtos = ticketSystemService.fetchTicketsByProjectId(id);
-        return new ResponseEntity<>(ticketDtos, HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}/tickets/{ticketNumber}")
-    public ResponseEntity<TicketResponseDto> getTicketByProjectIdAndTicketNumber(@PathVariable UUID id, @PathVariable UUID ticketNumber) {
-        TicketResponseDto ticketDto = ticketSystemService.fetchTicketByProjectIdAndTicketNumber(id, ticketNumber);
-        return new ResponseEntity<>(ticketDto, HttpStatus.OK);
-    }
-
-    @PostMapping("/{id}/tickets")
-    public ResponseEntity<TicketResponseDto> postTicket(@PathVariable UUID id, @RequestBody TicketPostDto ticketPostDto) {
-        TicketResponseDto ticketResponseDto = ticketSystemService.addTicketToProject(id, ticketPostDto);
-        URI returnURI = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{ticketNumber}")
-                .buildAndExpand(ticketResponseDto.getTicketNumber())
-                .toUri();
-
-        return ResponseEntity
-                .created(returnURI)
-                .body(ticketResponseDto);
-    }
-
-    @PatchMapping("/{id}/tickets/{ticketNumber}")
-    public ResponseEntity<Object> patchTicket(@PathVariable UUID id, @PathVariable UUID ticketNumber,
-                                              @RequestBody TicketPatchDto ticketPatchDto) {
-        ticketSystemService.patchTicket(id, ticketNumber, ticketPatchDto);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-    @DeleteMapping("/{id}/tickets/{ticketNumber}")
-    public ResponseEntity<Object> deleteTicket(@PathVariable UUID id, @PathVariable UUID ticketNumber) {
-        ticketSystemService.deleteTicketByProjectIdAndTicketNumber(id, ticketNumber);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
 
     // exception handlers
 
@@ -123,16 +80,6 @@ public class ProjectController {
     @ExceptionHandler(NoProjectFoundException.class)
     public ResponseEntity<String> handleNoProjectFoundException(NoProjectFoundException noProjectFoundException) {
         return new ResponseEntity<>(noProjectFoundException.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(TicketException.class)
-    public ResponseEntity<String> handleTicketException(TicketException ticketException) {
-        return new ResponseEntity<>(ticketException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(NoTicketFoundException.class)
-    public ResponseEntity<String> handleNoTicketFoundException(NoTicketFoundException noTicketFoundException) {
-        return new ResponseEntity<>(noTicketFoundException.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(ImpossibleException.class)
