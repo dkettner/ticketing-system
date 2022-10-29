@@ -14,7 +14,7 @@ public class ProjectResponseDto {
     private UUID id;
     private String name;
     private String description;
-    private UUID creatorId;
     private LocalDateTime creationTime;
+    private List<UUID> ownerIds = new ArrayList<>();
     private List<UUID> memberIds = new ArrayList<>();
 }

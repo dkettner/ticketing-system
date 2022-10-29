@@ -16,5 +16,6 @@ import java.util.UUID;
 public class ProjectPatchDto {
     private String name;
     private String description;
+    private List<UUID> ownerIds = new ArrayList<>();
     private List<UUID> memberIds = new ArrayList<>();
 }

@@ -16,6 +16,6 @@ import java.util.UUID;
 public class ProjectPostDto {
     private String name;
     private String description;
-    private UUID creatorId;
+    private UUID initialOwnerId;
     private List<UUID> memberIds = new ArrayList<>();
 }
