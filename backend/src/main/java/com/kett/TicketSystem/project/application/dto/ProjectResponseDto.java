@@ -1,6 +1,5 @@
 package com.kett.TicketSystem.project.application.dto;
 
-import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -18,5 +17,4 @@ public class ProjectResponseDto {
     private UUID creatorId;
     private LocalDateTime creationTime;
     private List<UUID> memberIds = new ArrayList<>();
-    private List<TicketResponseDto> tickets = new ArrayList<>();
 }
