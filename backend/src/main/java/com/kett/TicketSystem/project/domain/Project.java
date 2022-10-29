@@ -30,38 +30,35 @@ public class Project {
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
-    private UUID creatorId;
+    private LocalDateTime creationTime;
 
     @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private LocalDateTime creationTime;
+    @Setter
+    @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
+    private List<UUID> ownerIds = new ArrayList<>();
 
     @Getter
     @Setter
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> memberIds = new ArrayList<>();
 
-    public Project(String name, String description, UUID creatorId, List<UUID> memberIds) {
+    public Project(String name, String description, UUID initialOwnerId, List<UUID> memberIds) {
         if (name == null || name.isEmpty()) {
             throw new ProjectException("name must not be null or empty");
         }
-        if (description == null || description.isEmpty()) {
-            throw new ProjectException("description must not be null or empty");
-        }
-        if (creatorId == null) {
-            throw new ProjectException("creatorId must not be null");
-        }
-        if (memberIds == null) {
-            throw new ProjectException("memberIds must not be null");
+        if (initialOwnerId == null) {
+            throw new ProjectException("initialOwnerId must not be null");
         }
 
         this.name = name;
         this.description = description;
-        this.creatorId = creatorId;
         this.creationTime = LocalDateTime.now();
-        this.memberIds.addAll(memberIds); // TODO: Check for duplicates?
-        if (!this.memberIds.contains(creatorId)) {
-            this.memberIds.add(creatorId);
+        this.ownerIds.add(initialOwnerId);
+        if (memberIds != null) {
+            this.memberIds.addAll(memberIds);
+        }
+        if (!this.memberIds.contains(initialOwnerId)) {
+            this.memberIds.add(initialOwnerId);
         }
     }
 }
