@@ -1,9 +1,6 @@
 package com.kett.TicketSystem.project.domain;
 
-import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
-import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
-import com.kett.TicketSystem.ticket.domain.Ticket;
 import lombok.*;
 
 import javax.persistence.*;
@@ -43,42 +40,6 @@ public class Project {
     @Setter
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> memberIds = new ArrayList<>();
-
-    @Getter
-    @Setter
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Ticket> tickets = new ArrayList<>();
-
-    public void addTicket(Ticket ticket) {
-        tickets.add(ticket);
-    }
-
-    public Boolean hasTicketWithTicketNumber(UUID ticketNumber) {
-        return tickets
-                .stream()
-                .anyMatch(ticket ->
-                        ticket.getTicketNumber().equals(ticketNumber));
-    }
-
-    public void removeTicketWithTicketNumber(UUID ticketNumber) {
-        if (!this.hasTicketWithTicketNumber(ticketNumber)) {
-            throw new NoTicketFoundException(
-                    "could not find ticket with ticketNumber: " + ticketNumber +
-                    " in project with id: " + this.getId()
-            );
-        }
-
-        Boolean isTicketRemoved = tickets.removeIf(ticket ->
-                ticket.getTicketNumber().equals(ticketNumber));
-        if (!isTicketRemoved) {
-            throw new ImpossibleException(
-                    "!!! This should not happen. " +
-                    "The ticket with ticketNumber: " + ticketNumber +
-                    " was not removed from the project with id: " + this.getId() +
-                    " even though the check if the project holds the ticket was successful."
-            );
-        }
-    }
 
     public Project(String name, String description, UUID creatorId, List<UUID> memberIds) {
         if (name == null || name.isEmpty()) {
