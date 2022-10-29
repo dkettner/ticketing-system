@@ -3,6 +3,7 @@ package com.kett.TicketSystem.application;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
+import com.kett.TicketSystem.ticket.application.TicketService;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
@@ -19,12 +20,14 @@ import java.util.UUID;
 @Service
 public class TicketSystemService {
     private final ProjectService projectService;
+    private final TicketService ticketService;
     private final UserService userService;
     private final DtoMapper dtoMapper;
 
     @Autowired
-    public TicketSystemService (ProjectService projectService, UserService userService) {
+    public TicketSystemService (ProjectService projectService, TicketService ticketService, UserService userService) {
         this.projectService = projectService;
+        this.ticketService = ticketService;
         this.userService = userService;
         this.dtoMapper = new DtoMapper();
     }
