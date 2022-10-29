@@ -1,57 +1,27 @@
 package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.project.domain.Project;
-import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
-import com.kett.TicketSystem.ticket.domain.Ticket;
-import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
-import com.kett.TicketSystem.ticket.domain.TicketStatus;
 import com.kett.TicketSystem.project.domain.exceptions.*;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
-import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
-    private final TicketRepository ticketRepository;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, TicketRepository ticketRepository) {
+    public ProjectService(ProjectRepository projectRepository) {
         this.projectRepository = projectRepository;
-        this.ticketRepository = ticketRepository;
-    }
-
-    private Ticket getTicketByTicketNumber(UUID ticketNumber) throws NoTicketFoundException {
-        return ticketRepository
-                .findByTicketNumber(ticketNumber)
-                .orElseThrow(() -> new NoTicketFoundException("could not find ticket with ticketNumber: " + ticketNumber));
     }
 
     public Project getProjectById(UUID id) throws NoProjectFoundException {
         return projectRepository
                 .findById(id)
                 .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
-    }
-
-    public List<Ticket> getTicketsByProjectId(UUID id) {
-        return getProjectById(id).getTickets();
-    }
-    // TODO: clean this up
-
-    public Ticket getTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
-        Boolean projectHasTicket = getProjectById(id).hasTicketWithTicketNumber(ticketNumber);
-        if (!projectHasTicket) {
-            throw new NoTicketFoundException(
-                    "could not find ticket with ticketNumber: " + ticketNumber +
-                    " in project with id: " + id
-            );
-        }
-        return getTicketByTicketNumber(ticketNumber);
     }
 
     public Project addProject(Project project) {
@@ -93,77 +63,7 @@ public class ProjectService {
         projectRepository.save(existingProject);
     }
 
-    public Ticket addTicketToProject(UUID id, Ticket ticket) {
-        Project project = getProjectById(id);
-
-        // TODO: Check if this structure is needed or if addTicket could just use the "ticket"-parameter.
-        project.addTicket(
-                ticketRepository.save(ticket)
-        );
-        projectRepository.save(project);
-
-        return ticket;
-    }
-
-    public void deleteTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
-        Project project = getProjectById(id);
-        project.removeTicketWithTicketNumber(ticketNumber);
-        projectRepository.save(project);
-
-        Long numOfDeletedTickets = ticketRepository.deleteByTicketNumber(ticketNumber);
-        if (numOfDeletedTickets == 0 || numOfDeletedTickets > 1) {
-            throw new ImpossibleException(
-                    "!!! This should not happen. " +
-                    "While trying to delete Ticket with ticketNumber: " + ticketNumber +
-                    " the number of deleted tickets was: " + numOfDeletedTickets
-            );
-        }
-    }
-
-    // TODO: clean this up
-    public void patchTicket(
-            UUID id,
-            UUID ticketNumber,
-            String newTitle,
-            String newDescription,
-            LocalDateTime newDueTime,
-            TicketStatus newTicketStatus,
-            List<UUID> newAssigneeIds
-    ) {
-        if (newAssigneeIds != null && newAssigneeIds.isEmpty()) {
-            throw new TicketException(
-                    "Cannot patch assigneeIds with empty list. " +
-                    "If you do not want to patch assigneeIds, use null instead of empty list."
-            );
-        }
-
-        Boolean projectHasTicket = getProjectById(id).hasTicketWithTicketNumber(ticketNumber);
-        if (!projectHasTicket) {
-            throw new NoTicketFoundException(
-                    "could not find ticket with ticketNumber: " + ticketNumber +
-                    " in project with id: " + id
-            );
-        }
-
-        Ticket existingTicket = getTicketByTicketNumber(ticketNumber);
-        if (newTitle != null) {
-            existingTicket.setTitle(newTitle);
-        }
-        if (newDescription != null) {
-            existingTicket.setDescription(newDescription);
-        }
-        if (newDueTime != null) {
-            existingTicket.setDueTime(newDueTime);
-        }
-        if (newTicketStatus != null) {
-            existingTicket.setTicketStatus(newTicketStatus);
-        }
-        if (newAssigneeIds != null) {
-            existingTicket.setAssigneeIds(newAssigneeIds);
-        }
-        ticketRepository.save(existingTicket);
-    }
-
+    // TODO: only for testing
     public List<Project> getAllProjects() {
         return projectRepository.findAll();
     }
