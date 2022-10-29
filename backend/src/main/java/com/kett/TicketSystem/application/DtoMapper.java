@@ -1,11 +1,11 @@
 package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.project.application.dto.TicketPostDto;
-import com.kett.TicketSystem.project.application.dto.TicketResponseDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.application.dto.ProjectResponseDto;
 import com.kett.TicketSystem.project.domain.Project;
-import com.kett.TicketSystem.project.domain.Ticket;
+import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
 import org.modelmapper.ModelMapper;

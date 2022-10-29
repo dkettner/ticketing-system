@@ -1,11 +1,13 @@
 package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.project.domain.Project;
-import com.kett.TicketSystem.project.domain.Ticket;
-import com.kett.TicketSystem.project.domain.TicketStatus;
+import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
+import com.kett.TicketSystem.ticket.domain.Ticket;
+import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
+import com.kett.TicketSystem.ticket.domain.TicketStatus;
 import com.kett.TicketSystem.project.domain.exceptions.*;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
-import com.kett.TicketSystem.project.repository.TicketRepository;
+import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

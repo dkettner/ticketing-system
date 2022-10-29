@@ -4,6 +4,11 @@ import com.kett.TicketSystem.application.TicketSystemService;
 
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.exceptions.*;
+import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
+import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
+import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

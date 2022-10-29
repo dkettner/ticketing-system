@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.project.domain;
+package com.kett.TicketSystem.ticket.domain;
 
 public enum TicketStatus {
     TO_DO,

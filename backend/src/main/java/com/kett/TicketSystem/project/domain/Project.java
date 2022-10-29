@@ -1,8 +1,9 @@
 package com.kett.TicketSystem.project.domain;
 
 import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
-import com.kett.TicketSystem.project.domain.exceptions.NoTicketFoundException;
+import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
+import com.kett.TicketSystem.ticket.domain.Ticket;
 import lombok.*;
 
 import javax.persistence.*;

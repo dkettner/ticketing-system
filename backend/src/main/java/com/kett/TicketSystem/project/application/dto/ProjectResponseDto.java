@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.project.application.dto;
 
+import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import lombok.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

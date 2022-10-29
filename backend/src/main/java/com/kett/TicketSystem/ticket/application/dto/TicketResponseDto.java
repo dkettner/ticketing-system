@@ -1,9 +1,7 @@
-package com.kett.TicketSystem.project.application.dto;
+package com.kett.TicketSystem.ticket.application.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import com.kett.TicketSystem.ticket.domain.TicketStatus;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,10 +12,13 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class TicketPostDto {
+public class TicketResponseDto {
+    private UUID ticketNumber;
     private String title;
     private String description;
+    private LocalDateTime creationTime;
     private LocalDateTime dueTime;
+    private TicketStatus ticketStatus;
     private UUID creatorId;
     private List<UUID> assigneeIds = new ArrayList<>();
 }
