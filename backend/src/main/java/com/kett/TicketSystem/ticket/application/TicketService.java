@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.ticket.application.dto;
+package com.kett.TicketSystem.ticket.application;
 
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
