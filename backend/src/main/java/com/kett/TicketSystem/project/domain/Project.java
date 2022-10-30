@@ -1,7 +1,5 @@
 package com.kett.TicketSystem.project.domain;
 
-import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
-import com.kett.TicketSystem.project.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import lombok.*;
 
@@ -32,74 +30,35 @@ public class Project {
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
-    private UUID creatorId;
+    private LocalDateTime creationTime;
 
     @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private LocalDateTime creationTime;
+    @Setter
+    @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
+    private List<UUID> ownerIds = new ArrayList<>();
 
     @Getter
     @Setter
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> memberIds = new ArrayList<>();
 
-    @Getter
-    @Setter
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Ticket> tickets = new ArrayList<>();
-
-    public void addTicket(Ticket ticket) {
-        tickets.add(ticket);
-    }
-
-    public Boolean hasTicketWithTicketNumber(UUID ticketNumber) {
-        return tickets
-                .stream()
-                .anyMatch(ticket ->
-                        ticket.getTicketNumber().equals(ticketNumber));
-    }
-
-    public void removeTicketWithTicketNumber(UUID ticketNumber) {
-        if (!this.hasTicketWithTicketNumber(ticketNumber)) {
-            throw new NoTicketFoundException(
-                    "could not find ticket with ticketNumber: " + ticketNumber +
-                    " in project with id: " + this.getId()
-            );
-        }
-
-        Boolean isTicketRemoved = tickets.removeIf(ticket ->
-                ticket.getTicketNumber().equals(ticketNumber));
-        if (!isTicketRemoved) {
-            throw new ImpossibleException(
-                    "!!! This should not happen. " +
-                    "The ticket with ticketNumber: " + ticketNumber +
-                    " was not removed from the project with id: " + this.getId() +
-                    " even though the check if the project holds the ticket was successful."
-            );
-        }
-    }
-
-    public Project(String name, String description, UUID creatorId, List<UUID> memberIds) {
+    public Project(String name, String description, UUID initialOwnerId, List<UUID> memberIds) {
         if (name == null || name.isEmpty()) {
             throw new ProjectException("name must not be null or empty");
         }
-        if (description == null || description.isEmpty()) {
-            throw new ProjectException("description must not be null or empty");
-        }
-        if (creatorId == null) {
-            throw new ProjectException("creatorId must not be null");
-        }
-        if (memberIds == null) {
-            throw new ProjectException("memberIds must not be null");
+        if (initialOwnerId == null) {
+            throw new ProjectException("initialOwnerId must not be null");
         }
 
         this.name = name;
         this.description = description;
-        this.creatorId = creatorId;
         this.creationTime = LocalDateTime.now();
-        this.memberIds.addAll(memberIds); // TODO: Check for duplicates?
-        if (!this.memberIds.contains(creatorId)) {
-            this.memberIds.add(creatorId);
+        this.ownerIds.add(initialOwnerId);
+        if (memberIds != null) {
+            this.memberIds.addAll(memberIds);
+        }
+        if (!this.memberIds.contains(initialOwnerId)) {
+            this.memberIds.add(initialOwnerId);
         }
     }
 }

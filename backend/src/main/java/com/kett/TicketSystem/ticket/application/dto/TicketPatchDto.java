@@ -1,6 +1,6 @@
-package com.kett.TicketSystem.project.application.dto;
+package com.kett.TicketSystem.ticket.application.dto;
 
-import com.kett.TicketSystem.project.domain.TicketStatus;
+import com.kett.TicketSystem.ticket.domain.TicketStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

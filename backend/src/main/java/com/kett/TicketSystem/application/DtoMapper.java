@@ -1,11 +1,11 @@
 package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.project.application.dto.TicketPostDto;
-import com.kett.TicketSystem.project.application.dto.TicketResponseDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.application.dto.ProjectResponseDto;
 import com.kett.TicketSystem.project.domain.Project;
-import com.kett.TicketSystem.project.domain.Ticket;
+import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
 import org.modelmapper.ModelMapper;
@@ -30,10 +30,9 @@ public class DtoMapper {
             mapper.map(Project::getId, ProjectResponseDto::setId);
             mapper.map(Project::getName, ProjectResponseDto::setName);
             mapper.map(Project::getDescription, ProjectResponseDto::setDescription);
-            mapper.map(Project::getCreatorId, ProjectResponseDto::setCreatorId);
             mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
+            mapper.map(Project::getOwnerIds, ProjectResponseDto::setOwnerIds);
             mapper.map(Project::getMemberIds, ProjectResponseDto::setMemberIds);
-            // TODO: add proper mapping for List<Ticket> -> List<TicketResponseDto>
         });
         modelMapper.typeMap(User.class, UserResponseDto.class).addMappings(mapper -> {
             mapper.map(User::getId, UserResponseDto::setId);
@@ -54,18 +53,14 @@ public class DtoMapper {
     }
 
     public ProjectResponseDto mapProjectToProjectResponseDto(Project project) {
-        ProjectResponseDto projectResponseDto = modelMapper.map(project, ProjectResponseDto.class);
-        projectResponseDto.setTickets(
-                mapTicketListToTicketResponseDtoList(project.getTickets())
-        );
-        return projectResponseDto;
+        return modelMapper.map(project, ProjectResponseDto.class);
     }
 
     public Project mapProjectPostDtoToProject(ProjectPostDto projectPostDto) {
         return new Project(
                 projectPostDto.getName(),
                 projectPostDto.getDescription(),
-                projectPostDto.getCreatorId(),
+                projectPostDto.getInitialOwnerId(),
                 projectPostDto.getMemberIds()
         );
     }

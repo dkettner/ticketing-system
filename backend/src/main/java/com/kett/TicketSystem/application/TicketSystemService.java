@@ -3,7 +3,11 @@ package com.kett.TicketSystem.application;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
-import com.kett.TicketSystem.project.domain.Ticket;
+import com.kett.TicketSystem.ticket.application.TicketService;
+import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
+import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.user.application.UserService;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
@@ -16,12 +20,14 @@ import java.util.UUID;
 @Service
 public class TicketSystemService {
     private final ProjectService projectService;
+    private final TicketService ticketService;
     private final UserService userService;
     private final DtoMapper dtoMapper;
 
     @Autowired
-    public TicketSystemService (ProjectService projectService, UserService userService) {
+    public TicketSystemService (ProjectService projectService, TicketService ticketService, UserService userService) {
         this.projectService = projectService;
+        this.ticketService = ticketService;
         this.userService = userService;
         this.dtoMapper = new DtoMapper();
     }
@@ -29,16 +35,6 @@ public class TicketSystemService {
     public ProjectResponseDto fetchProjectById(UUID id) {
         Project project = projectService.getProjectById(id);
         return dtoMapper.mapProjectToProjectResponseDto(project);
-    }
-
-    public List<TicketResponseDto> fetchTicketsByProjectId(UUID id) {
-        List<Ticket> tickets = projectService.getTicketsByProjectId(id);
-        return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
-    }
-
-    public TicketResponseDto fetchTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
-        Ticket ticket = projectService.getTicketByProjectIdAndTicketNumber(id, ticketNumber);
-        return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
 
     public ProjectResponseDto addProject(ProjectPostDto projectPostDto) {
@@ -55,30 +51,11 @@ public class TicketSystemService {
     // TODO: clean this up
     public void patchProjectById(UUID id, ProjectPatchDto projectPatchDto) {
         projectService.patchProjectById(
-                id, projectPatchDto.getName(),
-                projectPatchDto.getDescription(),
-                projectPatchDto.getMemberIds());
-    }
-
-    public TicketResponseDto addTicketToProject(UUID id, TicketPostDto ticketPostDto) {
-        Ticket ticket = projectService.addTicketToProject(id, dtoMapper.mapTicketPostDtoToTicket(ticketPostDto));
-        return dtoMapper.mapTicketToTicketResponseDto(ticket);
-    }
-
-    public void deleteTicketByProjectIdAndTicketNumber(UUID id, UUID ticketNumber) {
-        projectService.deleteTicketByProjectIdAndTicketNumber(id, ticketNumber);
-    }
-
-    // TODO: clean this up
-    public void patchTicket(UUID id, UUID ticketNumber, TicketPatchDto ticketPatchDto) {
-        projectService.patchTicket(
                 id,
-                ticketNumber,
-                ticketPatchDto.getTitle(),
-                ticketPatchDto.getDescription(),
-                ticketPatchDto.getDueTime(),
-                ticketPatchDto.getTicketStatus(),
-                ticketPatchDto.getAssigneeIds()
+                projectPatchDto.getName(),
+                projectPatchDto.getDescription(),
+                projectPatchDto.getOwnerIds(),
+                projectPatchDto.getMemberIds()
         );
     }
 
