@@ -1,5 +1,7 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
+import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
@@ -70,5 +72,10 @@ public class TicketSystemService {
     public UserResponseDto getUserById(UUID id) {
         User user = userService.getUserById(id);
         return dtoMapper.mapUserToUserResponseDto(user);
+    }
+
+    public PhaseResponseDto getPhaseById(UUID id) {
+        Phase phase = phaseService.getPhaseById(id);
+        return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
 }
