@@ -19,6 +19,7 @@ public class Phase {
 
     @Getter
     @Setter(AccessLevel.PROTECTED)
+    @Column(length = 16)
     private UUID projectId;
 
     @Getter
