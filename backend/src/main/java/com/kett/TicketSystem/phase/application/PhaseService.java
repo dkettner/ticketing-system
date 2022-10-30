@@ -1,6 +1,6 @@
-package com.kett.TicketSystem.projectphase.application;
+package com.kett.TicketSystem.phase.application;
 
-import com.kett.TicketSystem.projectphase.repository.PhaseRepository;
+import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

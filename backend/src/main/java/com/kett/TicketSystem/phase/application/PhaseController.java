@@ -1,8 +1,8 @@
-package com.kett.TicketSystem.projectphase.application;
+package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
-import com.kett.TicketSystem.projectphase.domain.exceptions.NoPhaseFoundException;
-import com.kett.TicketSystem.projectphase.domain.exceptions.PhaseException;
+import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
+import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

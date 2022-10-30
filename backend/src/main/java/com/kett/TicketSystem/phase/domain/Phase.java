@@ -1,6 +1,6 @@
-package com.kett.TicketSystem.projectphase.domain;
+package com.kett.TicketSystem.phase.domain;
 
-import com.kett.TicketSystem.projectphase.domain.exceptions.PhaseException;
+import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import lombok.*;
 
 import javax.persistence.*;

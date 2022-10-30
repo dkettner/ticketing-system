@@ -1,6 +1,6 @@
-package com.kett.TicketSystem.projectphase.repository;
+package com.kett.TicketSystem.phase.repository;
 
-import com.kett.TicketSystem.projectphase.domain.Phase;
+import com.kett.TicketSystem.phase.domain.Phase;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

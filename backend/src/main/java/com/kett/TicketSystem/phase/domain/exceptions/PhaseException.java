@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.projectphase.domain.exceptions;
+package com.kett.TicketSystem.phase.domain.exceptions;
 
 public class PhaseException extends RuntimeException {
     public PhaseException(String message) {
