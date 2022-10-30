@@ -35,6 +35,14 @@ public class Phase {
     @OneToOne(fetch = FetchType.LAZY)
     private Phase nextPhase;
 
+    public Boolean isFirst() {
+        return previousPhase == null;
+    }
+
+    public Boolean isLast() {
+        return nextPhase == null;
+    }
+
     public Phase(UUID projectId, String name, Phase previousPhase, Phase nextPhase) {
         if (projectId == null) {
             throw new PhaseException("projectId must not be null");
