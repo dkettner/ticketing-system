@@ -1,13 +1,12 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
+import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
+import com.kett.TicketSystem.phase.application.PhaseService;
 import com.kett.TicketSystem.ticket.application.TicketService;
-import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
-import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
-import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
-import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.user.application.UserService;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
@@ -20,13 +19,16 @@ import java.util.UUID;
 @Service
 public class TicketSystemService {
     private final ProjectService projectService;
+    private final PhaseService phaseService;
     private final TicketService ticketService;
     private final UserService userService;
     private final DtoMapper dtoMapper;
 
     @Autowired
-    public TicketSystemService (ProjectService projectService, TicketService ticketService, UserService userService) {
+    public TicketSystemService (ProjectService projectService, PhaseService phaseService,
+                                TicketService ticketService, UserService userService) {
         this.projectService = projectService;
+        this.phaseService = phaseService;
         this.ticketService = ticketService;
         this.userService = userService;
         this.dtoMapper = new DtoMapper();
@@ -70,5 +72,10 @@ public class TicketSystemService {
     public UserResponseDto getUserById(UUID id) {
         User user = userService.getUserById(id);
         return dtoMapper.mapUserToUserResponseDto(user);
+    }
+
+    public PhaseResponseDto getPhaseById(UUID id) {
+        Phase phase = phaseService.getPhaseById(id);
+        return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
 }

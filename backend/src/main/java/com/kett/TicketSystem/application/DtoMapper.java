@@ -1,5 +1,7 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
+import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
@@ -33,6 +35,13 @@ public class DtoMapper {
             mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
             mapper.map(Project::getOwnerIds, ProjectResponseDto::setOwnerIds);
             mapper.map(Project::getMemberIds, ProjectResponseDto::setMemberIds);
+        });
+        modelMapper.typeMap(Phase.class, PhaseResponseDto.class).addMappings(mapper -> {
+            mapper.map(Phase::getId, PhaseResponseDto::setId);
+            mapper.map(Phase::getProjectId, PhaseResponseDto::setProjectId);
+            mapper.map(Phase::getName, PhaseResponseDto::setName);
+            mapper.map(Phase::getPreviousPhase, PhaseResponseDto::setPreviousPhase);
+            mapper.map(Phase::getNextPhase, PhaseResponseDto::setNextPhase);
         });
         modelMapper.typeMap(User.class, UserResponseDto.class).addMappings(mapper -> {
             mapper.map(User::getId, UserResponseDto::setId);
@@ -77,5 +86,9 @@ public class DtoMapper {
 
     public UserResponseDto mapUserToUserResponseDto(User user) {
         return modelMapper.map(user, UserResponseDto.class);
+    }
+
+    public PhaseResponseDto mapPhaseToPhaseResponseDto(Phase phase) {
+        return modelMapper.map(phase, PhaseResponseDto.class);
     }
 }
