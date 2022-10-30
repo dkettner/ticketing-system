@@ -51,9 +51,12 @@ public class TicketSystemService {
     // TODO: clean this up
     public void patchProjectById(UUID id, ProjectPatchDto projectPatchDto) {
         projectService.patchProjectById(
-                id, projectPatchDto.getName(),
+                id,
+                projectPatchDto.getName(),
                 projectPatchDto.getDescription(),
-                projectPatchDto.getMemberIds());
+                projectPatchDto.getOwnerIds(),
+                projectPatchDto.getMemberIds()
+        );
     }
 
     public List<ProjectResponseDto> fetchAllProjects() {
