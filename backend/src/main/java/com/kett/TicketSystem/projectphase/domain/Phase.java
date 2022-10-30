@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.projectphase.domain;
 
+import com.kett.TicketSystem.projectphase.domain.exceptions.PhaseException;
 import lombok.*;
 
 import javax.persistence.*;
@@ -36,10 +37,10 @@ public class Phase {
 
     public Phase(UUID projectId, String name, Phase previousPhase, Phase nextPhase) {
         if (projectId == null) {
-            throw new RuntimeException("projectId must not be null");
+            throw new PhaseException("projectId must not be null");
         }
         if (name == null) {
-            throw new RuntimeException("name must not be null");
+            throw new PhaseException("name must not be null");
         }
 
         this.projectId = projectId;
