@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.projectphase;
+package com.kett.TicketSystem.projectphase.domain;
 
 import lombok.*;
 
