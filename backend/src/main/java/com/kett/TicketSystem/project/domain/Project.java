@@ -34,12 +34,12 @@ public class Project {
 
     @Getter
     @Setter
-    @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = UUID.class, fetch = FetchType.LAZY)
     private List<UUID> ownerIds = new ArrayList<>();
 
     @Getter
     @Setter
-    @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
+    @ElementCollection(targetClass = UUID.class, fetch = FetchType.LAZY)
     private List<UUID> memberIds = new ArrayList<>();
 
     public Project(String name, String description, UUID initialOwnerId, List<UUID> memberIds) {
