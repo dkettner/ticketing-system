@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.membership.domain;
 
+import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import lombok.*;
 
 import javax.persistence.*;
@@ -39,13 +40,13 @@ public class Membership {
 
     public Membership(UUID projectId, UUID userId, Role role) {
         if (projectId == null) {
-            throw new RuntimeException("projectId cannot be null");
+            throw new MembershipException("projectId cannot be null");
         }
         if (userId == null) {
-            throw new RuntimeException("userId cannot be null");
+            throw new MembershipException("userId cannot be null");
         }
         if (role == null) {
-            throw new RuntimeException("role cannot be null");
+            throw new MembershipException("role cannot be null");
         }
 
         this.projectId = projectId;
