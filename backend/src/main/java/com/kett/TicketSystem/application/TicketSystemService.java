@@ -1,5 +1,8 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.membership.application.MembershipService;
+import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
+import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.project.application.ProjectService;
@@ -22,15 +25,18 @@ public class TicketSystemService {
     private final PhaseService phaseService;
     private final TicketService ticketService;
     private final UserService userService;
+    private final MembershipService membershipService;
     private final DtoMapper dtoMapper;
 
     @Autowired
     public TicketSystemService (ProjectService projectService, PhaseService phaseService,
-                                TicketService ticketService, UserService userService) {
+                                TicketService ticketService, UserService userService,
+                                MembershipService membershipService) {
         this.projectService = projectService;
         this.phaseService = phaseService;
         this.ticketService = ticketService;
         this.userService = userService;
+        this.membershipService = membershipService;
         this.dtoMapper = new DtoMapper();
     }
 
@@ -55,9 +61,7 @@ public class TicketSystemService {
         projectService.patchProjectById(
                 id,
                 projectPatchDto.getName(),
-                projectPatchDto.getDescription(),
-                projectPatchDto.getOwnerIds(),
-                projectPatchDto.getMemberIds()
+                projectPatchDto.getDescription()
         );
     }
 
@@ -77,5 +81,10 @@ public class TicketSystemService {
     public PhaseResponseDto getPhaseById(UUID id) {
         Phase phase = phaseService.getPhaseById(id);
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
+    }
+
+    public MembershipResponseDto getMemberShipById(UUID id) {
+        Membership membership = membershipService.getMembershipById(id);
+        return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 }

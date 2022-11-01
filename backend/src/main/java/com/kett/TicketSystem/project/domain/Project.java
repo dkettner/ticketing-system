@@ -5,8 +5,6 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -32,33 +30,13 @@ public class Project {
     @Setter(AccessLevel.PROTECTED)
     private LocalDateTime creationTime;
 
-    @Getter
-    @Setter
-    @ElementCollection(targetClass = UUID.class, fetch = FetchType.LAZY)
-    private List<UUID> ownerIds = new ArrayList<>();
-
-    @Getter
-    @Setter
-    @ElementCollection(targetClass = UUID.class, fetch = FetchType.LAZY)
-    private List<UUID> memberIds = new ArrayList<>();
-
-    public Project(String name, String description, UUID initialOwnerId, List<UUID> memberIds) {
+    public Project(String name, String description) {
         if (name == null || name.isEmpty()) {
             throw new ProjectException("name must not be null or empty");
-        }
-        if (initialOwnerId == null) {
-            throw new ProjectException("initialOwnerId must not be null");
         }
 
         this.name = name;
         this.description = description;
         this.creationTime = LocalDateTime.now();
-        this.ownerIds.add(initialOwnerId);
-        if (memberIds != null) {
-            this.memberIds.addAll(memberIds);
-        }
-        if (!this.memberIds.contains(initialOwnerId)) {
-            this.memberIds.add(initialOwnerId);
-        }
     }
 }
