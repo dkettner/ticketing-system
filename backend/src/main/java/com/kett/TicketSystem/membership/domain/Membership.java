@@ -33,10 +33,19 @@ public class Membership {
     private Role role;
 
     @Getter
-    @Setter
     @Enumerated(EnumType.STRING)
     private State state;
 
+    public void setState(State state) {
+        if (this.state.equals(State.ACCEPTED) && state.equals(State.OPEN)) {
+            throw new MembershipException(
+                    "Once state as been changed to ACCEPTED, it cannot go back to OPEN. " +
+                    "To revoke Membership, use delete."
+            );
+        }
+
+        this.state = state;
+    }
 
     public Membership(UUID projectId, UUID userId, Role role) {
         if (projectId == null) {
