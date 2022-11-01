@@ -1,6 +1,8 @@
 package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.membership.application.MembershipService;
+import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
+import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.project.application.ProjectService;
@@ -79,5 +81,10 @@ public class TicketSystemService {
     public PhaseResponseDto getPhaseById(UUID id) {
         Phase phase = phaseService.getPhaseById(id);
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
+    }
+
+    public MembershipResponseDto getMemberShipById(UUID id) {
+        Membership membership = membershipService.getMembershipById(id);
+        return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 }
