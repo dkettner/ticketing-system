@@ -1,5 +1,7 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
+import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
@@ -41,11 +43,22 @@ public class DtoMapper {
             mapper.map(Phase::getPreviousPhase, PhaseResponseDto::setPreviousPhase);
             mapper.map(Phase::getNextPhase, PhaseResponseDto::setNextPhase);
         });
+        modelMapper.typeMap(Membership.class, MembershipResponseDto.class).addMappings(mapper -> {
+            mapper.map(Membership::getId, MembershipResponseDto::setId);
+            mapper.map(Membership::getProjectId, MembershipResponseDto::setProjectId);
+            mapper.map(Membership::getUserId, MembershipResponseDto::setUserId);
+            mapper.map(Membership::getRole, MembershipResponseDto::setRole);
+            mapper.map(Membership::getState, MembershipResponseDto::setState);
+        });
         modelMapper.typeMap(User.class, UserResponseDto.class).addMappings(mapper -> {
             mapper.map(User::getId, UserResponseDto::setId);
             mapper.map(User::getName, UserResponseDto::setName);
             mapper.map(user -> user.getEMailAddress().toString(), UserResponseDto::setEMailAddress);
         });
+    }
+
+    public MembershipResponseDto mapMembershipToMembershipResponseDto(Membership membership) {
+        return modelMapper.map(membership, MembershipResponseDto.class);
     }
 
     public TicketResponseDto mapTicketToTicketResponseDto(Ticket ticket) {
