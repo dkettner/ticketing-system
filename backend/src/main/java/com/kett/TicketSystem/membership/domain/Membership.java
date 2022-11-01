@@ -28,7 +28,8 @@ public class Membership {
 
     @Getter
     @Setter
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @Getter
     @Setter
