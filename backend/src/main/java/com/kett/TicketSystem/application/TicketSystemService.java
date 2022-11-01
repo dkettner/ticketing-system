@@ -55,9 +55,7 @@ public class TicketSystemService {
         projectService.patchProjectById(
                 id,
                 projectPatchDto.getName(),
-                projectPatchDto.getDescription(),
-                projectPatchDto.getOwnerIds(),
-                projectPatchDto.getMemberIds()
+                projectPatchDto.getDescription()
         );
     }
 

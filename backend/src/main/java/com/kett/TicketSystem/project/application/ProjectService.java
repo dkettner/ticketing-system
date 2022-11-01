@@ -42,27 +42,13 @@ public class ProjectService {
     }
 
     // TODO: clean this up
-    public void patchProjectById(UUID id, String newName, String newDescription, List<UUID> newOwnerIds, List<UUID> newMemberIds) {
-        if (newMemberIds != null && newMemberIds.isEmpty()) {
-            throw new ProjectException(
-                    "Cannot patch memberIds with empty list. " +
-                    "If you do not want to patch memberIds, use null instead of empty list"
-            );
-        }
-
+    public void patchProjectById(UUID id, String newName, String newDescription) {
         Project existingProject = getProjectById(id);
         if (newName != null) {
             existingProject.setName(newName);
         }
         if (newDescription != null) {
             existingProject.setDescription(newDescription);
-        }
-        if (newOwnerIds != null) {
-            existingProject.setOwnerIds(newOwnerIds);
-            // TODO: check integrity of memberIds
-        }
-        if (newMemberIds != null) {
-            existingProject.setMemberIds(newMemberIds);
         }
         projectRepository.save(existingProject);
     }

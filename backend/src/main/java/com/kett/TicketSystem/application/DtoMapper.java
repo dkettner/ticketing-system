@@ -33,8 +33,6 @@ public class DtoMapper {
             mapper.map(Project::getName, ProjectResponseDto::setName);
             mapper.map(Project::getDescription, ProjectResponseDto::setDescription);
             mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
-            mapper.map(Project::getOwnerIds, ProjectResponseDto::setOwnerIds);
-            mapper.map(Project::getMemberIds, ProjectResponseDto::setMemberIds);
         });
         modelMapper.typeMap(Phase.class, PhaseResponseDto.class).addMappings(mapper -> {
             mapper.map(Phase::getId, PhaseResponseDto::setId);
@@ -66,12 +64,7 @@ public class DtoMapper {
     }
 
     public Project mapProjectPostDtoToProject(ProjectPostDto projectPostDto) {
-        return new Project(
-                projectPostDto.getName(),
-                projectPostDto.getDescription(),
-                projectPostDto.getInitialOwnerId(),
-                projectPostDto.getMemberIds()
-        );
+        return new Project(projectPostDto.getName(), projectPostDto.getDescription());
     }
 
     public Ticket mapTicketPostDtoToTicket(TicketPostDto ticketPostDto) {
