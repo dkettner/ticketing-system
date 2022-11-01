@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.project.application.ProjectService;
@@ -22,15 +23,18 @@ public class TicketSystemService {
     private final PhaseService phaseService;
     private final TicketService ticketService;
     private final UserService userService;
+    private final MembershipService membershipService;
     private final DtoMapper dtoMapper;
 
     @Autowired
     public TicketSystemService (ProjectService projectService, PhaseService phaseService,
-                                TicketService ticketService, UserService userService) {
+                                TicketService ticketService, UserService userService,
+                                MembershipService membershipService) {
         this.projectService = projectService;
         this.phaseService = phaseService;
         this.ticketService = ticketService;
         this.userService = userService;
+        this.membershipService = membershipService;
         this.dtoMapper = new DtoMapper();
     }
 
