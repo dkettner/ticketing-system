@@ -33,5 +33,5 @@ public class Membership {
 
     @Getter
     @Setter
-    private String state;
+    private State state;
 }
