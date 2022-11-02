@@ -99,4 +99,9 @@ public class TicketSystemService {
         List<Membership> memberships = membershipService.getMembershipsByUserId(userId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
+
+    public List<MembershipResponseDto> getMembershipsByProjectId(UUID projectId) {
+        List<Membership> memberships = membershipService.getMembershipsByProjectId(projectId);
+        return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
+    }
 }

@@ -33,4 +33,12 @@ public class MembershipService {
         }
         return memberships;
     }
+
+    public List<Membership> getMembershipsByProjectId(UUID projectId) {
+        List<Membership> memberships =  membershipRepository.findByProjectId(projectId);
+        if (memberships.isEmpty()) {
+            throw new NoMembershipFoundException("could not find memberships with projectId: " + projectId);
+        }
+        return memberships;
+    }
 }

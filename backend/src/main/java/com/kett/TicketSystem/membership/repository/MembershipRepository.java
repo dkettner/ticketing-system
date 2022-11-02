@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     List<Membership> findByUserId(UUID userId);
+    List<Membership> findByProjectId(UUID projectId);
 }
