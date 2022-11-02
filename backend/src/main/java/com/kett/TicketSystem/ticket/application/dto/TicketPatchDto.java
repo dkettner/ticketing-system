@@ -1,6 +1,5 @@
 package com.kett.TicketSystem.ticket.application.dto;
 
-import com.kett.TicketSystem.ticket.domain.TicketStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +18,6 @@ public class TicketPatchDto {
     private String title;
     private String description;
     private LocalDateTime dueTime;
-    private TicketStatus ticketStatus;
+    private UUID phaseId;
     private List<UUID> assigneeIds = new ArrayList<>();
 }

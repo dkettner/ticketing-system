@@ -21,11 +21,6 @@ public class Ticket {
     private UUID id;
 
     @Getter
-    @Setter(AccessLevel.PROTECTED)
-    @Column(unique = true, length = 16)
-    private UUID ticketNumber;
-
-    @Getter
     @Setter
     private String title;
 
@@ -42,12 +37,8 @@ public class Ticket {
 
     @Getter
     @Setter
-    @Enumerated(EnumType.STRING)
-    private TicketStatus ticketStatus;
-
-    @Getter
-    @Setter(AccessLevel.PROTECTED)
-    private UUID creatorId;
+    @Column(length = 16)
+    private UUID phaseId;
 
     @Getter
     @Setter
@@ -55,39 +46,24 @@ public class Ticket {
     private List<UUID> assigneeIds = new ArrayList<>();
 
     public void setDueTime(LocalDateTime newDueTime) {
-        if (newDueTime.isBefore(LocalDateTime.now())) {
+        if (newDueTime != null && newDueTime.isBefore(LocalDateTime.now())) {
             throw new TicketException("dueTime cannot be in the past");
         }
         this.dueTime = newDueTime;
     }
 
-    public Ticket(String title, String description, LocalDateTime dueTime, UUID creatorId, List<UUID> assigneeIds) {
+    public Ticket(String title, String description, LocalDateTime dueTime, List<UUID> assigneeIds) {
         if (title == null || title.isEmpty()) {
             throw new TicketException("title must not be null or empty");
-        }
-        if (description == null || description.isEmpty()) {
-            throw new TicketException("description must not be null or empty");
-        }
-        if (dueTime == null) {
-            throw new TicketException("dueTime must not be null");
-        }
-        if (creatorId == null) {
-            throw new TicketException("creatorId must not be null");
         }
         if (assigneeIds == null) {
             throw new TicketException("memberIds must not be null");
         }
 
-        this.ticketNumber = UUID.randomUUID();
         this.title = title;
         this.description = description;
         this.creationTime = LocalDateTime.now();
         this.setDueTime(dueTime);
-        this.ticketStatus = TicketStatus.TO_DO;
-        this.creatorId = creatorId;
-        this.assigneeIds.addAll(assigneeIds); // TODO: Check for duplicates?
-        if (!this.assigneeIds.contains(creatorId)) {
-            this.assigneeIds.add(creatorId);
-        }
+        this.assigneeIds.addAll(assigneeIds);
     }
 }

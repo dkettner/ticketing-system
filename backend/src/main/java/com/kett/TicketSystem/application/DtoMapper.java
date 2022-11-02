@@ -21,13 +21,12 @@ public class DtoMapper {
 
     public DtoMapper() {
         modelMapper.typeMap(Ticket.class, TicketResponseDto.class).addMappings(mapper -> {
-            mapper.map(Ticket::getTicketNumber, TicketResponseDto::setTicketNumber);
+            mapper.map(Ticket::getId, TicketResponseDto::setId);
             mapper.map(Ticket::getTitle, TicketResponseDto::setTitle);
             mapper.map(Ticket::getDescription, TicketResponseDto::setDescription);
             mapper.map(Ticket::getCreationTime, TicketResponseDto::setCreationTime);
             mapper.map(Ticket::getDueTime, TicketResponseDto::setDueTime);
-            mapper.map(Ticket::getTicketStatus, TicketResponseDto:: setTicketStatus);
-            mapper.map(Ticket::getCreatorId, TicketResponseDto::setCreatorId);
+            mapper.map(Ticket::getPhaseId, TicketResponseDto:: setPhaseId);
             mapper.map(Ticket::getAssigneeIds, TicketResponseDto::setAssigneeIds);
         });
         modelMapper.typeMap(Project.class, ProjectResponseDto.class).addMappings(mapper -> {
@@ -85,7 +84,6 @@ public class DtoMapper {
                 ticketPostDto.getTitle(),
                 ticketPostDto.getDescription(),
                 ticketPostDto.getDueTime(),
-                ticketPostDto.getCreatorId(),
                 ticketPostDto.getAssigneeIds()
         );
     }
