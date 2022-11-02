@@ -25,6 +25,8 @@ public class TicketController {
     }
 
 
+    // endpoints
+
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponseDto> getTicketById(@PathVariable UUID id) {
         TicketResponseDto ticketResponseDto = ticketSystemService.getTicketById(id);
