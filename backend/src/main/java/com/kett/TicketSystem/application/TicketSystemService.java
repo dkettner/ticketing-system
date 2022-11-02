@@ -10,6 +10,8 @@ import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.phase.application.PhaseService;
 import com.kett.TicketSystem.ticket.application.TicketService;
+import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
+import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.user.application.UserService;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
@@ -86,5 +88,10 @@ public class TicketSystemService {
     public MembershipResponseDto getMemberShipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
+    }
+
+    public TicketResponseDto getTicketById(UUID id) {
+        Ticket ticket = ticketService.getTicketById(id);
+        return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
 }
