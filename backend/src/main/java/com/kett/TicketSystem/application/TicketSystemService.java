@@ -94,4 +94,9 @@ public class TicketSystemService {
         Ticket ticket = ticketService.getTicketById(id);
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
+
+    public List<MembershipResponseDto> getMembershipsByUserId(UUID userId) {
+        List<Membership> memberships = membershipService.getMembershipsByUserId(userId);
+        return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
+    }
 }

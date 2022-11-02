@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -31,6 +32,12 @@ public class MembershipController {
     public ResponseEntity<MembershipResponseDto> getMembershipById(@PathVariable UUID id) {
         MembershipResponseDto membershipResponseDto = ticketSystemService.getMemberShipById(id);
         return new ResponseEntity<>(membershipResponseDto, HttpStatus.OK);
+    }
+
+    @GetMapping("?userId={userId}")
+    public ResponseEntity<List<MembershipResponseDto>> getMemberShipsByUserId(@PathVariable UUID userId) {
+        List<MembershipResponseDto> membershipResponseDtos = ticketSystemService.getMembershipsByUserId(userId);
+        return new ResponseEntity<>(membershipResponseDtos, HttpStatus.OK);
     }
 
 
