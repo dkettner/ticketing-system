@@ -37,7 +37,7 @@ public class MembershipController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MembershipResponseDto>> getMemberShipsByQuery(
+    public ResponseEntity<List<MembershipResponseDto>> getMembershipsByQuery(
             @RequestParam(name = "user-id", required = false) UUID userId,
             @RequestParam(name = "project-id", required = false) UUID projectId
     ) {
