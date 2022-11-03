@@ -20,6 +20,26 @@ public class DtoMapper {
     private final ModelMapper modelMapper = new ModelMapper();
 
     public DtoMapper() {
+        modelMapper.typeMap(Membership.class, MembershipResponseDto.class).addMappings(mapper -> {
+            mapper.map(Membership::getId, MembershipResponseDto::setId);
+            mapper.map(Membership::getProjectId, MembershipResponseDto::setProjectId);
+            mapper.map(Membership::getUserId, MembershipResponseDto::setUserId);
+            mapper.map(Membership::getRole, MembershipResponseDto::setRole);
+            mapper.map(Membership::getState, MembershipResponseDto::setState);
+        });
+        modelMapper.typeMap(Phase.class, PhaseResponseDto.class).addMappings(mapper -> {
+            mapper.map(Phase::getId, PhaseResponseDto::setId);
+            mapper.map(Phase::getProjectId, PhaseResponseDto::setProjectId);
+            mapper.map(Phase::getName, PhaseResponseDto::setName);
+            mapper.map(Phase::getPreviousPhase, PhaseResponseDto::setPreviousPhase);
+            mapper.map(Phase::getNextPhase, PhaseResponseDto::setNextPhase);
+        });
+        modelMapper.typeMap(Project.class, ProjectResponseDto.class).addMappings(mapper -> {
+            mapper.map(Project::getId, ProjectResponseDto::setId);
+            mapper.map(Project::getName, ProjectResponseDto::setName);
+            mapper.map(Project::getDescription, ProjectResponseDto::setDescription);
+            mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
+        });
         modelMapper.typeMap(Ticket.class, TicketResponseDto.class).addMappings(mapper -> {
             mapper.map(Ticket::getId, TicketResponseDto::setId);
             mapper.map(Ticket::getTitle, TicketResponseDto::setTitle);
@@ -29,26 +49,6 @@ public class DtoMapper {
             mapper.map(Ticket::getPhaseId, TicketResponseDto:: setPhaseId);
             mapper.map(Ticket::getAssigneeIds, TicketResponseDto::setAssigneeIds);
         });
-        modelMapper.typeMap(Project.class, ProjectResponseDto.class).addMappings(mapper -> {
-            mapper.map(Project::getId, ProjectResponseDto::setId);
-            mapper.map(Project::getName, ProjectResponseDto::setName);
-            mapper.map(Project::getDescription, ProjectResponseDto::setDescription);
-            mapper.map(Project::getCreationTime, ProjectResponseDto::setCreationTime);
-        });
-        modelMapper.typeMap(Phase.class, PhaseResponseDto.class).addMappings(mapper -> {
-            mapper.map(Phase::getId, PhaseResponseDto::setId);
-            mapper.map(Phase::getProjectId, PhaseResponseDto::setProjectId);
-            mapper.map(Phase::getName, PhaseResponseDto::setName);
-            mapper.map(Phase::getPreviousPhase, PhaseResponseDto::setPreviousPhase);
-            mapper.map(Phase::getNextPhase, PhaseResponseDto::setNextPhase);
-        });
-        modelMapper.typeMap(Membership.class, MembershipResponseDto.class).addMappings(mapper -> {
-            mapper.map(Membership::getId, MembershipResponseDto::setId);
-            mapper.map(Membership::getProjectId, MembershipResponseDto::setProjectId);
-            mapper.map(Membership::getUserId, MembershipResponseDto::setUserId);
-            mapper.map(Membership::getRole, MembershipResponseDto::setRole);
-            mapper.map(Membership::getState, MembershipResponseDto::setState);
-        });
         modelMapper.typeMap(User.class, UserResponseDto.class).addMappings(mapper -> {
             mapper.map(User::getId, UserResponseDto::setId);
             mapper.map(User::getName, UserResponseDto::setName);
@@ -56,9 +56,47 @@ public class DtoMapper {
         });
     }
 
+
+    // membership
+
     public MembershipResponseDto mapMembershipToMembershipResponseDto(Membership membership) {
         return modelMapper.map(membership, MembershipResponseDto.class);
     }
+
+    public List<MembershipResponseDto> mapMembershipListToMembershipResponseDtoList(List<Membership> memberships) {
+        return memberships
+                .stream()
+                .map(membership -> modelMapper.map(membership, MembershipResponseDto.class))
+                .toList();
+    }
+
+
+    // phase
+
+    public PhaseResponseDto mapPhaseToPhaseResponseDto(Phase phase) {
+        return modelMapper.map(phase, PhaseResponseDto.class);
+    }
+
+    public List<PhaseResponseDto> mapPhaseListToPhaseResponseDtoList(List<Phase> phases) {
+        return phases
+                .stream()
+                .map(phase -> modelMapper.map(phase, PhaseResponseDto.class))
+                .toList();
+    }
+
+
+    // project
+
+    public ProjectResponseDto mapProjectToProjectResponseDto(Project project) {
+        return modelMapper.map(project, ProjectResponseDto.class);
+    }
+
+    public Project mapProjectPostDtoToProject(ProjectPostDto projectPostDto) {
+        return new Project(projectPostDto.getName(), projectPostDto.getDescription());
+    }
+
+
+    // ticket
 
     public TicketResponseDto mapTicketToTicketResponseDto(Ticket ticket) {
         return modelMapper.map(ticket, TicketResponseDto.class);
@@ -71,14 +109,6 @@ public class DtoMapper {
                 .toList();
     }
 
-    public ProjectResponseDto mapProjectToProjectResponseDto(Project project) {
-        return modelMapper.map(project, ProjectResponseDto.class);
-    }
-
-    public Project mapProjectPostDtoToProject(ProjectPostDto projectPostDto) {
-        return new Project(projectPostDto.getName(), projectPostDto.getDescription());
-    }
-
     public Ticket mapTicketPostDtoToTicket(TicketPostDto ticketPostDto) {
         return new Ticket(
                 ticketPostDto.getTitle(),
@@ -88,25 +118,10 @@ public class DtoMapper {
         );
     }
 
+
+    // user
+
     public UserResponseDto mapUserToUserResponseDto(User user) {
         return modelMapper.map(user, UserResponseDto.class);
-    }
-
-    public PhaseResponseDto mapPhaseToPhaseResponseDto(Phase phase) {
-        return modelMapper.map(phase, PhaseResponseDto.class);
-    }
-
-    public List<MembershipResponseDto> mapMembershipListToMembershipResponseDtoList(List<Membership> memberships) {
-        return memberships
-                .stream()
-                .map(membership -> modelMapper.map(membership, MembershipResponseDto.class))
-                .toList();
-    }
-
-    public List<PhaseResponseDto> mapPhaseListToPhaseResponseDtoList(List<Phase> phases) {
-        return phases
-                .stream()
-                .map(phase -> modelMapper.map(phase, PhaseResponseDto.class))
-                .toList();
     }
 }
