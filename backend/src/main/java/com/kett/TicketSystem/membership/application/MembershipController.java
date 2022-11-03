@@ -73,6 +73,12 @@ public class MembershipController {
                 .body(membershipResponseDto);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMembership(@PathVariable UUID id) {
+        ticketSystemService.deleteMembershipById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 
     // exception handlers
 

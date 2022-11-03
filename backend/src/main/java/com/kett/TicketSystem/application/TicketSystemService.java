@@ -81,6 +81,10 @@ public class TicketSystemService {
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
+    public void deleteMembershipById(UUID id) {
+        membershipService.deleteMembershipById(id);
+    }
+
 
     // phase
 

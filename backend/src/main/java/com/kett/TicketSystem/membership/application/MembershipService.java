@@ -3,6 +3,7 @@ package com.kett.TicketSystem.membership.application;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
+import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,5 +45,18 @@ public class MembershipService {
 
     public Membership addMembership(Membership membership) {
         return membershipRepository.save(membership);
+    }
+
+    public void deleteMembershipById(UUID id) {
+        Long numOfDeletedMemberships = membershipRepository.removeById(id);
+
+        if (numOfDeletedMemberships == 0) {
+            throw new NoMembershipFoundException("could not delete because there was no membership with id: " + id);
+        } else if (numOfDeletedMemberships > 1) {
+            throw new ImpossibleException(
+                    "!!! This should not happen. " +
+                            "Multiple memberships were deleted when deleting project with id: " + id
+            );
+        }
     }
 }
