@@ -6,6 +6,7 @@ import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -21,5 +22,13 @@ public class PhaseService {
         return phaseRepository
                 .findById(id)
                 .orElseThrow(() -> new NoPhaseFoundException("could not find phase with id: " + id));
+    }
+
+    public List<Phase> getPhasesByProjectId(UUID projectId) {
+        List<Phase> phases = phaseRepository.findByProjectId(projectId);
+        if (phases.isEmpty()) {
+            throw new NoPhaseFoundException("could not find phases with projectId: " + projectId);
+        }
+        return phases;
     }
 }

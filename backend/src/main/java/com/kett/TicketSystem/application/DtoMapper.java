@@ -102,4 +102,11 @@ public class DtoMapper {
                 .map(membership -> modelMapper.map(membership, MembershipResponseDto.class))
                 .toList();
     }
+
+    public List<PhaseResponseDto> mapPhaseListToPhaseResponseDtoList(List<Phase> phases) {
+        return phases
+                .stream()
+                .map(phase -> modelMapper.map(phase, PhaseResponseDto.class))
+                .toList();
+    }
 }
