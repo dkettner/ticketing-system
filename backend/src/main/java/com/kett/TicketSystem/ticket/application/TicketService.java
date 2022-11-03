@@ -6,6 +6,7 @@ import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -21,5 +22,21 @@ public class TicketService {
         return ticketRepository
                 .findById(id)
                 .orElseThrow(() -> new NoTicketFoundException("could not find ticket with id: " + id));
+    }
+
+    public List<Ticket> getTicketsByPhaseId(UUID phaseId) {
+        List<Ticket> tickets = ticketRepository.findByPhaseId(phaseId);
+        if (tickets.isEmpty()) {
+            throw new NoTicketFoundException("could not find tickets with phasId: " + phaseId);
+        }
+        return tickets;
+    }
+
+    public List<Ticket> getTicketsByAssigneeId(UUID assigneeId) {
+        List<Ticket> tickets = ticketRepository.findByAssigneeIdsContaining(assigneeId);
+        if (tickets.isEmpty()) {
+            throw new NoTicketFoundException("could not find tickets with assigneeId: " + assigneeId);
+        }
+        return tickets;
     }
 }

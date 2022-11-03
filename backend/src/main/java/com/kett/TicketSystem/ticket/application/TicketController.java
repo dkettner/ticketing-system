@@ -1,6 +1,8 @@
 package com.kett.TicketSystem.ticket.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
+import com.kett.TicketSystem.application.exceptions.NoParametersException;
+import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
@@ -10,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -33,8 +36,38 @@ public class TicketController {
         return new ResponseEntity<>(ticketResponseDto, HttpStatus.OK);
     }
 
+    @GetMapping
+    public ResponseEntity<List<TicketResponseDto>> getTicketsByQuery(
+            @RequestParam(name = "phase-id", required = false) UUID phaseId,
+            @RequestParam(name = "assignee-id", required = false) UUID assigneeId
+    ) {
+        if (phaseId != null && assigneeId != null) {
+            throw new TooManyParametersException("cannot query by more than one parameter yet");
+        }
+
+        List<TicketResponseDto> ticketResponseDtos;
+        if (phaseId != null) {
+            ticketResponseDtos = ticketSystemService.getTicketsByPhaseId(phaseId);
+        } else if (assigneeId != null) {
+            ticketResponseDtos = ticketSystemService.getTicketsByAssigneeId(assigneeId);
+        } else {
+            throw new NoParametersException("cannot query if no parameters are specified");
+        }
+        return new ResponseEntity<>(ticketResponseDtos, HttpStatus.OK);
+    }
+
 
     // exception handlers
+
+    @ExceptionHandler(NoParametersException.class)
+    public ResponseEntity<String> handleNoParametersException(NoParametersException noParametersException) {
+        return new ResponseEntity<>(noParametersException.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(TooManyParametersException.class)
+    public ResponseEntity<String> handleTooManyParametersException(TooManyParametersException tooManyParametersException) {
+        return new ResponseEntity<>(tooManyParametersException.getMessage(), HttpStatus.BAD_REQUEST);
+    }
 
     @ExceptionHandler(TicketException.class)
     public ResponseEntity<String> handleTicketException(TicketException ticketException) {

@@ -109,4 +109,14 @@ public class TicketSystemService {
         List<Phase> phases = phaseService.getPhasesByProjectId(projectId);
         return dtoMapper.mapPhaseListToPhaseResponseDtoList(phases);
     }
+
+    public List<TicketResponseDto> getTicketsByPhaseId(UUID phaseId) {
+        List<Ticket> tickets = ticketService.getTicketsByPhaseId(phaseId);
+        return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
+    }
+
+    public List<TicketResponseDto> getTicketsByAssigneeId(UUID assigneeId) {
+        List<Ticket> tickets = ticketService.getTicketsByAssigneeId(assigneeId);
+        return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
+    }
 }
