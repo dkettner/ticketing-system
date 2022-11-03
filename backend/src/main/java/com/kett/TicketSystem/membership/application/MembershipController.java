@@ -5,6 +5,7 @@ import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
+import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,5 +101,10 @@ public class MembershipController {
     @ExceptionHandler(NoMembershipFoundException.class)
     public ResponseEntity<String> handleNoMembershipFoundException(NoMembershipFoundException noMembershipFoundException) {
         return new ResponseEntity<>(noMembershipFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MembershipAlreadyExistsException.class)
+    public ResponseEntity<String> handleMembershipAlreadyExistsException(MembershipAlreadyExistsException membershipAlreadyExistsException) {
+        return new ResponseEntity<>(membershipAlreadyExistsException.getMessage(), HttpStatus.CONFLICT);
     }
 }

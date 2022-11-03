@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.membership.application;
 
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
@@ -44,6 +45,13 @@ public class MembershipService {
     }
 
     public Membership addMembership(Membership membership) {
+        if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
+            throw new MembershipAlreadyExistsException(
+                    "membership for userId: " + membership.getUserId() +
+                    " and projectId: " + membership.getProjectId() +
+                    " already exists"
+            );
+        }
         return membershipRepository.save(membership);
     }
 
