@@ -42,9 +42,51 @@ public class TicketSystemService {
         this.dtoMapper = new DtoMapper();
     }
 
+
+    // membership
+
+    public MembershipResponseDto getMemberShipById(UUID id) {
+        Membership membership = membershipService.getMembershipById(id);
+        return dtoMapper.mapMembershipToMembershipResponseDto(membership);
+    }
+
+    public List<MembershipResponseDto> getMembershipsByUserId(UUID userId) {
+        List<Membership> memberships = membershipService.getMembershipsByUserId(userId);
+        return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
+    }
+
+    public List<MembershipResponseDto> getMembershipsByProjectId(UUID projectId) {
+        List<Membership> memberships = membershipService.getMembershipsByProjectId(projectId);
+        return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
+    }
+
+
+    // phase
+
+    public PhaseResponseDto getPhaseById(UUID id) {
+        Phase phase = phaseService.getPhaseById(id);
+        return dtoMapper.mapPhaseToPhaseResponseDto(phase);
+    }
+
+    public List<PhaseResponseDto> getPhasesByProjectId(UUID projectId) {
+        List<Phase> phases = phaseService.getPhasesByProjectId(projectId);
+        return dtoMapper.mapPhaseListToPhaseResponseDtoList(phases);
+    }
+
+
+    // project
+
     public ProjectResponseDto fetchProjectById(UUID id) {
         Project project = projectService.getProjectById(id);
         return dtoMapper.mapProjectToProjectResponseDto(project);
+    }
+
+    public List<ProjectResponseDto> fetchAllProjects() {
+        List<Project> allProjects = projectService.getAllProjects();
+        return allProjects
+                .stream()
+                .map(dtoMapper::mapProjectToProjectResponseDto)
+                .toList();
     }
 
     public ProjectResponseDto addProject(ProjectPostDto projectPostDto) {
@@ -67,47 +109,12 @@ public class TicketSystemService {
         );
     }
 
-    public List<ProjectResponseDto> fetchAllProjects() {
-        List<Project> allProjects = projectService.getAllProjects();
-        return allProjects
-                .stream()
-                .map(dtoMapper::mapProjectToProjectResponseDto)
-                .toList();
-    }
 
-    public UserResponseDto getUserById(UUID id) {
-        User user = userService.getUserById(id);
-        return dtoMapper.mapUserToUserResponseDto(user);
-    }
-
-    public PhaseResponseDto getPhaseById(UUID id) {
-        Phase phase = phaseService.getPhaseById(id);
-        return dtoMapper.mapPhaseToPhaseResponseDto(phase);
-    }
-
-    public MembershipResponseDto getMemberShipById(UUID id) {
-        Membership membership = membershipService.getMembershipById(id);
-        return dtoMapper.mapMembershipToMembershipResponseDto(membership);
-    }
+    // ticket
 
     public TicketResponseDto getTicketById(UUID id) {
         Ticket ticket = ticketService.getTicketById(id);
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
-    }
-
-    public List<MembershipResponseDto> getMembershipsByUserId(UUID userId) {
-        List<Membership> memberships = membershipService.getMembershipsByUserId(userId);
-        return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
-    }
-
-    public List<MembershipResponseDto> getMembershipsByProjectId(UUID projectId) {
-        List<Membership> memberships = membershipService.getMembershipsByProjectId(projectId);
-        return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
-    }
-
-    public List<PhaseResponseDto> getPhasesByProjectId(UUID projectId) {
-        List<Phase> phases = phaseService.getPhasesByProjectId(projectId);
-        return dtoMapper.mapPhaseListToPhaseResponseDtoList(phases);
     }
 
     public List<TicketResponseDto> getTicketsByPhaseId(UUID phaseId) {
@@ -118,5 +125,13 @@ public class TicketSystemService {
     public List<TicketResponseDto> getTicketsByAssigneeId(UUID assigneeId) {
         List<Ticket> tickets = ticketService.getTicketsByAssigneeId(assigneeId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
+    }
+
+
+    // user
+
+    public UserResponseDto getUserById(UUID id) {
+        User user = userService.getUserById(id);
+        return dtoMapper.mapUserToUserResponseDto(user);
     }
 }
