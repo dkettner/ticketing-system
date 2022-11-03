@@ -5,6 +5,7 @@ import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.project.application.ProjectService;
@@ -96,6 +97,24 @@ public class TicketSystemService {
     public List<PhaseResponseDto> getPhasesByProjectId(UUID projectId) {
         List<Phase> phases = phaseService.getPhasesByProjectId(projectId);
         return dtoMapper.mapPhaseListToPhaseResponseDtoList(phases);
+    }
+
+    public PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
+        UUID projectId = phasePostDto.getProjectId();
+        if (!projectService.isExistentById(projectId)) {
+            throw new NoProjectFoundException("could not find project with id: " + projectId);
+        }
+
+        UUID previousPhaseId = phasePostDto.getPreviousPhaseId();
+        Phase previousPhase = null;
+        if (previousPhaseId != null) {
+            previousPhase = phaseService.getPhaseById(phasePostDto.getPreviousPhaseId());
+        }
+
+        Phase phase = phaseService.addPhase(
+                dtoMapper.mapPhasePostDtoToPhase(phasePostDto, previousPhase)
+        );
+        return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
 
 

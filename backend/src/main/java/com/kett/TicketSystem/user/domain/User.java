@@ -25,21 +25,21 @@ public class User {
     @Getter
     @Setter
     @Column(unique = true)
-    private EMailAddress eMailAddress;
+    private EMailAddress email;
 
-    public User(String name, EMailAddress eMailAddress) {
+    public User(String name, EMailAddress email) {
         if (name == null || name.isEmpty()) {
             throw new UserException("name must not be null or empty");
         }
-        if (eMailAddress == null) {
+        if (email == null) {
             throw new UserException("mailAddress must not be null or empty");
         }
 
         this.name = name;
-        this.eMailAddress = eMailAddress;
+        this.email = email;
     }
 
-    public User(String name, String eMailAddress) {
-        this(name, EMailAddress.fromString(eMailAddress));
+    public User(String name, String email) {
+        this(name, EMailAddress.fromString(email));
     }
 }

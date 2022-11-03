@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.user.application.dto;
+package com.kett.TicketSystem.phase.application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +9,10 @@ import java.util.UUID;
 
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserResponseDto {
-    private UUID id;
+@AllArgsConstructor
+public class PhasePostDto {
+    private UUID projectId;
     private String name;
-    private String email;
+    private UUID previousPhaseId;
 }

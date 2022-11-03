@@ -15,6 +15,6 @@ public class PhaseResponseDto {
     private UUID id;
     private UUID projectId;
     private String name;
-    private UUID previousPhase;
-    private UUID nextPhase;
+    private UUID previousPhaseId;
+    private UUID nextPhaseId;
 }

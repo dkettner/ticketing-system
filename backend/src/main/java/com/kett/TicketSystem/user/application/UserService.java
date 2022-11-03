@@ -26,7 +26,7 @@ public class UserService {
 
     public User getUserByEMailAddress(EMailAddress eMailAddress) {
         return userRepository
-                .findByEMailAddress(eMailAddress)
+                .findByEmailEquals(eMailAddress)
                 .orElseThrow(() -> new NoUserFoundException("could not find user with eMailAddress: " + eMailAddress));
     }
 

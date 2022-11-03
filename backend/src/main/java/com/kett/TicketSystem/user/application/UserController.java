@@ -38,12 +38,12 @@ public class UserController {
 
     @GetMapping
     public ResponseEntity<UserResponseDto> getUserByQuery(
-            @RequestParam(name = "email-address", required = true) String eMailAddress
+            @RequestParam(name = "email", required = true) String email
     ) {
-        if (eMailAddress == null) {
+        if (email == null) {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
-        UserResponseDto userResponseDto = ticketSystemService.getByEMailAddress(EMailAddress.fromString(eMailAddress));
+        UserResponseDto userResponseDto = ticketSystemService.getByEMailAddress(EMailAddress.fromString(email));
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
 
     }

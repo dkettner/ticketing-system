@@ -3,6 +3,7 @@ package com.kett.TicketSystem.application;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
@@ -32,8 +33,14 @@ public class DtoMapper {
             mapper.map(Phase::getId, PhaseResponseDto::setId);
             mapper.map(Phase::getProjectId, PhaseResponseDto::setProjectId);
             mapper.map(Phase::getName, PhaseResponseDto::setName);
-            mapper.map(Phase::getPreviousPhase, PhaseResponseDto::setPreviousPhase);
-            mapper.map(Phase::getNextPhase, PhaseResponseDto::setNextPhase);
+            mapper.map(phase ->  {
+                Phase previousPhase = phase.getPreviousPhase();
+                return (previousPhase == null) ? null : previousPhase.getId();
+            }, PhaseResponseDto::setPreviousPhaseId);
+            mapper.map(phase ->  {
+                Phase nextPhase = phase.getNextPhase();
+                return (nextPhase == null) ? null : nextPhase.getId();
+            }, PhaseResponseDto::setNextPhaseId);
         });
         modelMapper.typeMap(Project.class, ProjectResponseDto.class).addMappings(mapper -> {
             mapper.map(Project::getId, ProjectResponseDto::setId);
@@ -53,7 +60,7 @@ public class DtoMapper {
         modelMapper.typeMap(User.class, UserResponseDto.class).addMappings(mapper -> {
             mapper.map(User::getId, UserResponseDto::setId);
             mapper.map(User::getName, UserResponseDto::setName);
-            mapper.map(user -> user.getEMailAddress().toString(), UserResponseDto::setEMailAddress);
+            mapper.map(user -> user.getEmail().toString(), UserResponseDto::setEmail);
         });
     }
 
@@ -91,6 +98,15 @@ public class DtoMapper {
                 .stream()
                 .map(phase -> modelMapper.map(phase, PhaseResponseDto.class))
                 .toList();
+    }
+
+    public Phase mapPhasePostDtoToPhase(PhasePostDto phasePostDto, Phase previousPhase) {
+        return new Phase(
+                phasePostDto.getProjectId(),
+                phasePostDto.getName(),
+                previousPhase,
+                null
+        );
     }
 
 

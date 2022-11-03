@@ -2,6 +2,7 @@ package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
+import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
@@ -10,7 +11,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,6 +48,20 @@ public class PhaseController {
 
         List<PhaseResponseDto> phaseResponseDtos = ticketSystemService.getPhasesByProjectId(projectId);
         return new ResponseEntity<>(phaseResponseDtos, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<PhaseResponseDto> postPhase(@RequestBody PhasePostDto phasePostDto) {
+        PhaseResponseDto phaseResponseDto = ticketSystemService.addPhase(phasePostDto);
+        URI returnURI = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(phaseResponseDto.getId())
+                .toUri();
+
+        return ResponseEntity
+                .created(returnURI)
+                .body(phaseResponseDto);
     }
 
 
