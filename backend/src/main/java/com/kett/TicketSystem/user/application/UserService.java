@@ -29,4 +29,8 @@ public class UserService {
                 .findByEMailAddress(eMailAddress)
                 .orElseThrow(() -> new NoUserFoundException("could not find user with eMailAddress: " + eMailAddress));
     }
+
+    public boolean isExistentById(UUID id) {
+        return userRepository.existsById(id);
+    }
 }

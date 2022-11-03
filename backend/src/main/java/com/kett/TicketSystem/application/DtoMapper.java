@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
@@ -68,6 +69,14 @@ public class DtoMapper {
                 .stream()
                 .map(membership -> modelMapper.map(membership, MembershipResponseDto.class))
                 .toList();
+    }
+
+    public Membership mapMembershipPostDtoToMembership(MembershipPostDto membershipPostDto) {
+        return new Membership(
+                membershipPostDto.getProjectId(),
+                membershipPostDto.getUserId(),
+                membershipPostDto.getRole()
+        );
     }
 
 

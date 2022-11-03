@@ -2,6 +2,7 @@ package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.domainprimitives.EMailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
+import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
@@ -10,12 +11,14 @@ import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.phase.application.PhaseService;
+import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.ticket.application.TicketService;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.user.application.UserService;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
+import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -59,6 +62,23 @@ public class TicketSystemService {
     public List<MembershipResponseDto> getMembershipsByProjectId(UUID projectId) {
         List<Membership> memberships = membershipService.getMembershipsByProjectId(projectId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
+    }
+
+    public MembershipResponseDto addMembership(MembershipPostDto membershipPostDto) {
+        // TODO: add proper validation once authentication is possible
+        UUID projectId = membershipPostDto.getProjectId();
+        if (!projectService.isExistentById(projectId)) {
+            throw new NoProjectFoundException("could not find project with id: " + projectId);
+        }
+        UUID userId = membershipPostDto.getUserId();
+        if (!userService.isExistentById(userId)) {
+            throw new NoUserFoundException("could not find user with id: " + userId);
+        }
+
+        Membership membership = membershipService.addMembership(
+                dtoMapper.mapMembershipPostDtoToMembership(membershipPostDto)
+        );
+        return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
 

@@ -41,4 +41,8 @@ public class MembershipService {
         }
         return memberships;
     }
+
+    public Membership addMembership(Membership membership) {
+        return membershipRepository.save(membership);
+    }
 }

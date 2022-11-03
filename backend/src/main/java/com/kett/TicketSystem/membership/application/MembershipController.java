@@ -3,6 +3,7 @@ package com.kett.TicketSystem.membership.application;
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
+import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
@@ -11,7 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -54,6 +57,20 @@ public class MembershipController {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
         return new ResponseEntity<>(membershipResponseDtos, HttpStatus.OK);
+    }
+
+    @PostMapping
+    public ResponseEntity<MembershipResponseDto> postMembership(@RequestBody MembershipPostDto membershipPostDto) {
+        MembershipResponseDto membershipResponseDto = ticketSystemService.addMembership(membershipPostDto);
+        URI returnURI = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(membershipResponseDto.getId())
+                .toUri();
+
+        return ResponseEntity
+                .created(returnURI)
+                .body(membershipResponseDto);
     }
 
 
