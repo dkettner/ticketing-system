@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.domainprimitives.EMailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
@@ -132,6 +133,11 @@ public class TicketSystemService {
 
     public UserResponseDto getUserById(UUID id) {
         User user = userService.getUserById(id);
+        return dtoMapper.mapUserToUserResponseDto(user);
+    }
+
+    public UserResponseDto getByEMailAddress(EMailAddress eMailAddress) {
+        User user = userService.getUserByEMailAddress(eMailAddress);
         return dtoMapper.mapUserToUserResponseDto(user);
     }
 }
