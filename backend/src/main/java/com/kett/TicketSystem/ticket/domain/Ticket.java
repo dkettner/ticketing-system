@@ -52,6 +52,10 @@ public class Ticket {
         this.dueTime = newDueTime;
     }
 
+    public void removeAssignee(UUID userId) {
+        assigneeIds.remove(userId);
+    }
+
     public Ticket(String title, String description, LocalDateTime dueTime, UUID phaseId, List<UUID> assigneeIds) {
         if (title == null || title.isEmpty()) {
             throw new TicketException("title must not be null or empty");

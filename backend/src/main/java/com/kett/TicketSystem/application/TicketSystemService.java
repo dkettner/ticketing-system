@@ -93,6 +93,9 @@ public class TicketSystemService {
     }
 
     public void deleteMembershipById(UUID id) {
+        Membership membership = membershipService.getMembershipById(id);
+        this.removeUserFromAllTicketsOfProject(membership.getUserId(), membership.getProjectId());
+
         membershipService.deleteMembershipById(id);
     }
 
@@ -226,6 +229,19 @@ public class TicketSystemService {
                 dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, phaseId)
         );
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
+    }
+
+    private void removeUserFromAllTicketsOfProject(UUID userId, UUID projectId) {
+        List<UUID> projectPhaseIds =
+                phaseService
+                        .getPhasesByProjectId(projectId)
+                        .stream()
+                        .map(Phase::getId)
+                        .toList();
+
+        List<Ticket> tickets = ticketService.getTicketsByPhaseIdsAndAssigneeId(projectPhaseIds, userId);
+        tickets.forEach(ticket -> ticket.removeAssignee(userId));
+        ticketService.saveAll(tickets);
     }
 
 

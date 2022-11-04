@@ -40,11 +40,19 @@ public class TicketService {
         return tickets;
     }
 
+    public List<Ticket> getTicketsByPhaseIdsAndAssigneeId(List<UUID> phaseIds, UUID assigneeId) {
+        return ticketRepository.findByPhaseIdInAndAssigneeIdsContaining(phaseIds, assigneeId);
+    }
+
     public boolean hasTicketsWithPhaseId(UUID phaseId) {
         return ticketRepository.existsByPhaseIdEquals(phaseId);
     }
 
     public Ticket addTicket(Ticket ticket) {
         return ticketRepository.save(ticket);
+    }
+
+    public void saveAll(List<Ticket> tickets) {
+        ticketRepository.saveAll(tickets);
     }
 }
