@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.phase.domain.Phase;
+import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
@@ -87,8 +88,27 @@ public class PhaseService {
     }
 
     public void deleteById(UUID id) {
-        Long numOfDeletedPhases = phaseRepository.removeById(id);
+        Phase phase = phaseRepository
+                .findById(id)
+                .orElseThrow(() -> new NoPhaseFoundException("could not delete because there was no phase with id: " + id));
 
+        if (phase.isFirst() && phase.isLast()) {
+            throw new LastPhaseException("could not delete phase with id: " + id + " because it is the last phase of its project");
+        }
+
+        Phase previousPhase = phase.getPreviousPhase();
+        Phase nextPhase = phase.getNextPhase();
+
+        if (previousPhase != null) {
+            previousPhase.setNextPhase(nextPhase);
+            phaseRepository.save(previousPhase);
+        }
+        if (nextPhase != null) {
+            nextPhase.setPreviousPhase(previousPhase);
+            phaseRepository.save(nextPhase);
+        }
+
+        Long numOfDeletedPhases = phaseRepository.removeById(id);
         if (numOfDeletedPhases == 0) {
             throw new NoPhaseFoundException("could not delete because there was no phase with id: " + id);
         } else if (numOfDeletedPhases > 1) {

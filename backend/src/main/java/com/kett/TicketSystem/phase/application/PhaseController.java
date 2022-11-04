@@ -5,6 +5,7 @@ import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
+import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
@@ -94,6 +95,11 @@ public class PhaseController {
     @ExceptionHandler(PhaseIsNotEmptyException.class)
     public ResponseEntity<String> handlePhaseIsNotEmptyException(PhaseIsNotEmptyException phaseIsNotEmptyException) {
         return new ResponseEntity<>(phaseIsNotEmptyException.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(LastPhaseException.class)
+    public ResponseEntity<String> handleLastPhaseException(LastPhaseException lastPhaseException) {
+        return new ResponseEntity<>(lastPhaseException.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(NoProjectFoundException.class)
