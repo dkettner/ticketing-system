@@ -5,6 +5,7 @@ import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
@@ -83,6 +84,11 @@ public class TicketSystemService {
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
+    private void addDefaultMembershipForProject(Project project, UUID postingUserId) {
+        MembershipPostDto defaultMembership = new MembershipPostDto(project.getId(), postingUserId, Role.ADMIN);
+        this.addMembership(defaultMembership);
+    }
+
     public void deleteMembershipById(UUID id) {
         membershipService.deleteMembershipById(id);
     }
@@ -118,6 +124,18 @@ public class TicketSystemService {
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
 
+    private void addDefaultPhasesForProject(Project project) {
+        PhasePostDto toDo = new PhasePostDto(project.getId(), "TO DO", null);
+        PhasePostDto doing = new PhasePostDto(project.getId(), "DOING", null);
+        PhasePostDto review = new PhasePostDto(project.getId(), "REVIEW", null);
+        PhasePostDto done = new PhasePostDto(project.getId(), "DONE", null);
+
+        this.addPhase(done);
+        this.addPhase(review);
+        this.addPhase(doing);
+        this.addPhase(toDo);
+    }
+
     public void deletePhaseById(UUID id) {
         if (ticketService.hasTicketsWithPhaseId(id)) {
             throw new PhaseIsNotEmptyException("phase with id: " + id + " is not empty and can not be deleted");
@@ -141,10 +159,14 @@ public class TicketSystemService {
                 .toList();
     }
 
-    public ProjectResponseDto addProject(ProjectPostDto projectPostDto) {
+    public ProjectResponseDto addProject(ProjectPostDto projectPostDto, UUID postingUserId) {
         Project project = projectService.addProject(
                 dtoMapper.mapProjectPostDtoToProject(projectPostDto)
         );
+
+        this.addDefaultMembershipForProject(project, postingUserId);
+        this.addDefaultPhasesForProject(project);
+
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
