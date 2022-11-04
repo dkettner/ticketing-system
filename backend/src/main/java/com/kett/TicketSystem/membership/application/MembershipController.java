@@ -8,6 +8,8 @@ import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
+import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -106,5 +108,15 @@ public class MembershipController {
     @ExceptionHandler(MembershipAlreadyExistsException.class)
     public ResponseEntity<String> handleMembershipAlreadyExistsException(MembershipAlreadyExistsException membershipAlreadyExistsException) {
         return new ResponseEntity<>(membershipAlreadyExistsException.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(NoProjectFoundException.class)
+    public ResponseEntity<String> handleNoProjectFoundException(NoProjectFoundException noProjectFoundException) {
+        return new ResponseEntity<>(noProjectFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoUserFoundException.class)
+    public ResponseEntity<String> handleTicketException(NoUserFoundException noUserFoundException) {
+        return new ResponseEntity<>(noUserFoundException.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
