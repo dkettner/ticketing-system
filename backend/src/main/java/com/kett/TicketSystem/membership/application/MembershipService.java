@@ -63,7 +63,7 @@ public class MembershipService {
         } else if (numOfDeletedMemberships > 1) {
             throw new ImpossibleException(
                     "!!! This should not happen. " +
-                            "Multiple memberships were deleted when deleting project with id: " + id
+                            "Multiple memberships were deleted when deleting membership with id: " + id
             );
         }
     }
