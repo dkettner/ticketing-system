@@ -4,7 +4,7 @@ import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
-import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
+import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

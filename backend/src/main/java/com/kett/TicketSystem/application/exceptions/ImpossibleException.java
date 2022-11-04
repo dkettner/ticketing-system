@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.project.domain.exceptions;
+package com.kett.TicketSystem.application.exceptions;
 
 public class ImpossibleException extends RuntimeException {
     public ImpossibleException(String message) {

@@ -4,7 +4,7 @@ import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
-import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
+import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

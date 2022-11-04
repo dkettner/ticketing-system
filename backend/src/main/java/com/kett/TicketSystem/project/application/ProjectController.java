@@ -2,6 +2,7 @@ package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
 
+import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;

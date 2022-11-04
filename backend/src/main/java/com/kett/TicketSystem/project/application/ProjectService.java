@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.project.application;
 
+import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.exceptions.*;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
