@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.membership.application;
 
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
@@ -9,8 +10,10 @@ import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class MembershipService {
@@ -63,8 +66,21 @@ public class MembershipService {
         } else if (numOfDeletedMemberships > 1) {
             throw new ImpossibleException(
                     "!!! This should not happen. " +
-                            "Multiple memberships were deleted when deleting membership with id: " + id
+                    "Multiple memberships were deleted when deleting membership with id: " + id
             );
         }
+    }
+
+    // TODO: Write query in repository for this?
+    public Boolean allUsersAreProjectMembers(List<UUID> assigneeIds, UUID projectId) {
+        HashSet<UUID> projectMemberIds =
+                membershipRepository
+                        .findByProjectId(projectId)
+                        .stream()
+                        .filter(membership -> membership.getState().equals(State.ACCEPTED))
+                        .map(Membership::getUserId)
+                        .collect(Collectors.toCollection(HashSet::new));
+
+        return projectMemberIds.containsAll(assigneeIds);
     }
 }

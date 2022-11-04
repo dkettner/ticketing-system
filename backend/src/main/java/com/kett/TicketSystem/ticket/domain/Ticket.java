@@ -52,18 +52,22 @@ public class Ticket {
         this.dueTime = newDueTime;
     }
 
-    public Ticket(String title, String description, LocalDateTime dueTime, List<UUID> assigneeIds) {
+    public Ticket(String title, String description, LocalDateTime dueTime, UUID phaseId, List<UUID> assigneeIds) {
         if (title == null || title.isEmpty()) {
             throw new TicketException("title must not be null or empty");
         }
+        if (phaseId == null) {
+            throw new TicketException("phaseId must not be null");
+        }
         if (assigneeIds == null) {
-            throw new TicketException("memberIds must not be null");
+            throw new TicketException("memberIds must not be null but it may be empty");
         }
 
         this.title = title;
         this.description = description;
         this.creationTime = LocalDateTime.now();
         this.setDueTime(dueTime);
+        this.phaseId = phaseId;
         this.assigneeIds.addAll(assigneeIds);
     }
 }

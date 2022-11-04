@@ -15,9 +15,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TicketPostDto {
+    private UUID projectId;
     private String title;
     private String description;
     private LocalDateTime dueTime;
-    private UUID creatorId;
     private List<UUID> assigneeIds = new ArrayList<>();
 }

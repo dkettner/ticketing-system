@@ -1,11 +1,13 @@
 package com.kett.TicketSystem.application;
 
+import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.domainprimitives.EMailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
+import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
@@ -16,6 +18,7 @@ import com.kett.TicketSystem.phase.application.PhaseService;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.ticket.application.TicketService;
+import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.user.application.UserService;
@@ -199,6 +202,30 @@ public class TicketSystemService {
     public List<TicketResponseDto> getTicketsByAssigneeId(UUID assigneeId) {
         List<Ticket> tickets = ticketService.getTicketsByAssigneeId(assigneeId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
+    }
+
+    public TicketResponseDto addTicket(TicketPostDto ticketPostDto) {
+        if (!projectService.isExistentById(ticketPostDto.getProjectId())) {
+            throw new NoProjectFoundException("could not find project with id: " + ticketPostDto.getProjectId());
+        }
+        if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
+            throw new InvalidProjectMembersException(
+                    "not all assignees are not part of the project with id: " + ticketPostDto.getProjectId()
+            );
+        }
+
+        UUID phaseId = phaseService
+                .getFirstPhaseByProjectId(ticketPostDto.getProjectId())
+                .orElseThrow(() -> new ImpossibleException(
+                        "!!! This should not happen. " +
+                        "The project with id: " + ticketPostDto.getProjectId() + " exists but has no phases."
+                ))
+                .getId();
+
+        Ticket ticket = ticketService.addTicket(
+                dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, phaseId)
+        );
+        return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
 
 

@@ -1,8 +1,12 @@
 package com.kett.TicketSystem.ticket.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
+import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
+import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
+import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
@@ -11,7 +15,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,6 +62,20 @@ public class TicketController {
         return new ResponseEntity<>(ticketResponseDtos, HttpStatus.OK);
     }
 
+    @PostMapping
+    public ResponseEntity<TicketResponseDto> postTicket(@RequestBody TicketPostDto ticketPostDto) {
+        TicketResponseDto ticketResponseDto = ticketSystemService.addTicket(ticketPostDto);
+        URI returnURI = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(ticketResponseDto.getId())
+                .toUri();
+
+        return ResponseEntity
+                .created(returnURI)
+                .body(ticketResponseDto);
+    }
+
 
     // exception handlers
 
@@ -77,5 +97,20 @@ public class TicketController {
     @ExceptionHandler(NoTicketFoundException.class)
     public ResponseEntity<String> handleNoTicketFoundException(NoTicketFoundException noTicketFoundException) {
         return new ResponseEntity<>(noTicketFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidProjectMembersException.class)
+    public ResponseEntity<String> handleInvalidProjectMembersException(InvalidProjectMembersException invalidProjectMembersException) {
+        return new ResponseEntity<>(invalidProjectMembersException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoProjectFoundException.class)
+    public ResponseEntity<String> handleNoProjectFoundException(NoProjectFoundException noProjectFoundException) {
+        return new ResponseEntity<>(noProjectFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ImpossibleException.class)
+    public ResponseEntity<String> handleImpossibleException(ImpossibleException impossibleException) {
+        return new ResponseEntity<>(impossibleException.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -17,6 +17,7 @@ import com.kett.TicketSystem.user.domain.User;
 import org.modelmapper.ModelMapper;
 
 import java.util.List;
+import java.util.UUID;
 
 public class DtoMapper {
     private final ModelMapper modelMapper = new ModelMapper();
@@ -134,11 +135,12 @@ public class DtoMapper {
                 .toList();
     }
 
-    public Ticket mapTicketPostDtoToTicket(TicketPostDto ticketPostDto) {
+    public Ticket mapTicketPostDtoToTicket(TicketPostDto ticketPostDto, UUID phaseId) {
         return new Ticket(
                 ticketPostDto.getTitle(),
                 ticketPostDto.getDescription(),
                 ticketPostDto.getDueTime(),
+                phaseId,
                 ticketPostDto.getAssigneeIds()
         );
     }

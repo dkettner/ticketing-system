@@ -52,8 +52,12 @@ public class PhaseService {
         }
     }
 
+    public Optional<Phase> getFirstPhaseByProjectId(UUID projectId) {
+        return phaseRepository.findByProjectIdAndPreviousPhaseIsNull(projectId);
+    }
+
     private Phase addFirst(Phase phase) {
-        Optional<Phase> nextPhase = phaseRepository.findByProjectIdAndPreviousPhaseIsNull(phase.getProjectId());
+        Optional<Phase> nextPhase = getFirstPhaseByProjectId(phase.getProjectId());
         if (nextPhase.isPresent()) {
             phase.setNextPhase(nextPhase.get());
             nextPhase.get().setPreviousPhase(phase);
