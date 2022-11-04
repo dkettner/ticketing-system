@@ -6,6 +6,7 @@ import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
+import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -64,6 +65,12 @@ public class PhaseController {
                 .body(phaseResponseDto);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deletePhase(@PathVariable UUID id) {
+        ticketSystemService.deletePhaseById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 
     // exception handlers
 
@@ -80,5 +87,10 @@ public class PhaseController {
     @ExceptionHandler(NoPhaseFoundException.class)
     public ResponseEntity<String> handleNoPhaseFoundException(NoPhaseFoundException noPhaseFoundException) {
         return new ResponseEntity<>(noPhaseFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(PhaseIsNotEmptyException.class)
+    public ResponseEntity<String> handlePhaseIsNotEmptyException(PhaseIsNotEmptyException phaseIsNotEmptyException) {
+        return new ResponseEntity<>(phaseIsNotEmptyException.getMessage(), HttpStatus.CONFLICT);
     }
 }

@@ -4,6 +4,7 @@ import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
+import com.kett.TicketSystem.project.domain.exceptions.ImpossibleException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -79,5 +80,18 @@ public class PhaseService {
         phaseRepository.save(previousPhase);
 
         return phaseRepository.save(phase);
+    }
+
+    public void deleteById(UUID id) {
+        Long numOfDeletedPhases = phaseRepository.removeById(id);
+
+        if (numOfDeletedPhases == 0) {
+            throw new NoPhaseFoundException("could not delete because there was no phase with id: " + id);
+        } else if (numOfDeletedPhases > 1) {
+            throw new ImpossibleException(
+                    "!!! This should not happen. " +
+                            "Multiple phases were deleted when deleting phase with id: " + id
+            );
+        }
     }
 }

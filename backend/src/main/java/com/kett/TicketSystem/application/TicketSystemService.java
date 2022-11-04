@@ -13,6 +13,7 @@ import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.phase.application.PhaseService;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.ticket.application.TicketService;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
@@ -115,6 +116,13 @@ public class TicketSystemService {
                 dtoMapper.mapPhasePostDtoToPhase(phasePostDto, previousPhase)
         );
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
+    }
+
+    public void deletePhaseById(UUID id) {
+        if (ticketService.hasTicketsWithPhaseId(id)) {
+            throw new PhaseIsNotEmptyException("phase with id: " + id + " is not empty and can not be deleted");
+        }
+        phaseService.deleteById(id);
     }
 
 

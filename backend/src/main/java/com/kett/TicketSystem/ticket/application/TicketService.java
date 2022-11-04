@@ -39,4 +39,8 @@ public class TicketService {
         }
         return tickets;
     }
+
+    public boolean hasTicketsWithPhaseId(UUID phaseId) {
+        return ticketRepository.existsByPhaseIdEquals(phaseId);
+    }
 }
