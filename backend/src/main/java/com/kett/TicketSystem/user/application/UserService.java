@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.user.application;
 
-import com.kett.TicketSystem.domainprimitives.EMailAddress;
+import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.repository.UserRepository;
@@ -24,7 +24,7 @@ public class UserService {
                 .orElseThrow(() -> new NoUserFoundException("could not find user with id: " + id));
     }
 
-    public User getUserByEMailAddress(EMailAddress eMailAddress) {
+    public User getUserByEMailAddress(EmailAddress eMailAddress) {
         return userRepository
                 .findByEmailEquals(eMailAddress)
                 .orElseThrow(() -> new NoUserFoundException("could not find user with eMailAddress: " + eMailAddress));

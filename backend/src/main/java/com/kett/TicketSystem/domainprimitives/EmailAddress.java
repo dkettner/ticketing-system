@@ -10,32 +10,32 @@ import javax.persistence.Embeddable;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
 @EqualsAndHashCode
-public class EMailAddress {
+public class EmailAddress {
     private String localPart;
     private String domain;
 
-    protected EMailAddress(String localPart, String domain) {
+    protected EmailAddress(String localPart, String domain) {
         if (localPart == null || localPart.isEmpty()) {
-            throw  new EMailAddressException("localPart must not be null or empty");
+            throw  new EmailAddressException("localPart must not be null or empty");
         }
         if (domain == null || domain.isEmpty()) {
-            throw  new EMailAddressException("domain must not be null or empty");
+            throw  new EmailAddressException("domain must not be null or empty");
         }
 
         this.localPart = localPart;
         this.domain = domain;
     }
 
-    public static EMailAddress fromString(String eMailAddressCandidate) {
+    public static EmailAddress fromString(String eMailAddressCandidate) {
         if (eMailAddressCandidate == null || eMailAddressCandidate.isEmpty()) {
-            throw new EMailAddressException("eMailAddressCandidate must not be null or empty");
+            throw new EmailAddressException("eMailAddressCandidate must not be null or empty");
         }
         if (!EmailValidator.getInstance().isValid(eMailAddressCandidate)) {
-            throw new EMailAddressException("eMailAddressCandidate is not in a valid format: " + eMailAddressCandidate);
+            throw new EmailAddressException("eMailAddressCandidate is not in a valid format: " + eMailAddressCandidate);
         }
 
         String[] addressParts = eMailAddressCandidate.split("@", 2);
-        return new EMailAddress(addressParts[0], addressParts[1]);
+        return new EmailAddress(addressParts[0], addressParts[1]);
     }
 
     @Override

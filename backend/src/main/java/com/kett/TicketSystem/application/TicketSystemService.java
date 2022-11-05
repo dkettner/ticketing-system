@@ -1,7 +1,7 @@
 package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.application.exceptions.ImpossibleException;
-import com.kett.TicketSystem.domainprimitives.EMailAddress;
+import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
@@ -252,7 +252,7 @@ public class TicketSystemService {
         return dtoMapper.mapUserToUserResponseDto(user);
     }
 
-    public UserResponseDto getByEMailAddress(EMailAddress eMailAddress) {
+    public UserResponseDto getByEMailAddress(EmailAddress eMailAddress) {
         User user = userService.getUserByEMailAddress(eMailAddress);
         return dtoMapper.mapUserToUserResponseDto(user);
     }

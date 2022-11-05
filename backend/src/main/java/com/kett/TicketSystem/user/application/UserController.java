@@ -2,8 +2,8 @@ package com.kett.TicketSystem.user.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
-import com.kett.TicketSystem.domainprimitives.EMailAddress;
-import com.kett.TicketSystem.domainprimitives.EMailAddressException;
+import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.domainprimitives.EmailAddressException;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
@@ -43,7 +43,7 @@ public class UserController {
         if (email == null) {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
-        UserResponseDto userResponseDto = ticketSystemService.getByEMailAddress(EMailAddress.fromString(email));
+        UserResponseDto userResponseDto = ticketSystemService.getByEMailAddress(EmailAddress.fromString(email));
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
 
     }
@@ -56,8 +56,8 @@ public class UserController {
         return new ResponseEntity<>(noParametersException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(EMailAddressException.class)
-    public ResponseEntity<String> handleEMailAddressException(EMailAddressException eMailAddressException) {
+    @ExceptionHandler(EmailAddressException.class)
+    public ResponseEntity<String> handleEMailAddressException(EmailAddressException eMailAddressException) {
         return new ResponseEntity<>(eMailAddressException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
