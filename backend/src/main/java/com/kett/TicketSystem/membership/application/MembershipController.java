@@ -5,6 +5,7 @@ import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
+import com.kett.TicketSystem.membership.domain.exceptions.IllegalStateUpdateException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
@@ -108,6 +109,11 @@ public class MembershipController {
     @ExceptionHandler(MembershipAlreadyExistsException.class)
     public ResponseEntity<String> handleMembershipAlreadyExistsException(MembershipAlreadyExistsException membershipAlreadyExistsException) {
         return new ResponseEntity<>(membershipAlreadyExistsException.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(IllegalStateUpdateException.class)
+    public ResponseEntity<String> handleIllegalStateUpdateException(IllegalStateUpdateException illegalStateUpdateException) {
+        return new ResponseEntity<>(illegalStateUpdateException.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(NoProjectFoundException.class)

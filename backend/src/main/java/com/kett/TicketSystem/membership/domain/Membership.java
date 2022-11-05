@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.membership.domain;
 
+import com.kett.TicketSystem.membership.domain.exceptions.IllegalStateUpdateException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import lombok.*;
 
@@ -37,8 +38,12 @@ public class Membership {
     private State state;
 
     public void setState(State state) {
+        if (this.state.equals(state)) {
+            throw new IllegalStateUpdateException("state of membership with id: " + this.id + " is already " + this.state);
+        }
+
         if (this.state.equals(State.ACCEPTED) && state.equals(State.OPEN)) {
-            throw new MembershipException(
+            throw new IllegalStateUpdateException(
                     "Once state as been changed to ACCEPTED, it cannot go back to OPEN. " +
                     "To revoke Membership, use delete."
             );
