@@ -127,6 +127,11 @@ public class MembershipTests {
         assertNotEquals(membership2, membership2Copy);
         assertNotEquals(membership3, membership3Copy);
 
+        assertNotEquals(membership0, membership1);
+        assertNotEquals(membership1, membership2);
+        assertNotEquals(membership2, membership3);
+        assertNotEquals(membership3, membership0);
+
         // add id
         membershipRepository.save(membership0);
         membershipRepository.save(membership1);
@@ -142,6 +147,11 @@ public class MembershipTests {
         assertNotEquals(membership1, membership1Copy);
         assertNotEquals(membership2, membership2Copy);
         assertNotEquals(membership3, membership3Copy);
+
+        assertNotEquals(membership0, membership1);
+        assertNotEquals(membership1, membership2);
+        assertNotEquals(membership2, membership3);
+        assertNotEquals(membership3, membership0);
     }
 
     @Test
@@ -181,6 +191,14 @@ public class MembershipTests {
         assertNotEquals(Role.ADMIN, membership1.getRole());
         assertNotEquals(Role.STANDARD, membership2.getRole());
         assertNotEquals(Role.STANDARD, membership3.getRole());
+    }
+
+    @Test
+    public void checkSetRoleNull() {
+        assertThrows(MembershipException.class, () -> membership0.setRole(null));
+        assertThrows(MembershipException.class, () -> membership1.setRole(null));
+        assertThrows(MembershipException.class, () -> membership2.setRole(null));
+        assertThrows(MembershipException.class, () -> membership3.setRole(null));
     }
 
     @Test
