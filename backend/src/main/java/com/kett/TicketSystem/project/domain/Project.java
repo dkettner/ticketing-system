@@ -19,7 +19,6 @@ public class Project {
     private UUID id;
 
     @Getter
-    @Setter
     private String name;
 
     @Getter
@@ -30,12 +29,16 @@ public class Project {
     @Setter(AccessLevel.PROTECTED)
     private LocalDateTime creationTime;
 
-    public Project(String name, String description) {
+    public void setName(String name) {
         if (name == null || name.isEmpty()) {
             throw new ProjectException("name must not be null or empty");
         }
 
         this.name = name;
+    }
+
+    public Project(String name, String description) {
+        this.setName(name);
         this.description = description;
         this.creationTime = LocalDateTime.now();
     }
