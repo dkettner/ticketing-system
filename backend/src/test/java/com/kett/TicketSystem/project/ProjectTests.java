@@ -216,6 +216,7 @@ public class ProjectTests {
         assertNotEquals(emptyDescriptionProject, emptyDescriptionProjectCopy);
         assertNotEquals(nullDescriptionProject, nullDescriptionProjectCopy);
 
+        assertNotEquals(emptyDescriptionProject, nullDescriptionProject);
         assertNotEquals(emptyDescriptionProject, project0);
         assertNotEquals(nullDescriptionProject, project1);
         assertNotEquals(emptyDescriptionProject, project2);
@@ -241,6 +242,7 @@ public class ProjectTests {
         assertEquals(description1, project1.getDescription());
         assertEquals(description2, project2.getDescription());
         assertEquals(description3, project3.getDescription());
+
         assertEquals(emptyDescription, emptyDescriptionProject.getDescription());
         assertEquals(nullDescription, nullDescriptionProject.getDescription());
 
@@ -248,5 +250,20 @@ public class ProjectTests {
         assertNotEquals(description2, project1.getDescription());
         assertNotEquals(description3, project2.getDescription());
         assertNotEquals(description0, project3.getDescription());
+
+        assertNotEquals(emptyDescription, project0.getDescription());
+        assertNotEquals(emptyDescription, project1.getDescription());
+        assertNotEquals(emptyDescription, project2.getDescription());
+        assertNotEquals(emptyDescription, project3.getDescription());
+
+        assertNotEquals(nullDescription, project0.getDescription());
+        assertNotEquals(nullDescription, project1.getDescription());
+        assertNotEquals(nullDescription, project2.getDescription());
+        assertNotEquals(nullDescription, project3.getDescription());
+
+        assertNotEquals(description0, emptyDescriptionProject.getDescription());
+        assertNotEquals(description1, emptyDescriptionProject.getDescription());
+        assertNotEquals(description2, nullDescriptionProject.getDescription());
+        assertNotEquals(description3, nullDescriptionProject.getDescription());
     }
 }
