@@ -237,6 +237,26 @@ public class ProjectTests {
     }
 
     @Test
+    public void checkSetNameEmpty() {
+        assertThrows(ProjectException.class, () -> project0.setName(""));
+        assertThrows(ProjectException.class, () -> project1.setName(""));
+        assertThrows(ProjectException.class, () -> project2.setName(""));
+        assertThrows(ProjectException.class, () -> project3.setName(""));
+        assertThrows(ProjectException.class, () -> emptyDescriptionProject.setName(""));
+        assertThrows(ProjectException.class, () -> nullDescriptionProject.setName(""));
+    }
+
+    @Test
+    public void checkSetNameNull() {
+        assertThrows(ProjectException.class, () -> project0.setName(null));
+        assertThrows(ProjectException.class, () -> project1.setName(null));
+        assertThrows(ProjectException.class, () -> project2.setName(null));
+        assertThrows(ProjectException.class, () -> project3.setName(null));
+        assertThrows(ProjectException.class, () -> emptyDescriptionProject.setName(null));
+        assertThrows(ProjectException.class, () -> nullDescriptionProject.setName(null));
+    }
+
+    @Test
     public void checkDescription() {
         assertEquals(description0, project0.getDescription());
         assertEquals(description1, project1.getDescription());
