@@ -29,7 +29,6 @@ public class Membership {
     private UUID userId;
 
     @Getter
-    @Setter
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -52,6 +51,14 @@ public class Membership {
         this.state = state;
     }
 
+    public void setRole(Role role) {
+        if (role == null) {
+            throw new MembershipException("role cannot be null");
+        }
+
+        this.role = role;
+    }
+
     public Membership(UUID projectId, UUID userId, Role role) {
         if (projectId == null) {
             throw new MembershipException("projectId cannot be null");
@@ -59,13 +66,10 @@ public class Membership {
         if (userId == null) {
             throw new MembershipException("userId cannot be null");
         }
-        if (role == null) {
-            throw new MembershipException("role cannot be null");
-        }
 
         this.projectId = projectId;
         this.userId = userId;
-        this.role = role;
+        this.setRole(role);
         this.state = State.OPEN;
     }
 }
