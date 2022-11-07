@@ -27,19 +27,27 @@ public class User {
     @Column(unique = true)
     private EmailAddress email;
 
-    public User(String name, EmailAddress email) {
+    @Getter
+    @Setter
+    private String password;
+
+    public User(String name, EmailAddress email, String password) {
         if (name == null || name.isEmpty()) {
             throw new UserException("name must not be null or empty");
         }
         if (email == null) {
             throw new UserException("mailAddress must not be null or empty");
         }
+        if (password == null || password.isEmpty()) {
+            throw new UserException("mailAddress must not be null or empty");
+        }
 
         this.name = name;
         this.email = email;
+        this.password = password;
     }
 
-    public User(String name, String email) {
-        this(name, EmailAddress.fromString(email));
+    public User(String name, String email, String password) {
+        this(name, EmailAddress.fromString(email), password);
     }
 }
