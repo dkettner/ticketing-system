@@ -5,12 +5,16 @@ import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.UUID;
 
 @Repository
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Autowired
@@ -33,6 +37,16 @@ public class UserService {
 
     public boolean isExistentById(UUID id) {
         return userRepository.existsById(id);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = this.getUserByEMailAddress(EmailAddress.fromString(email));
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail().toString(),
+                user.getPassword(),
+                Collections.emptyList()
+        );
     }
 
     // only for testing security
