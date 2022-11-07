@@ -16,6 +16,7 @@ public class UserService {
     @Autowired
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+        addDefaultUsers();  // only for testing security
     }
 
     public User getUserById(UUID id) {
@@ -32,5 +33,24 @@ public class UserService {
 
     public boolean isExistentById(UUID id) {
         return userRepository.existsById(id);
+    }
+
+    // only for testing security
+    private void addDefaultUsers() {
+        System.out.println(
+                userRepository
+                        .save(new User(
+                                "Obi-Wan Kenobi",
+                                EmailAddress.fromString("hello.there@kenobi.com")
+                        )).getId()
+        );
+
+        System.out.println(
+                userRepository
+                        .save(new User(
+                                "Ben",
+                                EmailAddress.fromString("high_ground_rulz@negotiator.com")
+                        )).getId()
+        );
     }
 }
