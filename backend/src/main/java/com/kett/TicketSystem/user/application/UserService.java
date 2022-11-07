@@ -41,7 +41,8 @@ public class UserService {
                 userRepository
                         .save(new User(
                                 "Obi-Wan Kenobi",
-                                EmailAddress.fromString("hello.there@kenobi.com")
+                                EmailAddress.fromString("hello.there@kenobi.com"),
+                                "Schweineschnauze"
                         )).getId()
         );
 
@@ -49,7 +50,8 @@ public class UserService {
                 userRepository
                         .save(new User(
                                 "Ben",
-                                EmailAddress.fromString("high_ground_rulz@negotiator.com")
+                                EmailAddress.fromString("high_ground_rulz@negotiator.com"),
+                                "Zitronensorbet"
                         )).getId()
         );
     }
