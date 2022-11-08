@@ -8,7 +8,11 @@ import com.kett.TicketSystem.membership.domain.exceptions.IllegalStateUpdateExce
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
+import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
+import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
+import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import org.springframework.http.HttpStatus;
@@ -45,6 +49,11 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(eMailAddressException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(PhaseException.class)
+    public ResponseEntity<String> handlePhaseException(PhaseException phaseException) {
+        return new ResponseEntity<>(phaseException.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(NoProjectFoundException.class)
     public ResponseEntity<String> handleNoProjectFoundException(NoProjectFoundException noProjectFoundException) {
         return new ResponseEntity<>(noProjectFoundException.getMessage(), HttpStatus.NOT_FOUND);
@@ -60,6 +69,12 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(noUserFoundException.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+
+    @ExceptionHandler(NoPhaseFoundException.class)
+    public ResponseEntity<String> handleNoPhaseFoundException(NoPhaseFoundException noPhaseFoundException) {
+        return new ResponseEntity<>(noPhaseFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
     @ExceptionHandler(MembershipAlreadyExistsException.class)
     public ResponseEntity<String> handleMembershipAlreadyExistsException(MembershipAlreadyExistsException membershipAlreadyExistsException) {
         return new ResponseEntity<>(membershipAlreadyExistsException.getMessage(), HttpStatus.CONFLICT);
@@ -68,6 +83,16 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
     @ExceptionHandler(IllegalStateUpdateException.class)
     public ResponseEntity<String> handleIllegalStateUpdateException(IllegalStateUpdateException illegalStateUpdateException) {
         return new ResponseEntity<>(illegalStateUpdateException.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(PhaseIsNotEmptyException.class)
+    public ResponseEntity<String> handlePhaseIsNotEmptyException(PhaseIsNotEmptyException phaseIsNotEmptyException) {
+        return new ResponseEntity<>(phaseIsNotEmptyException.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(LastPhaseException.class)
+    public ResponseEntity<String> handleLastPhaseException(LastPhaseException lastPhaseException) {
+        return new ResponseEntity<>(lastPhaseException.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(ImpossibleException.class)
