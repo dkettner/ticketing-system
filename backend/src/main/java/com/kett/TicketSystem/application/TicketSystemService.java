@@ -273,7 +273,7 @@ public class TicketSystemService {
         }
         if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
             throw new InvalidProjectMembersException(
-                    "not all assignees are not part of the project with id: " + ticketPostDto.getProjectId()
+                    "not all assignees are part of the project with id: " + ticketPostDto.getProjectId()
             );
         }
 
