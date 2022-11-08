@@ -9,6 +9,7 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
+import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
@@ -92,9 +93,11 @@ public class TicketSystemService {
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
+    // TODO: too dirty, this bypasses some checks
     private void addDefaultMembershipForProject(Project project, UUID postingUserId) {
-        MembershipPostDto defaultMembership = new MembershipPostDto(project.getId(), postingUserId, Role.ADMIN);
-        this.addMembership(defaultMembership);
+        Membership defaultMembership = new Membership(project.getId(), postingUserId, Role.ADMIN);
+        defaultMembership.setState(State.ACCEPTED);
+        this.membershipService.addMembership(defaultMembership);
     }
 
     public void deleteMembershipById(UUID id) {
