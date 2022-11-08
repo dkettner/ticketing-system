@@ -12,6 +12,7 @@ import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.application.dto.ProjectResponseDto;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.ticket.domain.Ticket;
+import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
 import org.modelmapper.ModelMapper;
@@ -150,5 +151,13 @@ public class DtoMapper {
 
     public UserResponseDto mapUserToUserResponseDto(User user) {
         return modelMapper.map(user, UserResponseDto.class);
+    }
+
+    public User mapUserPostDtoToUser(UserPostDto userPostDto) {
+        return new User(
+                userPostDto.getName(),
+                userPostDto.getEmail(),
+                userPostDto.getPassword()
+        );
     }
 }

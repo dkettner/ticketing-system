@@ -3,19 +3,27 @@ package com.kett.TicketSystem.user.application;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
+import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collections;
 import java.util.UUID;
 
 @Repository
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User getUserById(UUID id) {
@@ -32,5 +40,24 @@ public class UserService {
 
     public boolean isExistentById(UUID id) {
         return userRepository.existsById(id);
+    }
+
+    public User addUser(User user) {
+        if (userRepository.findByEmailEquals(user.getEmail()).isPresent()) {
+            throw new UserException("user with email: " + user.getEmail().toString() + " already exists");
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = this.getUserByEMailAddress(EmailAddress.fromString(email));
+        return new org.springframework.security.core.userdetails.User(
+                user.getEmail().toString(),
+                user.getPassword(),
+                Collections.emptyList()
+        );
     }
 }

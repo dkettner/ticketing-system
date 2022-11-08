@@ -4,6 +4,7 @@ import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.domainprimitives.EmailAddressException;
+import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
@@ -12,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.UUID;
 
 @RestController
@@ -46,6 +49,20 @@ public class UserController {
         UserResponseDto userResponseDto = ticketSystemService.getByEMailAddress(EmailAddress.fromString(email));
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
 
+    }
+
+    @PostMapping
+    public ResponseEntity<UserResponseDto> createUser (@RequestBody UserPostDto userPostDto) {
+        UserResponseDto userResponseDto = ticketSystemService.addUser(userPostDto);
+        URI returnURI = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(userResponseDto.getId())
+                .toUri();
+
+        return ResponseEntity
+                .created(returnURI)
+                .body(userResponseDto);
     }
 
 

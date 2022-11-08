@@ -19,27 +19,46 @@ public class User {
     private UUID id;
 
     @Getter
-    @Setter
     private String name;
 
     @Getter
-    @Setter
     @Column(unique = true)
     private EmailAddress email;
 
-    public User(String name, EmailAddress email) {
+    @Getter
+    private String password;
+
+    public void setName(String name) {
         if (name == null || name.isEmpty()) {
             throw new UserException("name must not be null or empty");
         }
-        if (email == null) {
-            throw new UserException("mailAddress must not be null or empty");
-        }
 
         this.name = name;
+    }
+
+    public void setEmail(EmailAddress email) {
+        if (email == null) {
+            throw new UserException("email must not be null or empty");
+        }
+
         this.email = email;
     }
 
-    public User(String name, String email) {
-        this(name, EmailAddress.fromString(email));
+    public void setPassword(String password) {
+        if (password == null || password.isEmpty()) {
+            throw new UserException("password must not be null or empty");
+        }
+
+        this.password = password;
+    }
+
+    public User(String name, EmailAddress email, String password) {
+        this.setName(name);
+        this.setEmail(email);
+        this.setPassword(password);
+    }
+
+    public User(String name, String email, String password) {
+        this(name, EmailAddress.fromString(email), password);
     }
 }
