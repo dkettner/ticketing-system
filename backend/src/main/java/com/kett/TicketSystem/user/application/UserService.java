@@ -46,6 +46,10 @@ public class UserService implements UserDetailsService {
         return this.getUserByEMailAddress(postingUserEmail).getId();
     }
 
+    public UUID getUserIdByEmail(String postingUserEmail) {
+        return this.getUserIdByEmail(EmailAddress.fromString(postingUserEmail));
+    }
+
     public boolean isExistentById(UUID id) {
         return userRepository.existsById(id);
     }
