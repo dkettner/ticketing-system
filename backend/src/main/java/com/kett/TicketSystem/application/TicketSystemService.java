@@ -1,6 +1,8 @@
 package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.application.exceptions.ImpossibleException;
+import com.kett.TicketSystem.authentication.AuthenticationService;
+import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
@@ -22,6 +24,7 @@ import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.user.application.UserService;
+import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
@@ -38,17 +41,19 @@ public class TicketSystemService {
     private final TicketService ticketService;
     private final UserService userService;
     private final MembershipService membershipService;
+    private final AuthenticationService authenticationService;
     private final DtoMapper dtoMapper;
 
     @Autowired
     public TicketSystemService (ProjectService projectService, PhaseService phaseService,
                                 TicketService ticketService, UserService userService,
-                                MembershipService membershipService) {
+                                MembershipService membershipService, AuthenticationService authenticationService) {
         this.projectService = projectService;
         this.phaseService = phaseService;
         this.ticketService = ticketService;
         this.userService = userService;
         this.membershipService = membershipService;
+        this.authenticationService = authenticationService;
         this.dtoMapper = new DtoMapper();
     }
 
@@ -255,5 +260,20 @@ public class TicketSystemService {
     public UserResponseDto getByEMailAddress(EmailAddress eMailAddress) {
         User user = userService.getUserByEMailAddress(eMailAddress);
         return dtoMapper.mapUserToUserResponseDto(user);
+    }
+
+    public UserResponseDto addUser(UserPostDto userPostDto) {
+        User user = userService.addUser(
+                dtoMapper.mapUserPostDtoToUser(userPostDto)
+        );
+        return dtoMapper.mapUserToUserResponseDto(user);
+    }
+
+
+    // authentication
+
+    public String authenticateUser(AuthenticationPostDto authenticationPostDto) {
+        return authenticationService
+                .authenticateUser(authenticationPostDto.getEmail(), authenticationPostDto.getPassword());
     }
 }
