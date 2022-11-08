@@ -200,14 +200,6 @@ public class TicketSystemService {
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
-    public List<ProjectResponseDto> fetchAllProjects() {
-        List<Project> allProjects = projectService.getAllProjects();
-        return allProjects
-                .stream()
-                .map(dtoMapper::mapProjectToProjectResponseDto)
-                .toList();
-    }
-
     public ProjectResponseDto addProject(ProjectPostDto projectPostDto, UUID postingUserId) {
         Project project = projectService.addProject(
                 dtoMapper.mapProjectPostDtoToProject(projectPostDto)

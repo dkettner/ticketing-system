@@ -7,7 +7,6 @@ import com.kett.TicketSystem.project.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -56,10 +55,5 @@ public class ProjectService {
             existingProject.setDescription(newDescription);
         }
         projectRepository.save(existingProject);
-    }
-
-    // TODO: only for testing
-    public List<Project> getAllProjects() {
-        return projectRepository.findAll();
     }
 }
