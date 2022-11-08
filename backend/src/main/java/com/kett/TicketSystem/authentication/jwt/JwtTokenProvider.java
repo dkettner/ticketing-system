@@ -5,23 +5,20 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.security.Key;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 
-@Service
-public class JwtTokenProviderService {
+@Component
+public class JwtTokenProvider {
     private final Key jwtKey;
 
-    @Autowired
-    public JwtTokenProviderService() {
+    public JwtTokenProvider() {
         this.jwtKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     }
 

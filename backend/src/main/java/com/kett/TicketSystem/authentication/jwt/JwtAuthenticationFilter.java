@@ -18,7 +18,7 @@ import java.io.IOException;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
-    private JwtTokenProviderService jwtTokenProviderService;
+    private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
     private UserService userService;
@@ -31,8 +31,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         String jwt = getJwtFromRequest(request);
 
-        if (StringUtils.hasText(jwt) && jwtTokenProviderService.validateToken(jwt)) {
-            String email = jwtTokenProviderService.getEmailFromToken(jwt);
+        if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
+            String email = jwtTokenProvider.getEmailFromToken(jwt);
             UserDetails userDetails = userService.loadUserByUsername(email);
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.authentication;
 
-import com.kett.TicketSystem.authentication.jwt.JwtTokenProviderService;
+import com.kett.TicketSystem.authentication.jwt.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
-    private final JwtTokenProviderService jwtTokenProviderService;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    public AuthenticationService(AuthenticationManager authenticationManager, JwtTokenProviderService jwtTokenProviderService) {
+    public AuthenticationService(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider) {
         this.authenticationManager = authenticationManager;
-        this.jwtTokenProviderService = jwtTokenProviderService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
 
 
@@ -23,6 +23,6 @@ public class AuthenticationService {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, password)
         );
-        return jwtTokenProviderService.generateToken(authentication);
+        return jwtTokenProvider.generateToken(authentication);
     }
 }
