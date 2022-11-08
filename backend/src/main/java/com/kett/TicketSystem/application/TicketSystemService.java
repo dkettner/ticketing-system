@@ -246,21 +246,29 @@ public class TicketSystemService {
 
     // ticket
 
+    @PreAuthorize("#ticketService.getTicketById(#id).isAssignee(#userService.getUserIdByEmail(#principal.username))")
     public TicketResponseDto getTicketById(UUID id) {
         Ticket ticket = ticketService.getTicketById(id);
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
 
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(#phaseService.getPhaseById(#phaseId).projectId), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(#phaseService.getPhaseById(#phaseId).projectId))")
     public List<TicketResponseDto> getTicketsByPhaseId(UUID phaseId) {
         List<Ticket> tickets = ticketService.getTicketsByPhaseId(phaseId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
+    @PreAuthorize("#assigneeId.equals(#userService.getUserIdByEmail(principal.username))")
     public List<TicketResponseDto> getTicketsByAssigneeId(UUID assigneeId) {
         List<Ticket> tickets = ticketService.getTicketsByAssigneeId(assigneeId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto) {
         if (!projectService.isExistentById(ticketPostDto.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + ticketPostDto.getProjectId());
