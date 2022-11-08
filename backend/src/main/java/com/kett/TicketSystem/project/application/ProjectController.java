@@ -2,10 +2,8 @@ package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
 
-import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.project.application.dto.*;
-import com.kett.TicketSystem.project.domain.exceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,23 +61,5 @@ public class ProjectController {
     public ResponseEntity<?> deleteProject(@PathVariable UUID id) {
         ticketSystemService.deleteProjectById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    }
-
-
-    // exception handlers
-
-    @ExceptionHandler(ProjectException.class)
-    public ResponseEntity<String> handleProjectException(ProjectException projectException) {
-        return new ResponseEntity<>(projectException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(NoProjectFoundException.class)
-    public ResponseEntity<String> handleNoProjectFoundException(NoProjectFoundException noProjectFoundException) {
-        return new ResponseEntity<>(noProjectFoundException.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(ImpossibleException.class)
-    public ResponseEntity<String> handleImpossibleException(ImpossibleException impossibleException) {
-        return new ResponseEntity<>(impossibleException.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
