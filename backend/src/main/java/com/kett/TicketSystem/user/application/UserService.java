@@ -24,7 +24,6 @@ public class UserService implements UserDetailsService {
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        addDefaultUsers();  // only for testing security
     }
 
     public User getUserById(UUID id) {
@@ -59,27 +58,6 @@ public class UserService implements UserDetailsService {
                 user.getEmail().toString(),
                 user.getPassword(),
                 Collections.emptyList()
-        );
-    }
-
-    // only for testing security
-    private void addDefaultUsers() {
-        System.out.println(
-                this.addUser(
-                        new User(
-                                "Obi-Wan Kenobi",
-                                EmailAddress.fromString("hello.there@kenobi.com"),
-                                "Schweineschnauze"
-                        )).getId()
-        );
-
-        System.out.println(
-                this.addUser(
-                        new User(
-                                "Ben",
-                                EmailAddress.fromString("high_ground_rulz@negotiator.com"),
-                                "Zitronensorbet"
-                        )).getId()
         );
     }
 }
