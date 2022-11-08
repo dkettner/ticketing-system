@@ -24,98 +24,46 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(NoParametersException.class)
-    public ResponseEntity<String> handleNoParametersException(NoParametersException noParametersException) {
-        return new ResponseEntity<>(noParametersException.getMessage(), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(value = {
+            NoParametersException.class,
+            TooManyParametersException.class,
+            MembershipException.class,
+            PhaseException.class,
+            ProjectException.class,
+            TicketException.class,
+            UserException.class,
+            EmailAddressException.class
+    })
+    public ResponseEntity<String> handleBadRequestException(RuntimeException runtimeException) {
+        return new ResponseEntity<>(runtimeException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(TooManyParametersException.class)
-    public ResponseEntity<String> handleTooManyParametersException(TooManyParametersException tooManyParametersException) {
-        return new ResponseEntity<>(tooManyParametersException.getMessage(), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(value = {
+            NoMembershipFoundException.class,
+            NoPhaseFoundException.class,
+            NoProjectFoundException.class,
+            NoTicketFoundException.class,
+            NoUserFoundException.class
+    })
+    public ResponseEntity<String> handleNotFoundException(RuntimeException runtimeException) {
+        return new ResponseEntity<>(runtimeException.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler(ProjectException.class)
-    public ResponseEntity<String> handleProjectException(ProjectException projectException) {
-        return new ResponseEntity<>(projectException.getMessage(), HttpStatus.BAD_REQUEST);
+    @ExceptionHandler(value = {
+            InvalidProjectMembersException.class,
+            MembershipAlreadyExistsException.class,
+            IllegalStateUpdateException.class,
+            PhaseIsNotEmptyException.class,
+            LastPhaseException.class
+    })
+    public ResponseEntity<String> handleConflictException(RuntimeException runtimeException) {
+        return new ResponseEntity<>(runtimeException.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(MembershipException.class)
-    public ResponseEntity<String> handleMembershipException(MembershipException membershipException) {
-        return new ResponseEntity<>(membershipException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(PhaseException.class)
-    public ResponseEntity<String> handlePhaseException(PhaseException phaseException) {
-        return new ResponseEntity<>(phaseException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(TicketException.class)
-    public ResponseEntity<String> handleTicketException(TicketException ticketException) {
-        return new ResponseEntity<>(ticketException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(UserException.class)
-    public ResponseEntity<String> handleUserException(UserException userException) {
-        return new ResponseEntity<>(userException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(EmailAddressException.class)
-    public ResponseEntity<String> handleEMailAddressException(EmailAddressException eMailAddressException) {
-        return new ResponseEntity<>(eMailAddressException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(NoProjectFoundException.class)
-    public ResponseEntity<String> handleNoProjectFoundException(NoProjectFoundException noProjectFoundException) {
-        return new ResponseEntity<>(noProjectFoundException.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(NoMembershipFoundException.class)
-    public ResponseEntity<String> handleNoMembershipFoundException(NoMembershipFoundException noMembershipFoundException) {
-        return new ResponseEntity<>(noMembershipFoundException.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(NoUserFoundException.class)
-    public ResponseEntity<String> handleNoUserFoundException(NoUserFoundException noUserFoundException) {
-        return new ResponseEntity<>(noUserFoundException.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(NoPhaseFoundException.class)
-    public ResponseEntity<String> handleNoPhaseFoundException(NoPhaseFoundException noPhaseFoundException) {
-        return new ResponseEntity<>(noPhaseFoundException.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(NoTicketFoundException.class)
-    public ResponseEntity<String> handleNoTicketFoundException(NoTicketFoundException noTicketFoundException) {
-        return new ResponseEntity<>(noTicketFoundException.getMessage(), HttpStatus.NOT_FOUND);
-    }
-
-    @ExceptionHandler(InvalidProjectMembersException.class)
-    public ResponseEntity<String> handleInvalidProjectMembersException(InvalidProjectMembersException invalidProjectMembersException) {
-        return new ResponseEntity<>(invalidProjectMembersException.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(MembershipAlreadyExistsException.class)
-    public ResponseEntity<String> handleMembershipAlreadyExistsException(MembershipAlreadyExistsException membershipAlreadyExistsException) {
-        return new ResponseEntity<>(membershipAlreadyExistsException.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(IllegalStateUpdateException.class)
-    public ResponseEntity<String> handleIllegalStateUpdateException(IllegalStateUpdateException illegalStateUpdateException) {
-        return new ResponseEntity<>(illegalStateUpdateException.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(PhaseIsNotEmptyException.class)
-    public ResponseEntity<String> handlePhaseIsNotEmptyException(PhaseIsNotEmptyException phaseIsNotEmptyException) {
-        return new ResponseEntity<>(phaseIsNotEmptyException.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(LastPhaseException.class)
-    public ResponseEntity<String> handleLastPhaseException(LastPhaseException lastPhaseException) {
-        return new ResponseEntity<>(lastPhaseException.getMessage(), HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler(ImpossibleException.class)
-    public ResponseEntity<String> handleImpossibleException(ImpossibleException impossibleException) {
+    @ExceptionHandler(value = {
+            ImpossibleException.class
+    })
+    public ResponseEntity<String> handleInternalErrorServerException(ImpossibleException impossibleException) {
         return new ResponseEntity<>(impossibleException.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
