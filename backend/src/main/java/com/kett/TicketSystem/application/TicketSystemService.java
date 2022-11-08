@@ -181,6 +181,11 @@ public class TicketSystemService {
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
+    public ProjectResponseDto addProject(ProjectPostDto projectPostDto, EmailAddress postingUserEmail) {
+        UUID userId = userService.getUserIdByEmail(postingUserEmail);
+        return this.addProject(projectPostDto, userId);
+    }
+
     public void deleteProjectById(UUID id) {
         projectService.deleteProjectById(id);
     }
@@ -192,6 +197,15 @@ public class TicketSystemService {
                 projectPatchDto.getName(),
                 projectPatchDto.getDescription()
         );
+    }
+
+    private void addDefaultProjectForNewUser(UUID userId) {
+        ProjectPostDto defaultProject = new ProjectPostDto(
+                "Example Project",
+                "This project was automatically created. Use it to get accustomed to everything."
+        );
+
+        this.addProject(defaultProject, userId);
     }
 
 
@@ -266,6 +280,9 @@ public class TicketSystemService {
         User user = userService.addUser(
                 dtoMapper.mapUserPostDtoToUser(userPostDto)
         );
+
+        this.addDefaultProjectForNewUser(user.getId());
+
         return dtoMapper.mapUserToUserResponseDto(user);
     }
 
