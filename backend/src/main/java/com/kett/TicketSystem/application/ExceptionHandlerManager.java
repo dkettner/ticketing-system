@@ -14,6 +14,7 @@ import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
+import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -54,8 +55,13 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(TicketException.class)
-    public ResponseEntity<String> handleTicketException(TicketException ticketException) {
+    public ResponseEntity<String> handleNoUserFoundException(TicketException ticketException) {
         return new ResponseEntity<>(ticketException.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(UserException.class)
+    public ResponseEntity<String> handleNoUserFoundException(UserException userException) {
+        return new ResponseEntity<>(userException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NoProjectFoundException.class)
@@ -69,7 +75,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(NoUserFoundException.class)
-    public ResponseEntity<String> handleTicketException(NoUserFoundException noUserFoundException) {
+    public ResponseEntity<String> handleNoUserFoundException(NoUserFoundException noUserFoundException) {
         return new ResponseEntity<>(noUserFoundException.getMessage(), HttpStatus.NOT_FOUND);
     }
 

@@ -3,11 +3,8 @@ package com.kett.TicketSystem.user.application;
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.domainprimitives.EmailAddressException;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
-import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
-import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,28 +60,5 @@ public class UserController {
         return ResponseEntity
                 .created(returnURI)
                 .body(userResponseDto);
-    }
-
-
-    // exception handlers
-
-    @ExceptionHandler(NoParametersException.class)
-    public ResponseEntity<String> handleNoParametersException(NoParametersException noParametersException) {
-        return new ResponseEntity<>(noParametersException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(EmailAddressException.class)
-    public ResponseEntity<String> handleEMailAddressException(EmailAddressException eMailAddressException) {
-        return new ResponseEntity<>(eMailAddressException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(UserException.class)
-    public ResponseEntity<String> handleTicketException(UserException userException) {
-        return new ResponseEntity<>(userException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(NoUserFoundException.class)
-    public ResponseEntity<String> handleTicketException(NoUserFoundException noUserFoundException) {
-        return new ResponseEntity<>(noUserFoundException.getMessage(), HttpStatus.NOT_FOUND);
     }
 }
