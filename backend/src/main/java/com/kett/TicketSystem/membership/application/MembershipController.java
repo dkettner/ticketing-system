@@ -64,7 +64,7 @@ public class MembershipController {
         } else if (projectId != null) {
             membershipResponseDtos = ticketSystemService.getMembershipsByProjectId(projectId);
         } else if (email != null) {
-            membershipResponseDtos = ticketSystemService.getMembershipsByProjectEmail(EmailAddress.fromString(email));
+            membershipResponseDtos = ticketSystemService.getMembershipsByEmail(EmailAddress.fromString(email));
         } else {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
