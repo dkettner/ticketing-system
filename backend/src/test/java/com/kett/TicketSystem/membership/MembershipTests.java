@@ -47,7 +47,7 @@ public class MembershipTests {
         uuid2 = UUID.randomUUID();
         uuid3 = UUID.randomUUID();
 
-        standardRole = Role.STANDARD;
+        standardRole = Role.MEMBER;
         adminRole = Role.ADMIN;
 
         membership0 = new Membership(uuid0, uuid1, standardRole);
@@ -182,15 +182,15 @@ public class MembershipTests {
 
     @Test
     public void checkRole() {
-        assertEquals(Role.STANDARD, membership0.getRole());
-        assertEquals(Role.STANDARD, membership1.getRole());
+        assertEquals(Role.MEMBER, membership0.getRole());
+        assertEquals(Role.MEMBER, membership1.getRole());
         assertEquals(Role.ADMIN, membership2.getRole());
         assertEquals(Role.ADMIN, membership3.getRole());
 
         assertNotEquals(Role.ADMIN, membership0.getRole());
         assertNotEquals(Role.ADMIN, membership1.getRole());
-        assertNotEquals(Role.STANDARD, membership2.getRole());
-        assertNotEquals(Role.STANDARD, membership3.getRole());
+        assertNotEquals(Role.MEMBER, membership2.getRole());
+        assertNotEquals(Role.MEMBER, membership3.getRole());
     }
 
     @Test
