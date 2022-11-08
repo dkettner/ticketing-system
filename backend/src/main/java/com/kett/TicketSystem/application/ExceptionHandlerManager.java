@@ -4,16 +4,15 @@ import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.domainprimitives.EmailAddressException;
-import com.kett.TicketSystem.membership.domain.exceptions.IllegalStateUpdateException;
-import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
-import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
-import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
+import com.kett.TicketSystem.membership.domain.exceptions.*;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
+import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
+import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,6 +53,11 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(phaseException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(TicketException.class)
+    public ResponseEntity<String> handleTicketException(TicketException ticketException) {
+        return new ResponseEntity<>(ticketException.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(NoProjectFoundException.class)
     public ResponseEntity<String> handleNoProjectFoundException(NoProjectFoundException noProjectFoundException) {
         return new ResponseEntity<>(noProjectFoundException.getMessage(), HttpStatus.NOT_FOUND);
@@ -69,10 +73,19 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(noUserFoundException.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-
     @ExceptionHandler(NoPhaseFoundException.class)
     public ResponseEntity<String> handleNoPhaseFoundException(NoPhaseFoundException noPhaseFoundException) {
         return new ResponseEntity<>(noPhaseFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(NoTicketFoundException.class)
+    public ResponseEntity<String> handleNoTicketFoundException(NoTicketFoundException noTicketFoundException) {
+        return new ResponseEntity<>(noTicketFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidProjectMembersException.class)
+    public ResponseEntity<String> handleInvalidProjectMembersException(InvalidProjectMembersException invalidProjectMembersException) {
+        return new ResponseEntity<>(invalidProjectMembersException.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(MembershipAlreadyExistsException.class)
