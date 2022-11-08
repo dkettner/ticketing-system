@@ -50,11 +50,11 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(value = {
-            InvalidProjectMembersException.class,
             MembershipAlreadyExistsException.class,
             IllegalStateUpdateException.class,
             PhaseIsNotEmptyException.class,
-            LastPhaseException.class
+            LastPhaseException.class,
+            InvalidProjectMembersException.class
     })
     public ResponseEntity<String> handleConflictException(RuntimeException runtimeException) {
         return new ResponseEntity<>(runtimeException.getMessage(), HttpStatus.CONFLICT);
