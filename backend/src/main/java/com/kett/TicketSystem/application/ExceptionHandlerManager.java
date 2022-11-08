@@ -24,11 +24,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(ProjectException.class)
-    public ResponseEntity<String> handleProjectException(ProjectException projectException) {
-        return new ResponseEntity<>(projectException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(NoParametersException.class)
     public ResponseEntity<String> handleNoParametersException(NoParametersException noParametersException) {
         return new ResponseEntity<>(noParametersException.getMessage(), HttpStatus.BAD_REQUEST);
@@ -39,14 +34,14 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(tooManyParametersException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ProjectException.class)
+    public ResponseEntity<String> handleProjectException(ProjectException projectException) {
+        return new ResponseEntity<>(projectException.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(MembershipException.class)
     public ResponseEntity<String> handleMembershipException(MembershipException membershipException) {
         return new ResponseEntity<>(membershipException.getMessage(), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(EmailAddressException.class)
-    public ResponseEntity<String> handleEMailAddressException(EmailAddressException eMailAddressException) {
-        return new ResponseEntity<>(eMailAddressException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(PhaseException.class)
@@ -55,13 +50,18 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(TicketException.class)
-    public ResponseEntity<String> handleNoUserFoundException(TicketException ticketException) {
+    public ResponseEntity<String> handleTicketException(TicketException ticketException) {
         return new ResponseEntity<>(ticketException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(UserException.class)
-    public ResponseEntity<String> handleNoUserFoundException(UserException userException) {
+    public ResponseEntity<String> handleUserException(UserException userException) {
         return new ResponseEntity<>(userException.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(EmailAddressException.class)
+    public ResponseEntity<String> handleEMailAddressException(EmailAddressException eMailAddressException) {
+        return new ResponseEntity<>(eMailAddressException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(NoProjectFoundException.class)
@@ -91,7 +91,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(InvalidProjectMembersException.class)
     public ResponseEntity<String> handleInvalidProjectMembersException(InvalidProjectMembersException invalidProjectMembersException) {
-        return new ResponseEntity<>(invalidProjectMembersException.getMessage(), HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(invalidProjectMembersException.getMessage(), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(MembershipAlreadyExistsException.class)
