@@ -8,6 +8,7 @@ import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
@@ -37,6 +38,14 @@ public class MembershipService {
             throw new NoMembershipFoundException("could not find memberships with userId: " + userId);
         }
         return memberships;
+    }
+
+    public List<GrantedAuthority> getAuthoritiesByUserId(UUID userId) {
+        return membershipRepository
+                .findByUserIdAndStateEquals(userId, State.ACCEPTED)
+                .stream()
+                .map(membership -> (GrantedAuthority) membership)
+                .toList();
     }
 
     public List<Membership> getMembershipsByProjectId(UUID projectId) {

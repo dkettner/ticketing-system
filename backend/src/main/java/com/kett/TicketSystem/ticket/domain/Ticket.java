@@ -56,6 +56,10 @@ public class Ticket {
         assigneeIds.remove(userId);
     }
 
+    public Boolean isAssignee(UUID assigneeId) {
+        return this.assigneeIds.contains(assigneeId);
+    }
+
     public Ticket(String title, String description, LocalDateTime dueTime, UUID phaseId, List<UUID> assigneeIds) {
         if (title == null || title.isEmpty()) {
             throw new TicketException("title must not be null or empty");

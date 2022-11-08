@@ -1,29 +1,33 @@
 package com.kett.TicketSystem.user.application;
 
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collections;
+import java.util.List;
 import java.util.UUID;
 
 @Repository
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MembershipService membershipService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MembershipService membershipService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.membershipService = membershipService;
     }
 
     public User getUserById(UUID id) {
@@ -36,6 +40,14 @@ public class UserService implements UserDetailsService {
         return userRepository
                 .findByEmailEquals(eMailAddress)
                 .orElseThrow(() -> new NoUserFoundException("could not find user with eMailAddress: " + eMailAddress));
+    }
+
+    public UUID getUserIdByEmail(EmailAddress postingUserEmail) {
+        return this.getUserByEMailAddress(postingUserEmail).getId();
+    }
+
+    public UUID getUserIdByEmail(String postingUserEmail) {
+        return this.getUserIdByEmail(EmailAddress.fromString(postingUserEmail));
     }
 
     public boolean isExistentById(UUID id) {
@@ -54,10 +66,12 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = this.getUserByEMailAddress(EmailAddress.fromString(email));
+        List<GrantedAuthority> grantedAuthorities = membershipService.getAuthoritiesByUserId(user.getId());
+
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail().toString(),
                 user.getPassword(),
-                Collections.emptyList()
+                grantedAuthorities
         );
     }
 }

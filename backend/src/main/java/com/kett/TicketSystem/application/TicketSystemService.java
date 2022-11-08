@@ -9,6 +9,7 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
+import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
@@ -29,6 +30,7 @@ import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -60,21 +62,34 @@ public class TicketSystemService {
 
     // membership
 
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipService.getMembershipById(#id).projectId)) " +
+            "or #principal.username.equals(ticketSystemService.getEmailByMembershipId(#id).toString())")
     public MembershipResponseDto getMemberShipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
+    @PreAuthorize("#userId.equals(#userService.getUserIdByEmail(#principal.username))")
     public List<MembershipResponseDto> getMembershipsByUserId(UUID userId) {
         List<Membership> memberships = membershipService.getMembershipsByUserId(userId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
+    @PreAuthorize("#email.toString().equals(principal.username)")
+    public List<MembershipResponseDto> getMembershipsByEmail(EmailAddress email) {
+        UUID userId = userService.getUserIdByEmail(email);
+        return this.getMembershipsByUserId(userId);
+    }
+
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
     public List<MembershipResponseDto> getMembershipsByProjectId(UUID projectId) {
         List<Membership> memberships = membershipService.getMembershipsByProjectId(projectId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipPostDto.projectId))")
     public MembershipResponseDto addMembership(MembershipPostDto membershipPostDto) {
         // TODO: add proper validation once authentication is possible
         UUID projectId = membershipPostDto.getProjectId();
@@ -92,11 +107,15 @@ public class TicketSystemService {
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
+    // TODO: too dirty, this bypasses some checks
     private void addDefaultMembershipForProject(Project project, UUID postingUserId) {
-        MembershipPostDto defaultMembership = new MembershipPostDto(project.getId(), postingUserId, Role.ADMIN);
-        this.addMembership(defaultMembership);
+        Membership defaultMembership = new Membership(project.getId(), postingUserId, Role.ADMIN);
+        defaultMembership.setState(State.ACCEPTED);
+        this.membershipService.addMembership(defaultMembership);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipService.getMembershipById(#id).projectId)) " +
+            "or #principal.username.equals(ticketSystemService.getEmailByMembershipId(#id).toString())")
     public void deleteMembershipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         this.removeUserFromAllTicketsOfProject(membership.getUserId(), membership.getProjectId());
@@ -107,17 +126,28 @@ public class TicketSystemService {
 
     // phase
 
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(#phaseService.getPhaseById(#id).projectId), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(#phaseService.getPhaseById(#id).projectId))")
     public PhaseResponseDto getPhaseById(UUID id) {
         Phase phase = phaseService.getPhaseById(id);
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
 
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
     public List<PhaseResponseDto> getPhasesByProjectId(UUID projectId) {
         List<Phase> phases = phaseService.getPhasesByProjectId(projectId);
         return dtoMapper.mapPhaseListToPhaseResponseDtoList(phases);
     }
 
-    public PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#phasePostDto.projectId))")
+    public PhaseResponseDto addPhaseAuthorized(PhasePostDto phasePostDto) {
+        return addPhase(phasePostDto);
+    }
+
+    private PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
         UUID projectId = phasePostDto.getProjectId();
         if (!projectService.isExistentById(projectId)) {
             throw new NoProjectFoundException("could not find project with id: " + projectId);
@@ -147,6 +177,7 @@ public class TicketSystemService {
         this.addPhase(toDo);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#phaseService.getPhaseById(#id).projectId))")
     public void deletePhaseById(UUID id) {
         if (ticketService.hasTicketsWithPhaseId(id)) {
             throw new PhaseIsNotEmptyException("phase with id: " + id + " is not empty and can not be deleted");
@@ -157,6 +188,7 @@ public class TicketSystemService {
 
     // project
 
+    @PreAuthorize("hasAnyAuthority('ROLE_PROJECT_ADMIN_'.concat(#id), 'ROLE_PROJECT_MEMBER_'.concat(#id))")
     public ProjectResponseDto fetchProjectById(UUID id) {
         Project project = projectService.getProjectById(id);
         return dtoMapper.mapProjectToProjectResponseDto(project);
@@ -181,11 +213,19 @@ public class TicketSystemService {
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
+    public ProjectResponseDto addProject(ProjectPostDto projectPostDto, EmailAddress postingUserEmail) {
+        UUID userId = userService.getUserIdByEmail(postingUserEmail);
+        return this.addProject(projectPostDto, userId);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")
     public void deleteProjectById(UUID id) {
+        // TODO: Also delete Tickets, Phases, Memberships!
+
         projectService.deleteProjectById(id);
     }
 
-    // TODO: clean this up
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")
     public void patchProjectById(UUID id, ProjectPatchDto projectPatchDto) {
         projectService.patchProjectById(
                 id,
@@ -194,24 +234,41 @@ public class TicketSystemService {
         );
     }
 
+    private void addDefaultProjectForNewUser(UUID userId) {
+        ProjectPostDto defaultProject = new ProjectPostDto(
+                "Example Project",
+                "This project was automatically created. Use it to get accustomed to everything."
+        );
+
+        this.addProject(defaultProject, userId);
+    }
+
 
     // ticket
 
+    @PreAuthorize("#ticketService.getTicketById(#id).isAssignee(#userService.getUserIdByEmail(#principal.username))")
     public TicketResponseDto getTicketById(UUID id) {
         Ticket ticket = ticketService.getTicketById(id);
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
 
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(#phaseService.getPhaseById(#phaseId).projectId), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(#phaseService.getPhaseById(#phaseId).projectId))")
     public List<TicketResponseDto> getTicketsByPhaseId(UUID phaseId) {
         List<Ticket> tickets = ticketService.getTicketsByPhaseId(phaseId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
+    @PreAuthorize("#assigneeId.equals(#userService.getUserIdByEmail(principal.username))")
     public List<TicketResponseDto> getTicketsByAssigneeId(UUID assigneeId) {
         List<Ticket> tickets = ticketService.getTicketsByAssigneeId(assigneeId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto) {
         if (!projectService.isExistentById(ticketPostDto.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + ticketPostDto.getProjectId());
@@ -266,7 +323,15 @@ public class TicketSystemService {
         User user = userService.addUser(
                 dtoMapper.mapUserPostDtoToUser(userPostDto)
         );
+
+        this.addDefaultProjectForNewUser(user.getId());
+
         return dtoMapper.mapUserToUserResponseDto(user);
+    }
+
+    public EmailAddress getEmailByMembershipId(UUID membershipId) {
+        UUID userId = membershipService.getMembershipById(membershipId).getUserId();
+        return userService.getUserById(userId).getEmail();
     }
 
 

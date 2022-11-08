@@ -52,7 +52,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponseDto> createUser (@RequestBody UserPostDto userPostDto) {
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserPostDto userPostDto) {
         UserResponseDto userResponseDto = ticketSystemService.addUser(userPostDto);
         URI returnURI = ServletUriComponentsBuilder
                 .fromCurrentRequest()

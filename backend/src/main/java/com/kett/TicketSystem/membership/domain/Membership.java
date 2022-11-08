@@ -3,6 +3,7 @@ package com.kett.TicketSystem.membership.domain;
 import com.kett.TicketSystem.membership.domain.exceptions.IllegalStateUpdateException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import lombok.*;
+import org.springframework.security.core.GrantedAuthority;
 
 import javax.persistence.*;
 import java.util.UUID;
@@ -10,7 +11,7 @@ import java.util.UUID;
 @Entity
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Membership {
+public class Membership implements GrantedAuthority {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Getter
@@ -36,6 +37,10 @@ public class Membership {
     @Enumerated(EnumType.STRING)
     private State state;
 
+    public Boolean isAccepted() {
+        return this.state.equals(State.ACCEPTED);
+    }
+
     public void setState(State state) {
         if (this.state.equals(state)) {
             throw new IllegalStateUpdateException("state of membership with id: " + this.id + " is already " + this.state);
@@ -57,6 +62,14 @@ public class Membership {
         }
 
         this.role = role;
+    }
+
+    @Override
+    public String getAuthority() {
+        return  "ROLE_" +
+                "PROJECT_" +
+                this.role.toString() + "_" +
+                this.projectId.toString();
     }
 
     public Membership(UUID projectId, UUID userId, Role role) {
