@@ -60,7 +60,7 @@ public class ProjectController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteProject(@PathVariable UUID id) { // TODO: What to use instead of Object?
+    public ResponseEntity<?> deleteProject(@PathVariable UUID id) {
         ticketSystemService.deleteProjectById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
