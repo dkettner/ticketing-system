@@ -37,6 +37,10 @@ public class Membership implements GrantedAuthority {
     @Enumerated(EnumType.STRING)
     private State state;
 
+    public Boolean isAccepted() {
+        return this.state.equals(State.ACCEPTED);
+    }
+
     public void setState(State state) {
         if (this.state.equals(state)) {
             throw new IllegalStateUpdateException("state of membership with id: " + this.id + " is already " + this.state);
