@@ -71,6 +71,11 @@ public class TicketSystemService {
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
+    public List<MembershipResponseDto> getMembershipsByProjectEmail(EmailAddress email) {
+        UUID userId = userService.getUserIdByEmail(email);
+        return this.getMembershipsByUserId(userId);
+    }
+
     public List<MembershipResponseDto> getMembershipsByProjectId(UUID projectId) {
         List<Membership> memberships = membershipService.getMembershipsByProjectId(projectId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);

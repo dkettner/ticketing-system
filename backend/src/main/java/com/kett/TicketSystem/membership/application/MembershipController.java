@@ -3,6 +3,8 @@ package com.kett.TicketSystem.membership.application;
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
+import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.domainprimitives.EmailAddressException;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.exceptions.IllegalStateUpdateException;
@@ -46,9 +48,13 @@ public class MembershipController {
     @GetMapping
     public ResponseEntity<List<MembershipResponseDto>> getMembershipsByQuery(
             @RequestParam(name = "user-id", required = false) UUID userId,
-            @RequestParam(name = "project-id", required = false) UUID projectId
+            @RequestParam(name = "project-id", required = false) UUID projectId,
+            @RequestParam(name = "email", required = false) String email
     ) {
-        if (userId != null && projectId != null) {
+        // TODO: What if another parameter gets added? This is too dirty.
+        if (userId != null && projectId != null
+            || userId != null && email != null
+            || projectId != null && email != null) {
             throw new TooManyParametersException("cannot query by more than one parameter yet");
         }
 
@@ -57,6 +63,8 @@ public class MembershipController {
             membershipResponseDtos = ticketSystemService.getMembershipsByUserId(userId);
         } else if (projectId != null) {
             membershipResponseDtos = ticketSystemService.getMembershipsByProjectId(projectId);
+        } else if (email != null) {
+            membershipResponseDtos = ticketSystemService.getMembershipsByProjectEmail(EmailAddress.fromString(email));
         } else {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
@@ -124,5 +132,10 @@ public class MembershipController {
     @ExceptionHandler(NoUserFoundException.class)
     public ResponseEntity<String> handleTicketException(NoUserFoundException noUserFoundException) {
         return new ResponseEntity<>(noUserFoundException.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(EmailAddressException.class)
+    public ResponseEntity<String> handleEMailAddressException(EmailAddressException eMailAddressException) {
+        return new ResponseEntity<>(eMailAddressException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 }
