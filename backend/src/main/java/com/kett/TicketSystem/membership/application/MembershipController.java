@@ -7,6 +7,7 @@ import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.domainprimitives.EmailAddressException;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
+import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.IllegalStateUpdateException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
@@ -83,6 +84,12 @@ public class MembershipController {
         return ResponseEntity
                 .created(returnURI)
                 .body(membershipResponseDto);
+    }
+
+    @PatchMapping("/{id}/state")
+    public ResponseEntity<?> patchMemberShipState(@PathVariable UUID id, @RequestBody State state) {
+        ticketSystemService.patchMembershipState(id, state);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")

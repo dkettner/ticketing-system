@@ -114,6 +114,12 @@ public class TicketSystemService {
         this.membershipService.addMembership(defaultMembership);
     }
 
+
+    @PreAuthorize("#principal.username.equals(ticketSystemService.getEmailByMembershipId(#id).toString())")
+    public void patchMembershipState(UUID id, State state) {
+        membershipService.patchMemberShipState(id, state);
+    }
+
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipService.getMembershipById(#id).projectId)) " +
             "or #principal.username.equals(ticketSystemService.getEmailByMembershipId(#id).toString())")
     public void deleteMembershipById(UUID id) {

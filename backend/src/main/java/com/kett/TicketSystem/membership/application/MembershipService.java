@@ -92,4 +92,10 @@ public class MembershipService {
 
         return projectMemberIds.containsAll(assigneeIds);
     }
+
+    public void patchMemberShipState(UUID id, State state) {
+        Membership existingMembership = getMembershipById(id);
+        existingMembership.setState(state);
+        membershipRepository.save(existingMembership);
+    }
 }
