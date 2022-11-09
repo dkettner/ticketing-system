@@ -62,14 +62,14 @@ public class TicketSystemService {
 
     // membership
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipService.getMembershipById(#id).projectId)) " +
-            "or #principal.username.equals(ticketSystemService.getEmailByMembershipId(#id).toString())")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getMembershipById(#id).projectId)) " +
+            "or #principal.username.equals(@ticketSystemService.getEmailByMembershipId(#id).toString())")
     public MembershipResponseDto getMemberShipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
-    @PreAuthorize("#userId.equals(#userService.getUserIdByEmail(#principal.username))")
+    @PreAuthorize("#userId.equals(@userService.getUserIdByEmail(#principal.username))")
     public List<MembershipResponseDto> getMembershipsByUserId(UUID userId) {
         List<Membership> memberships = membershipService.getMembershipsByUserId(userId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
@@ -115,13 +115,13 @@ public class TicketSystemService {
     }
 
 
-    @PreAuthorize("#principal.username.equals(ticketSystemService.getEmailByMembershipId(#id).toString())")
+    @PreAuthorize("#principal.username.equals(@ticketSystemService.getEmailByMembershipId(#id).toString())")
     public void patchMembershipState(UUID id, State state) {
         membershipService.patchMemberShipState(id, state);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipService.getMembershipById(#id).projectId)) " +
-            "or #principal.username.equals(ticketSystemService.getEmailByMembershipId(#id).toString())")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getMembershipById(#id).projectId)) " +
+            "or #principal.username.equals(@ticketSystemService.getEmailByMembershipId(#id).toString())")
     public void deleteMembershipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         this.removeUserFromAllTicketsOfProject(membership.getUserId(), membership.getProjectId());
@@ -133,8 +133,8 @@ public class TicketSystemService {
     // phase
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(#phaseService.getPhaseById(#id).projectId), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(#phaseService.getPhaseById(#id).projectId))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
     public PhaseResponseDto getPhaseById(UUID id) {
         Phase phase = phaseService.getPhaseById(id);
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
@@ -183,7 +183,7 @@ public class TicketSystemService {
         this.addPhase(toDo);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#phaseService.getPhaseById(#id).projectId))")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
     public void deletePhaseById(UUID id) {
         if (ticketService.hasTicketsWithPhaseId(id)) {
             throw new PhaseIsNotEmptyException("phase with id: " + id + " is not empty and can not be deleted");
@@ -244,21 +244,21 @@ public class TicketSystemService {
 
     // ticket
 
-    @PreAuthorize("#ticketService.getTicketById(#id).isAssignee(#userService.getUserIdByEmail(#principal.username))")
+    @PreAuthorize("@ticketService.getTicketById(#id).isAssignee(@userService.getUserIdByEmail(#principal.username))")
     public TicketResponseDto getTicketById(UUID id) {
         Ticket ticket = ticketService.getTicketById(id);
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(#phaseService.getPhaseById(#phaseId).projectId), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(#phaseService.getPhaseById(#phaseId).projectId))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#phaseId)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@phaseService.getProjectIdByPhaseId(#phaseId)))")
     public List<TicketResponseDto> getTicketsByPhaseId(UUID phaseId) {
         List<Ticket> tickets = ticketService.getTicketsByPhaseId(phaseId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
-    @PreAuthorize("#assigneeId.equals(#userService.getUserIdByEmail(principal.username))")
+    @PreAuthorize("#assigneeId.equals(@userService.getUserIdByEmail(principal.username))")
     public List<TicketResponseDto> getTicketsByAssigneeId(UUID assigneeId) {
         List<Ticket> tickets = ticketService.getTicketsByAssigneeId(assigneeId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);

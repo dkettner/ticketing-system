@@ -28,6 +28,10 @@ public class PhaseService {
                 .orElseThrow(() -> new NoPhaseFoundException("could not find phase with id: " + id));
     }
 
+    public UUID getProjectIdByPhaseId(UUID phaseId) {
+        return this.getPhaseById(phaseId).getProjectId();
+    }
+
     public List<Phase> getPhasesByProjectId(UUID projectId) {
         List<Phase> phases = phaseRepository.findByProjectId(projectId);
         if (phases.isEmpty()) {
