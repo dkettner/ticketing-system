@@ -70,20 +70,21 @@ public class TicketSystemService {
 
     // membership
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getMembershipById(#id).projectId)) " +
-            "or @ticketSystemService.getEmailByMembershipId(#id).toString().equals(principal.username)")
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
+            "'ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
     public MembershipResponseDto getMemberShipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
-    @PreAuthorize("#userId.equals(@userService.getUserIdByEmail(#principal.username))")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#userId))")
     public List<MembershipResponseDto> getMembershipsByUserId(UUID userId) {
         List<Membership> memberships = membershipService.getMembershipsByUserId(userId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
-    @PreAuthorize("#email.toString().equals(principal.username)")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userService.getUserIdByEmail(#email)))")
     public List<MembershipResponseDto> getMembershipsByEmail(EmailAddress email) {
         UUID userId = userService.getUserIdByEmail(email);
         return this.getMembershipsByUserId(userId);
@@ -115,13 +116,14 @@ public class TicketSystemService {
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
-    @PreAuthorize("#principal.username.equals(@ticketSystemService.getEmailByMembershipId(#id).toString())")
+    @PreAuthorize("hasAuthority('ROLE_USER'.concat(@membershipService.getUserIdByMembershipId(#id)))")
     public void patchMembershipState(UUID id, State state) {
         membershipService.patchMemberShipState(id, state);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getMembershipById(#id).projectId)) " +
-            "or @ticketSystemService.getEmailByMembershipId(#id).toString().equals(principal.username)")
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
+            "'ROLE_USER'.concat(@membershipService.getUserIdByMembershipId(#id)))")
     public void deleteMembershipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         this.removeUserFromAllTicketsOfProject(membership.getUserId(), membership.getProjectId());
@@ -289,7 +291,7 @@ public class TicketSystemService {
         if (!projectService.isExistentById(ticketPostDto.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + ticketPostDto.getProjectId());
         }
-        if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
+        if (!membershipService.areAllUsersProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
             throw new InvalidProjectMembersException(
                     "not all assignees are part of the project with id: " + ticketPostDto.getProjectId()
             );
