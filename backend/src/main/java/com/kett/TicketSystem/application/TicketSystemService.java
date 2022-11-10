@@ -244,7 +244,9 @@ public class TicketSystemService {
 
     // ticket
 
-    @PreAuthorize("@ticketService.getTicketById(#id).isAssignee(@userService.getUserIdByEmail(#principal.username))")
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
     public TicketResponseDto getTicketById(UUID id) {
         Ticket ticket = ticketService.getTicketById(id);
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
