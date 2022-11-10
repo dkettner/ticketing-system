@@ -60,6 +60,14 @@ public class TicketSystemService {
     }
 
 
+    // authentication
+
+    public String authenticateUser(AuthenticationPostDto authenticationPostDto) {
+        return authenticationService
+                .authenticateUser(authenticationPostDto.getEmail(), authenticationPostDto.getPassword());
+    }
+
+
     // membership
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getMembershipById(#id).projectId)) " +
@@ -107,14 +115,6 @@ public class TicketSystemService {
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
-    // TODO: too dirty, this bypasses some checks
-    private void addDefaultMembershipForProject(Project project, UUID postingUserId) {
-        Membership defaultMembership = new Membership(project.getId(), postingUserId, Role.ADMIN);
-        defaultMembership.setState(State.ACCEPTED);
-        this.membershipService.addMembership(defaultMembership);
-    }
-
-
     @PreAuthorize("#principal.username.equals(@ticketSystemService.getEmailByMembershipId(#id).toString())")
     public void patchMembershipState(UUID id, State state) {
         membershipService.patchMemberShipState(id, state);
@@ -127,6 +127,13 @@ public class TicketSystemService {
         this.removeUserFromAllTicketsOfProject(membership.getUserId(), membership.getProjectId());
 
         membershipService.deleteMembershipById(id);
+    }
+
+    // TODO: too dirty, this bypasses some checks
+    private void addDefaultMembershipForProject(Project project, UUID postingUserId) {
+        Membership defaultMembership = new Membership(project.getId(), postingUserId, Role.ADMIN);
+        defaultMembership.setState(State.ACCEPTED);
+        this.membershipService.addMembership(defaultMembership);
     }
 
 
@@ -341,13 +348,5 @@ public class TicketSystemService {
     public EmailAddress getEmailByMembershipId(UUID membershipId) {
         UUID userId = membershipService.getMembershipById(membershipId).getUserId();
         return userService.getUserById(userId).getEmail();
-    }
-
-
-    // authentication
-
-    public String authenticateUser(AuthenticationPostDto authenticationPostDto) {
-        return authenticationService
-                .authenticateUser(authenticationPostDto.getEmail(), authenticationPostDto.getPassword());
     }
 }
