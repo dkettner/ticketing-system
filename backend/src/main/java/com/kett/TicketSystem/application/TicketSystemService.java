@@ -63,7 +63,7 @@ public class TicketSystemService {
     // membership
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getMembershipById(#id).projectId)) " +
-            "or #principal.username.equals(@ticketSystemService.getEmailByMembershipId(#id).toString())")
+            "or @ticketSystemService.getEmailByMembershipId(#id).toString().equals(principal.username)")
     public MembershipResponseDto getMemberShipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
@@ -121,7 +121,7 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getMembershipById(#id).projectId)) " +
-            "or #principal.username.equals(@ticketSystemService.getEmailByMembershipId(#id).toString())")
+            "or @ticketSystemService.getEmailByMembershipId(#id).toString().equals(principal.username)")
     public void deleteMembershipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         this.removeUserFromAllTicketsOfProject(membership.getUserId(), membership.getProjectId());
