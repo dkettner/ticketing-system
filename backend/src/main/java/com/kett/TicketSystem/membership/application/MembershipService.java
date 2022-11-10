@@ -88,7 +88,7 @@ public class MembershipService {
     }
 
     // TODO: Write query in repository for this?
-    public Boolean allUsersAreProjectMembers(List<UUID> assigneeIds, UUID projectId) {
+    public Boolean areAllUsersProjectMembers(List<UUID> assigneeIds, UUID projectId) {
         HashSet<UUID> projectMemberIds =
                 membershipRepository
                         .findByProjectId(projectId)
