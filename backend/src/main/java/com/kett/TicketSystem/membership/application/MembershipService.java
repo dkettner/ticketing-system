@@ -100,8 +100,8 @@ public class MembershipService {
         return projectMemberIds.containsAll(assigneeIds);
     }
 
-    public void patchMemberShipState(UUID id, State state) {
-        Membership existingMembership = getMembershipById(id);
+    public void patchMemberShipState(UUID id, State state) throws NoMembershipFoundException {
+        Membership existingMembership = this.getMembershipById(id);
         existingMembership.setState(state);
         membershipRepository.save(existingMembership);
     }
