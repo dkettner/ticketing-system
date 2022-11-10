@@ -66,12 +66,19 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = this.getUserByEMailAddress(EmailAddress.fromString(email));
-        List<GrantedAuthority> grantedAuthorities = membershipService.getAuthoritiesByUserId(user.getId());
+        List<GrantedAuthority> grantedAuthorities = this.getAllUserAuthoritiesByUserId(user.getId());
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail().toString(),
                 user.getPassword(),
                 grantedAuthorities
         );
+    }
+
+    private List<GrantedAuthority> getAllUserAuthoritiesByUserId(UUID id) {
+        List<GrantedAuthority> grantedAuthorities = membershipService.getProjectAuthoritiesByUserId(id);
+        grantedAuthorities.add( (GrantedAuthority) () -> "ROLE_" + "USER_" + id );
+
+        return grantedAuthorities;
     }
 }
