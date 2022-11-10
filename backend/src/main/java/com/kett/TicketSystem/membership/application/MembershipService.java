@@ -31,7 +31,7 @@ public class MembershipService {
     }
 
     // TODO: Throw exception when empty or just return empty list?
-    public List<Membership> getMembershipsByUserId(UUID userId) {
+    public List<Membership> getMembershipsByUserId(UUID userId) throws NoMembershipFoundException {
         List<Membership> memberships =  membershipRepository.findByUserId(userId);
         if (memberships.isEmpty()) {
             throw new NoMembershipFoundException("could not find memberships with userId: " + userId);
@@ -47,7 +47,7 @@ public class MembershipService {
                 .toList();
     }
 
-    public List<Membership> getMembershipsByProjectId(UUID projectId) {
+    public List<Membership> getMembershipsByProjectId(UUID projectId) throws NoMembershipFoundException {
         List<Membership> memberships =  membershipRepository.findByProjectId(projectId);
         if (memberships.isEmpty()) {
             throw new NoMembershipFoundException("could not find memberships with projectId: " + projectId);
@@ -63,7 +63,7 @@ public class MembershipService {
         return this.getMembershipById(id).getProjectId();
     }
 
-    public Membership addMembership(Membership membership) {
+    public Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
         if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
             throw new MembershipAlreadyExistsException(
                     "membership for userId: " + membership.getUserId() +
@@ -74,7 +74,7 @@ public class MembershipService {
         return membershipRepository.save(membership);
     }
 
-    public void deleteMembershipById(UUID id) {
+    public void deleteMembershipById(UUID id) throws NoMembershipFoundException {
         Long numOfDeletedMemberships = membershipRepository.removeById(id);
 
         if (numOfDeletedMemberships == 0) {
