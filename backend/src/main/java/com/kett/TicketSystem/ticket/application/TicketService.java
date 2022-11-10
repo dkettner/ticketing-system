@@ -52,7 +52,7 @@ public class TicketService {
         return ticketRepository.findByPhaseIdInAndAssigneeIdsContaining(phaseIds, assigneeId);
     }
 
-    public UUID getProjectIdByTicketId(UUID ticketId) {
+    public UUID getProjectIdByTicketId(UUID ticketId) throws NoTicketFoundException {
         return this.getTicketById(ticketId).getProjectId();
     }
 
