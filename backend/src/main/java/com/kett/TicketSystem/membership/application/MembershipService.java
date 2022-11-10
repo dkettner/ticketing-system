@@ -55,11 +55,11 @@ public class MembershipService {
         return memberships;
     }
 
-    public UUID getUserIdByMembershipId(UUID id) {
+    public UUID getUserIdByMembershipId(UUID id) throws NoMembershipFoundException {
         return this.getMembershipById(id).getUserId();
     }
 
-    public UUID getProjectIdByMembershipId(UUID id) {
+    public UUID getProjectIdByMembershipId(UUID id) throws NoMembershipFoundException {
         return this.getMembershipById(id).getProjectId();
     }
 
