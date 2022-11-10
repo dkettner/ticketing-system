@@ -36,6 +36,10 @@ public class Ticket {
     private LocalDateTime dueTime;
 
     @Getter
+    @Setter(AccessLevel.PROTECTED)
+    private UUID projectId;
+
+    @Getter
     @Setter
     @Column(length = 16)
     private UUID phaseId;
@@ -60,11 +64,14 @@ public class Ticket {
         return this.assigneeIds.contains(assigneeId);
     }
 
-    public Ticket(String title, String description, LocalDateTime dueTime, UUID phaseId, List<UUID> assigneeIds) {
+    public Ticket(String title, String description, LocalDateTime dueTime, UUID projectId, UUID phaseId, List<UUID> assigneeIds) {
         if (title == null || title.isEmpty()) {
             throw new TicketException("title must not be null or empty");
         }
         if (phaseId == null) {
+            throw new TicketException("phaseId must not be null");
+        }
+        if (projectId == null) {
             throw new TicketException("phaseId must not be null");
         }
         if (assigneeIds == null) {
@@ -76,6 +83,7 @@ public class Ticket {
         this.creationTime = LocalDateTime.now();
         this.setDueTime(dueTime);
         this.phaseId = phaseId;
+        this.projectId = projectId;
         this.assigneeIds.addAll(assigneeIds);
     }
 }
