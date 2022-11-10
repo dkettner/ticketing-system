@@ -203,7 +203,9 @@ public class TicketSystemService {
 
     // project
 
-    @PreAuthorize("hasAnyAuthority('ROLE_PROJECT_ADMIN_'.concat(#id), 'ROLE_PROJECT_MEMBER_'.concat(#id))")
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(#id), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(#id))")
     public ProjectResponseDto fetchProjectById(UUID id) {
         Project project = projectService.getProjectById(id);
         return dtoMapper.mapProjectToProjectResponseDto(project);
