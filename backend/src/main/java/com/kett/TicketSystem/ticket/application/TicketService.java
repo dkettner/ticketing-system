@@ -18,13 +18,13 @@ public class TicketService {
         this.ticketRepository = ticketRepository;
     }
 
-    public Ticket getTicketById(UUID id) {
+    public Ticket getTicketById(UUID id) throws NoTicketFoundException {
         return ticketRepository
                 .findById(id)
                 .orElseThrow(() -> new NoTicketFoundException("could not find ticket with id: " + id));
     }
 
-    public List<Ticket> getTicketsByPhaseId(UUID phaseId) {
+    public List<Ticket> getTicketsByPhaseId(UUID phaseId) throws NoTicketFoundException {
         List<Ticket> tickets = ticketRepository.findByPhaseId(phaseId);
         if (tickets.isEmpty()) {
             throw new NoTicketFoundException("could not find tickets with phaseId: " + phaseId);
@@ -32,7 +32,7 @@ public class TicketService {
         return tickets;
     }
 
-    public List<Ticket> getTicketsByProjectId(UUID projectId) {
+    public List<Ticket> getTicketsByProjectId(UUID projectId) throws NoTicketFoundException {
         List<Ticket> tickets = ticketRepository.findByProjectId(projectId);
         if (tickets.isEmpty()) {
             throw new NoTicketFoundException("could not find tickets with projectId: " + projectId);
@@ -40,7 +40,7 @@ public class TicketService {
         return tickets;
     }
 
-    public List<Ticket> getTicketsByAssigneeId(UUID assigneeId) {
+    public List<Ticket> getTicketsByAssigneeId(UUID assigneeId) throws NoTicketFoundException {
         List<Ticket> tickets = ticketRepository.findByAssigneeIdsContaining(assigneeId);
         if (tickets.isEmpty()) {
             throw new NoTicketFoundException("could not find tickets with assigneeId: " + assigneeId);
