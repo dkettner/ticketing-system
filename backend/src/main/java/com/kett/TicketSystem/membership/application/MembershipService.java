@@ -40,7 +40,7 @@ public class MembershipService {
         return memberships;
     }
 
-    public List<GrantedAuthority> getAuthoritiesByUserId(UUID userId) {
+    public List<GrantedAuthority> getProjectAuthoritiesByUserId(UUID userId) {
         return membershipRepository
                 .findByUserIdAndStateEquals(userId, State.ACCEPTED)
                 .stream()
