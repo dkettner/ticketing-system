@@ -272,7 +272,7 @@ public class TicketSystemService {
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
-    @PreAuthorize("#assigneeId.equals(@userService.getUserIdByEmail(principal.username))")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#assigneeId))")
     public List<TicketResponseDto> getTicketsByAssigneeId(UUID assigneeId) {
         List<Ticket> tickets = ticketService.getTicketsByAssigneeId(assigneeId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
