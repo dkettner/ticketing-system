@@ -52,6 +52,10 @@ public class TicketService {
         return ticketRepository.findByPhaseIdInAndAssigneeIdsContaining(phaseIds, assigneeId);
     }
 
+    public UUID getProjectIdByTicketId(UUID ticketId) {
+        return this.getTicketById(ticketId).getProjectId();
+    }
+
     public boolean hasTicketsWithPhaseId(UUID phaseId) {
         return ticketRepository.existsByPhaseIdEquals(phaseId);
     }
