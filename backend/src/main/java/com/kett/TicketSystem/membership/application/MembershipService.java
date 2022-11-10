@@ -56,6 +56,10 @@ public class MembershipService {
         return memberships;
     }
 
+    public UUID getUserIdByMembershipId(UUID id) {
+        return this.getMembershipById(id).getUserId();
+    }
+
     public Membership addMembership(Membership membership) {
         if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
             throw new MembershipAlreadyExistsException(
