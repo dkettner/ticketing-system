@@ -346,9 +346,4 @@ public class TicketSystemService {
 
         return dtoMapper.mapUserToUserResponseDto(user);
     }
-
-    public EmailAddress getEmailByMembershipId(UUID membershipId) {
-        UUID userId = membershipService.getMembershipById(membershipId).getUserId();
-        return userService.getUserById(userId).getEmail();
-    }
 }
