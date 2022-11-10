@@ -27,7 +27,7 @@ public class TicketService {
     public List<Ticket> getTicketsByPhaseId(UUID phaseId) {
         List<Ticket> tickets = ticketRepository.findByPhaseId(phaseId);
         if (tickets.isEmpty()) {
-            throw new NoTicketFoundException("could not find tickets with phasId: " + phaseId);
+            throw new NoTicketFoundException("could not find tickets with phaseId: " + phaseId);
         }
         return tickets;
     }
