@@ -32,6 +32,14 @@ public class TicketService {
         return tickets;
     }
 
+    public List<Ticket> getTicketsByProjectId(UUID projectId) {
+        List<Ticket> tickets = ticketRepository.findByProjectId(projectId);
+        if (tickets.isEmpty()) {
+            throw new NoTicketFoundException("could not find tickets with projectId: " + projectId);
+        }
+        return tickets;
+    }
+
     public List<Ticket> getTicketsByAssigneeId(UUID assigneeId) {
         List<Ticket> tickets = ticketRepository.findByAssigneeIdsContaining(assigneeId);
         if (tickets.isEmpty()) {
