@@ -18,5 +18,6 @@ public class TicketResponseDto {
     private LocalDateTime creationTime;
     private LocalDateTime dueTime;
     private UUID phaseId;
+    private UUID projectId;
     private List<UUID> assigneeIds = new ArrayList<>();
 }

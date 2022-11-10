@@ -57,6 +57,7 @@ public class DtoMapper {
             mapper.map(Ticket::getCreationTime, TicketResponseDto::setCreationTime);
             mapper.map(Ticket::getDueTime, TicketResponseDto::setDueTime);
             mapper.map(Ticket::getPhaseId, TicketResponseDto:: setPhaseId);
+            mapper.map(Ticket::getProjectId, TicketResponseDto::setProjectId);
             mapper.map(Ticket::getAssigneeIds, TicketResponseDto::setAssigneeIds);
         });
         modelMapper.typeMap(User.class, UserResponseDto.class).addMappings(mapper -> {
@@ -142,6 +143,7 @@ public class DtoMapper {
                 ticketPostDto.getDescription(),
                 ticketPostDto.getDueTime(),
                 phaseId,
+                ticketPostDto.getProjectId(),
                 ticketPostDto.getAssigneeIds()
         );
     }
