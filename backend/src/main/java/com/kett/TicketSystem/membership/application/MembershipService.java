@@ -6,7 +6,6 @@ import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExist
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.application.exceptions.ImpossibleException;
-import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
@@ -25,10 +24,10 @@ public class MembershipService {
         this.membershipRepository = membershipRepository;
     }
 
-    public Membership getMembershipById(UUID id) throws NoProjectFoundException {
+    public Membership getMembershipById(UUID id) throws NoMembershipFoundException {
         return membershipRepository
                 .findById(id)
-                .orElseThrow(() -> new NoProjectFoundException("could not find membership with id: " + id));
+                .orElseThrow(() -> new NoMembershipFoundException("could not find membership with id: " + id));
     }
 
     // TODO: Throw exception when empty or just return empty list?
