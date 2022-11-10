@@ -40,8 +40,10 @@ public class TicketController {
     @GetMapping
     public ResponseEntity<List<TicketResponseDto>> getTicketsByQuery(
             @RequestParam(name = "phase-id", required = false) UUID phaseId,
-            @RequestParam(name = "assignee-id", required = false) UUID assigneeId
+            @RequestParam(name = "assignee-id", required = false) UUID assigneeId,
+            @RequestParam(name = "project-id", required = false) UUID projectId
     ) {
+        // TODO: use proper check for too many parameters with map
         if (phaseId != null && assigneeId != null) {
             throw new TooManyParametersException("cannot query by more than one parameter yet");
         }
@@ -51,6 +53,8 @@ public class TicketController {
             ticketResponseDtos = ticketSystemService.getTicketsByPhaseId(phaseId);
         } else if (assigneeId != null) {
             ticketResponseDtos = ticketSystemService.getTicketsByAssigneeId(assigneeId);
+        } else if (projectId != null) {
+            ticketResponseDtos = ticketSystemService.getTicketsByProjectId(projectId);
         } else {
             throw new NoParametersException("cannot query if no parameters are specified");
         }

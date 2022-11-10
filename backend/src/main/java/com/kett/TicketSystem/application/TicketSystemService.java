@@ -265,6 +265,14 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
+    public List<TicketResponseDto> getTicketsByProjectId(UUID projectId) {
+        List<Ticket> tickets = ticketService.getTicketsByProjectId(projectId);
+        return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
+    }
+
+    @PreAuthorize("hasAnyAuthority(" +
             "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto) {
