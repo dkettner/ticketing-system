@@ -8,6 +8,8 @@
       <RouterLink to="/signin">Come back to safety</RouterLink>
     </nav>
     <br>
-    <img src="../assets/bonjour.png" alt="bonjour" width="500" height="500">    
+    <div style="font-size:25vw;">
+      4<img src="../assets/bonjour.png" alt="bonjour" style="height:1.6ex; display:inline-block">4
+    </div>   
   </div>
 </template>
