@@ -3,6 +3,7 @@ package com.kett.TicketSystem.phase.application;
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
+import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,12 @@ public class PhaseController {
     @PatchMapping("/{id}/name")
     public ResponseEntity<?> patchPhaseName(@PathVariable UUID id, @RequestBody PhasePatchNameDto phasePatchNameDto) {
         ticketSystemService.patchPhaseName(id, phasePatchNameDto);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/{id}/position")
+    public ResponseEntity<?> patchPhasePosition(@PathVariable UUID id, @RequestBody PhasePatchPositionDto phasePatchPositionDto) {
+        ticketSystemService.patchPhasePosition(id, phasePatchPositionDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

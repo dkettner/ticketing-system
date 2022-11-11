@@ -103,11 +103,11 @@ public class DtoMapper {
                 .toList();
     }
 
-    public Phase mapPhasePostDtoToPhase(PhasePostDto phasePostDto, Phase previousPhase) {
+    public Phase mapPhasePostDtoToPhase(PhasePostDto phasePostDto) {
         return new Phase(
                 phasePostDto.getProjectId(),
                 phasePostDto.getName(),
-                previousPhase,
+                null,
                 null
         );
     }

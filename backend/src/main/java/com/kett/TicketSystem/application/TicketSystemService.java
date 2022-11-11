@@ -14,6 +14,7 @@ import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
+import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
@@ -176,14 +177,8 @@ public class TicketSystemService {
             throw new NoProjectFoundException("could not find project with id: " + projectId);
         }
 
-        UUID previousPhaseId = phasePostDto.getPreviousPhaseId();
-        Phase previousPhase = null;
-        if (previousPhaseId != null) {
-            previousPhase = phaseService.getPhaseById(phasePostDto.getPreviousPhaseId());
-        }
-
         Phase phase = phaseService.addPhase(
-                dtoMapper.mapPhasePostDtoToPhase(phasePostDto, previousPhase)
+                dtoMapper.mapPhasePostDtoToPhase(phasePostDto), phasePostDto.getPreviousPhaseId()
         );
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
@@ -204,6 +199,11 @@ public class TicketSystemService {
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
     public void patchPhaseName(UUID id, PhasePatchNameDto phasePatchNameDto) {
         phaseService.patchPhaseName(id, phasePatchNameDto.getName());
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+    public void patchPhasePosition(UUID id, PhasePatchPositionDto phasePatchPositionDto) {
+        phaseService.patchPhasePosition(id, phasePatchPositionDto.getPreviousPhase());
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")

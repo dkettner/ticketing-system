@@ -41,9 +41,17 @@ public class PhaseService {
         return phases;
     }
 
-    public Phase addPhase(Phase phase) throws UnrelatedPhaseException {
+    public Optional<Phase> getFirstPhaseByProjectId(UUID projectId) {
+        return phaseRepository.findByProjectIdAndPreviousPhaseIsNull(projectId);
+    }
+
+    public Phase addPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException {
+        Phase previousPhase = null;
+        if (previousPhaseId != null) {
+            previousPhase = this.getPhaseById(previousPhaseId);
+        }
+
         UUID projectId = phase.getProjectId();
-        Phase previousPhase = phase.getPreviousPhase();
         if (previousPhase != null && !previousPhase.getProjectId().equals(projectId)) {
             throw new UnrelatedPhaseException(
                     "previous phase with id: " + previousPhase.getId() +
@@ -56,10 +64,6 @@ public class PhaseService {
         } else {
             return addAfterPrevious(phase, previousPhase);
         }
-    }
-
-    public Optional<Phase> getFirstPhaseByProjectId(UUID projectId) {
-        return phaseRepository.findByProjectIdAndPreviousPhaseIsNull(projectId);
     }
 
     private Phase addFirst(Phase phase) {
@@ -98,9 +102,32 @@ public class PhaseService {
         phaseRepository.save(phase);
     }
 
+    public void patchPhasePosition(UUID id, UUID previousPhaseId) throws PhaseException, NoPhaseFoundException {
+        Phase phase = this.getPhaseById(id);
+        this.removePhaseFromCurrentPosition(phase);
+        this.addPhase(phase, previousPhaseId);
+    }
+
+    private void removePhaseFromCurrentPosition(Phase phase) {
+        Phase previousPhase = phase.getPreviousPhase();
+        Phase nextPhase = phase.getNextPhase();
+
+        if (previousPhase != null) {
+            previousPhase.setNextPhase(nextPhase);
+            phaseRepository.save(previousPhase);
+            phase.setPreviousPhase(null);
+        }
+        if (nextPhase != null) {
+            nextPhase.setPreviousPhase(previousPhase);
+            phaseRepository.save(nextPhase);
+            phase.setNextPhase(null);
+        }
+
+        phaseRepository.save(phase);
+    }
+
     public void deleteById(UUID id) throws NoPhaseFoundException, LastPhaseException {
         Phase phase = this.getPhaseById(id);
-
         if (phase.isFirst() && phase.isLast()) {
             throw new LastPhaseException(
                     "could not delete phase with id: " + id + " " +
@@ -108,17 +135,7 @@ public class PhaseService {
             );
         }
 
-        Phase previousPhase = phase.getPreviousPhase();
-        Phase nextPhase = phase.getNextPhase();
-
-        if (previousPhase != null) {
-            previousPhase.setNextPhase(nextPhase);
-            phaseRepository.save(previousPhase);
-        }
-        if (nextPhase != null) {
-            nextPhase.setPreviousPhase(previousPhase);
-            phaseRepository.save(nextPhase);
-        }
+        this.removePhaseFromCurrentPosition(phase);
 
         Long numOfDeletedPhases = phaseRepository.removeById(id);
         if (numOfDeletedPhases == 0) {
