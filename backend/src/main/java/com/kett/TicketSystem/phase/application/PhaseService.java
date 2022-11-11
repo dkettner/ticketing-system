@@ -22,7 +22,7 @@ public class PhaseService {
         this.phaseRepository = phaseRepository;
     }
 
-    public Phase getPhaseById(UUID id) {
+    public Phase getPhaseById(UUID id) throws NoPhaseFoundException {
         return phaseRepository
                 .findById(id)
                 .orElseThrow(() -> new NoPhaseFoundException("could not find phase with id: " + id));
@@ -91,13 +91,22 @@ public class PhaseService {
         return phaseRepository.save(phase);
     }
 
+    public void patchPhaseName(UUID id, String name) {
+        Phase phase = this.getPhaseById(id);
+        if (name != null) {
+            phase.setName(name);
+        }
+        phaseRepository.save(phase);
+    }
+
     public void deleteById(UUID id) throws NoPhaseFoundException, LastPhaseException {
-        Phase phase = phaseRepository
-                .findById(id)
-                .orElseThrow(() -> new NoPhaseFoundException("could not delete because there was no phase with id: " + id));
+        Phase phase = this.getPhaseById(id);
 
         if (phase.isFirst() && phase.isLast()) {
-            throw new LastPhaseException("could not delete phase with id: " + id + " because it is the last phase of its project");
+            throw new LastPhaseException(
+                    "could not delete phase with id: " + id + " " +
+                    "because it is the last phase of the project with id: " + phase.getProjectId()
+            );
         }
 
         Phase previousPhase = phase.getPreviousPhase();

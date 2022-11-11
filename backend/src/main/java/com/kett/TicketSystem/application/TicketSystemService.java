@@ -13,6 +13,7 @@ import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
+import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
@@ -197,6 +198,12 @@ public class TicketSystemService {
         this.addPhase(review);
         this.addPhase(doing);
         this.addPhase(toDo);
+    }
+
+
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+    public void patchPhaseName(UUID id, PhasePatchNameDto phasePatchNameDto) {
+        phaseService.patchPhaseName(id, phasePatchNameDto.getName());
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
