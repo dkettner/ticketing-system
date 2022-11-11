@@ -3,6 +3,7 @@ package com.kett.TicketSystem.phase.application;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
+import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import com.kett.TicketSystem.application.exceptions.ImpossibleException;
@@ -91,11 +92,9 @@ public class PhaseService {
         return phaseRepository.save(phase);
     }
 
-    public void patchPhaseName(UUID id, String name) {
+    public void patchPhaseName(UUID id, String name) throws PhaseException, NoPhaseFoundException {
         Phase phase = this.getPhaseById(id);
-        if (name != null) {
-            phase.setName(name);
-        }
+        phase.setName(name);
         phaseRepository.save(phase);
     }
 
