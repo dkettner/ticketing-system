@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.membership.application;
 
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
@@ -103,6 +104,12 @@ public class MembershipService {
     public void patchMemberShipState(UUID id, State state) throws NoMembershipFoundException {
         Membership existingMembership = this.getMembershipById(id);
         existingMembership.setState(state);
+        membershipRepository.save(existingMembership);
+    }
+
+    public void patchMembershipRole(UUID id, Role role) throws NoMembershipFoundException {
+        Membership existingMembership = this.getMembershipById(id);
+        existingMembership.setRole(role);
         membershipRepository.save(existingMembership);
     }
 }

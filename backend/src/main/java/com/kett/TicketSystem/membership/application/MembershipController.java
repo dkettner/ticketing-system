@@ -4,6 +4,7 @@ import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.membership.application.dto.MembershipPatchRoleDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
@@ -82,6 +83,12 @@ public class MembershipController {
     @PatchMapping("/{id}/state")
     public ResponseEntity<?> patchMemberShipState(@PathVariable UUID id, @RequestBody MembershipPatchStateDto membershipPatchStateDto) {
         ticketSystemService.patchMembershipState(id, membershipPatchStateDto);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<?> patchMemberShipRole(@PathVariable UUID id, @RequestBody MembershipPatchRoleDto membershipPatchRoleDto) {
+        ticketSystemService.patchMembershipRole(id, membershipPatchRoleDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
