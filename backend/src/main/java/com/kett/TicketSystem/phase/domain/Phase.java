@@ -18,12 +18,10 @@ public class Phase {
     private UUID id;
 
     @Getter
-    @Setter(AccessLevel.PROTECTED)
     @Column(length = 16)
     private UUID projectId;
 
     @Getter
-    @Setter
     private String name;
 
     @Getter
@@ -36,6 +34,20 @@ public class Phase {
     @OneToOne(fetch = FetchType.LAZY)
     private Phase nextPhase;
 
+    protected void setProjectId(UUID projectId) {
+        if (projectId == null) {
+            throw new PhaseException("projectId must not be null");
+        }
+        this.projectId = projectId;
+    }
+
+    public void setName(String name) {
+        if (name == null || name.isEmpty()) {
+            throw new PhaseException("name must not be null or empty");
+        }
+        this.name = name;
+    }
+
     public Boolean isFirst() {
         return previousPhase == null;
     }
@@ -45,16 +57,9 @@ public class Phase {
     }
 
     public Phase(UUID projectId, String name, Phase previousPhase, Phase nextPhase) {
-        if (projectId == null) {
-            throw new PhaseException("projectId must not be null");
-        }
-        if (name == null) {
-            throw new PhaseException("name must not be null");
-        }
-
-        this.projectId = projectId;
-        this.name = name;
-        this.previousPhase = previousPhase;
-        this.nextPhase = nextPhase;
+        this.setProjectId(projectId);
+        this.setName(name);
+        this.setPreviousPhase(previousPhase);
+        this.setNextPhase(nextPhase);
     }
 }
