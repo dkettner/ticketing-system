@@ -5,6 +5,7 @@ import com.kett.TicketSystem.authentication.AuthenticationService;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
+import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
@@ -117,8 +118,8 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER'.concat(@membershipService.getUserIdByMembershipId(#id)))")
-    public void patchMembershipState(UUID id, State state) {
-        membershipService.patchMemberShipState(id, state);
+    public void patchMembershipState(UUID id, MembershipPatchStateDto membershipPatchStateDto) {
+        membershipService.patchMemberShipState(id, membershipPatchStateDto.getState());
     }
 
     @PreAuthorize("hasAnyAuthority(" +

@@ -4,9 +4,9 @@ import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
-import com.kett.TicketSystem.membership.domain.State;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -80,8 +80,8 @@ public class MembershipController {
     }
 
     @PatchMapping("/{id}/state")
-    public ResponseEntity<?> patchMemberShipState(@PathVariable UUID id, @RequestBody State state) {
-        ticketSystemService.patchMembershipState(id, state);
+    public ResponseEntity<?> patchMemberShipState(@PathVariable UUID id, @RequestBody MembershipPatchStateDto membershipPatchStateDto) {
+        ticketSystemService.patchMembershipState(id, membershipPatchStateDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
