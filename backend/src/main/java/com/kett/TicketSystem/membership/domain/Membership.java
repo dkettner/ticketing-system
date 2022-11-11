@@ -20,12 +20,10 @@ public class Membership implements GrantedAuthority {
     private UUID id;
 
     @Getter
-    @Setter(AccessLevel.PROTECTED)
     @Column(length = 16)
     private UUID projectId;
 
     @Getter
-    @Setter(AccessLevel.PROTECTED)
     @Column(length = 16)
     private UUID userId;
 
@@ -39,6 +37,20 @@ public class Membership implements GrantedAuthority {
 
     public Boolean isAccepted() {
         return this.state.equals(State.ACCEPTED);
+    }
+
+    protected void setProjectId(UUID projectId) {
+        if (projectId == null) {
+            throw new MembershipException("projectId cannot be null");
+        }
+        this.projectId = projectId;
+    }
+
+    protected void setUserId(UUID userId) {
+        if (userId == null) {
+            throw new MembershipException("userId cannot be null");
+        }
+        this.userId = userId;
     }
 
     public void setState(State state) {
@@ -60,7 +72,6 @@ public class Membership implements GrantedAuthority {
         if (role == null) {
             throw new MembershipException("role cannot be null");
         }
-
         this.role = role;
     }
 
@@ -73,16 +84,9 @@ public class Membership implements GrantedAuthority {
     }
 
     public Membership(UUID projectId, UUID userId, Role role) {
-        if (projectId == null) {
-            throw new MembershipException("projectId cannot be null");
-        }
-        if (userId == null) {
-            throw new MembershipException("userId cannot be null");
-        }
-
-        this.projectId = projectId;
-        this.userId = userId;
+        this.setProjectId(projectId);
+        this.setUserId(userId);
         this.setRole(role);
-        this.state = State.OPEN;
+        this.setState(State.OPEN);
     }
 }
