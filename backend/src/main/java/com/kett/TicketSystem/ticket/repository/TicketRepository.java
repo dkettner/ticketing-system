@@ -13,5 +13,8 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     List<Ticket> findByProjectId(UUID projectId);
     List<Ticket> findByAssigneeIdsContaining(UUID assigneeId);
     List<Ticket> findByPhaseIdInAndAssigneeIdsContaining(List<UUID> phaseIds, UUID assigneeId);
+
     Boolean existsByPhaseIdEquals(UUID phaseId);
+
+    void deleteByProjectId(UUID projectId);
 }

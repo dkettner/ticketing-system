@@ -67,4 +67,8 @@ public class TicketService {
     public void saveAll(List<Ticket> tickets) {
         ticketRepository.saveAll(tickets);
     }
+
+    public void deleteTicketsByProjectId(UUID projectId) {
+        ticketRepository.deleteByProjectId(projectId);
+    }
 }
