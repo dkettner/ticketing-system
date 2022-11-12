@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.ticket.application;
 
+import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
@@ -109,6 +110,19 @@ public class TicketService {
 
 
     // delete
+
+    public void deleteTicketById(UUID id) throws NoTicketFoundException {
+        Long numOfDeletedTickets = ticketRepository.removeById(id);
+
+        if (numOfDeletedTickets == 0) {
+            throw new NoTicketFoundException("could not delete because there was no ticket with id: " + id);
+        } else if (numOfDeletedTickets > 1) {
+            throw new ImpossibleException(
+                    "!!! This should not happen. " +
+                    "Multiple tickets were deleted when deleting tickets with id: " + id
+            );
+        }
+    }
 
     public void deleteTicketsByProjectId(UUID projectId) {
         ticketRepository.deleteByProjectId(projectId);

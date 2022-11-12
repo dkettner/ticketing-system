@@ -17,4 +17,6 @@ public interface TicketRepository extends JpaRepository<Ticket, UUID> {
     Boolean existsByPhaseIdEquals(UUID phaseId);
 
     void deleteByProjectId(UUID projectId);
+
+    Long removeById(UUID id);
 }

@@ -79,4 +79,10 @@ public class TicketController {
         ticketSystemService.patchTicketById(id, ticketPatchDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteTicketById(@PathVariable UUID id) {
+        ticketSystemService.deleteTicketById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }

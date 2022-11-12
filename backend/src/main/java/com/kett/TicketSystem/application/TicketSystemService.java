@@ -363,6 +363,13 @@ public class TicketSystemService {
         );
     }
 
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
+    public void deleteTicketById(UUID id) {
+        ticketService.deleteTicketById(id);
+    }
+
     private void removeUserFromAllTicketsOfProject(UUID userId, UUID projectId) {
         List<UUID> projectPhaseIds =
                 phaseService
