@@ -18,6 +18,15 @@ public class ProjectService {
         this.projectRepository = projectRepository;
     }
 
+
+    // create
+    public Project addProject(Project project) {
+        return projectRepository.save(project);
+    }
+
+
+    // read
+
     public Project getProjectById(UUID id) throws NoProjectFoundException {
         return projectRepository
                 .findById(id)
@@ -28,9 +37,22 @@ public class ProjectService {
         return projectRepository.existsById(id);
     }
 
-    public Project addProject(Project project) {
-        return projectRepository.save(project);
+
+    // update
+
+    public void patchProjectById(UUID id, String newName, String newDescription) {
+        Project existingProject = getProjectById(id);
+        if (newName != null) {
+            existingProject.setName(newName);
+        }
+        if (newDescription != null) {
+            existingProject.setDescription(newDescription);
+        }
+        projectRepository.save(existingProject);
     }
+
+
+    // delete
 
     public void deleteProjectById(UUID id) {
         Long numOfDeletedProjects = projectRepository.removeById(id);
@@ -43,17 +65,5 @@ public class ProjectService {
                     "Multiple projects were deleted when deleting project with id: " + id
             );
         }
-    }
-
-    // TODO: clean this up
-    public void patchProjectById(UUID id, String newName, String newDescription) {
-        Project existingProject = getProjectById(id);
-        if (newName != null) {
-            existingProject.setName(newName);
-        }
-        if (newDescription != null) {
-            existingProject.setDescription(newDescription);
-        }
-        projectRepository.save(existingProject);
     }
 }
