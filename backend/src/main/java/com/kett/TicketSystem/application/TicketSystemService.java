@@ -243,10 +243,10 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")
     public void deleteProjectById(UUID id) {
-        throw new UnsupportedOperationException();
-
-        // TODO: Also delete Tickets, Phases, Memberships!
-        //projectService.deleteProjectById(id);
+        projectService.deleteProjectById(id);
+        phaseService.deletePhasesByProjectId(id);
+        ticketService.deleteTicketsByProjectId(id);
+        membershipService.deleteMembershipsByProjectId(id);
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")
