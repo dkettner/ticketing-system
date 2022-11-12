@@ -11,7 +11,9 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     List<Membership> findByUserId(UUID userId);
     List<Membership> findByProjectId(UUID projectId);
     List<Membership> findByUserIdAndStateEquals(UUID projectId, State state);
-    Long removeById(UUID id);
 
     Boolean existsByUserIdAndProjectId(UUID userId, UUID projectId);
+
+    Long removeById(UUID id);
+    void deleteByProjectId(UUID projectId);
 }

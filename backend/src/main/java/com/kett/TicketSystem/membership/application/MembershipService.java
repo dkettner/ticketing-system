@@ -112,4 +112,8 @@ public class MembershipService {
         existingMembership.setRole(role);
         membershipRepository.save(existingMembership);
     }
+
+    public void deleteMembershipsByProjectId(UUID projectId) {
+        membershipRepository.deleteByProjectId(projectId);
+    }
 }
