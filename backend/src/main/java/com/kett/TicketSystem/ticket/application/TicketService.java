@@ -19,6 +19,20 @@ public class TicketService {
         this.ticketRepository = ticketRepository;
     }
 
+
+    // create
+
+    public Ticket addTicket(Ticket ticket) {
+        return ticketRepository.save(ticket);
+    }
+
+    public void saveAll(List<Ticket> tickets) {
+        ticketRepository.saveAll(tickets);
+    }
+
+
+    // read
+
     public Ticket getTicketById(UUID id) throws NoTicketFoundException {
         return ticketRepository
                 .findById(id)
@@ -61,13 +75,8 @@ public class TicketService {
         return ticketRepository.existsByPhaseIdEquals(phaseId);
     }
 
-    public Ticket addTicket(Ticket ticket) {
-        return ticketRepository.save(ticket);
-    }
 
-    public void saveAll(List<Ticket> tickets) {
-        ticketRepository.saveAll(tickets);
-    }
+    // update
 
     public void patchTicket(
             UUID id,
@@ -97,6 +106,9 @@ public class TicketService {
 
         ticketRepository.save(ticket);
     }
+
+
+    // delete
 
     public void deleteTicketsByProjectId(UUID projectId) {
         ticketRepository.deleteByProjectId(projectId);
