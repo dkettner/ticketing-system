@@ -23,27 +23,8 @@ public class PhaseService {
         this.phaseRepository = phaseRepository;
     }
 
-    public Phase getPhaseById(UUID id) throws NoPhaseFoundException {
-        return phaseRepository
-                .findById(id)
-                .orElseThrow(() -> new NoPhaseFoundException("could not find phase with id: " + id));
-    }
 
-    public UUID getProjectIdByPhaseId(UUID phaseId) throws NoPhaseFoundException {
-        return this.getPhaseById(phaseId).getProjectId();
-    }
-
-    public List<Phase> getPhasesByProjectId(UUID projectId) throws NoPhaseFoundException {
-        List<Phase> phases = phaseRepository.findByProjectId(projectId);
-        if (phases.isEmpty()) {
-            throw new NoPhaseFoundException("could not find phases with projectId: " + projectId);
-        }
-        return phases;
-    }
-
-    public Optional<Phase> getFirstPhaseByProjectId(UUID projectId) {
-        return phaseRepository.findByProjectIdAndPreviousPhaseIsNull(projectId);
-    }
+    // create
 
     public Phase addPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException {
         Phase previousPhase = null;
@@ -55,7 +36,7 @@ public class PhaseService {
         if (previousPhase != null && !previousPhase.getProjectId().equals(projectId)) {
             throw new UnrelatedPhaseException(
                     "previous phase with id: " + previousPhase.getId() +
-                    " does not belong to project with id: " + projectId
+                            " does not belong to project with id: " + projectId
             );
         }
 
@@ -96,6 +77,34 @@ public class PhaseService {
         return phaseRepository.save(phase);
     }
 
+
+    // read
+
+    public Phase getPhaseById(UUID id) throws NoPhaseFoundException {
+        return phaseRepository
+                .findById(id)
+                .orElseThrow(() -> new NoPhaseFoundException("could not find phase with id: " + id));
+    }
+
+    public List<Phase> getPhasesByProjectId(UUID projectId) throws NoPhaseFoundException {
+        List<Phase> phases = phaseRepository.findByProjectId(projectId);
+        if (phases.isEmpty()) {
+            throw new NoPhaseFoundException("could not find phases with projectId: " + projectId);
+        }
+        return phases;
+    }
+
+    public Optional<Phase> getFirstPhaseByProjectId(UUID projectId) {
+        return phaseRepository.findByProjectIdAndPreviousPhaseIsNull(projectId);
+    }
+
+    public UUID getProjectIdByPhaseId(UUID phaseId) throws NoPhaseFoundException {
+        return this.getPhaseById(phaseId).getProjectId();
+    }
+
+
+    // update
+
     public void patchPhaseName(UUID id, String name) throws PhaseException, NoPhaseFoundException {
         Phase phase = this.getPhaseById(id);
         phase.setName(name);
@@ -106,6 +115,31 @@ public class PhaseService {
         Phase phase = this.getPhaseById(id);
         this.removePhaseFromCurrentPosition(phase);
         this.addPhase(phase, previousPhaseId);
+    }
+
+
+    // delete
+
+    public void deleteById(UUID id) throws NoPhaseFoundException, LastPhaseException {
+        Phase phase = this.getPhaseById(id);
+        if (phase.isFirst() && phase.isLast()) {
+            throw new LastPhaseException(
+                    "could not delete phase with id: " + id + " " +
+                            "because it is the last phase of the project with id: " + phase.getProjectId()
+            );
+        }
+
+        this.removePhaseFromCurrentPosition(phase);
+
+        Long numOfDeletedPhases = phaseRepository.removeById(id);
+        if (numOfDeletedPhases == 0) {
+            throw new NoPhaseFoundException("could not delete because there was no phase with id: " + id);
+        } else if (numOfDeletedPhases > 1) {
+            throw new ImpossibleException(
+                    "!!! This should not happen. " +
+                            "Multiple phases were deleted when deleting phase with id: " + id
+            );
+        }
     }
 
     private void removePhaseFromCurrentPosition(Phase phase) {
@@ -124,28 +158,6 @@ public class PhaseService {
         }
 
         phaseRepository.save(phase);
-    }
-
-    public void deleteById(UUID id) throws NoPhaseFoundException, LastPhaseException {
-        Phase phase = this.getPhaseById(id);
-        if (phase.isFirst() && phase.isLast()) {
-            throw new LastPhaseException(
-                    "could not delete phase with id: " + id + " " +
-                    "because it is the last phase of the project with id: " + phase.getProjectId()
-            );
-        }
-
-        this.removePhaseFromCurrentPosition(phase);
-
-        Long numOfDeletedPhases = phaseRepository.removeById(id);
-        if (numOfDeletedPhases == 0) {
-            throw new NoPhaseFoundException("could not delete because there was no phase with id: " + id);
-        } else if (numOfDeletedPhases > 1) {
-            throw new ImpossibleException(
-                    "!!! This should not happen. " +
-                            "Multiple phases were deleted when deleting phase with id: " + id
-            );
-        }
     }
 
     public void deletePhasesByProjectId(UUID projectId) {
