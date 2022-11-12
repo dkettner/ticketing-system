@@ -4,7 +4,7 @@ import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
-import com.kett.TicketSystem.user.domain.exceptions.UserException;
+import com.kett.TicketSystem.user.domain.exceptions.UserAlreadyExistsException;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,9 +33,9 @@ public class UserService implements UserDetailsService {
 
     // create
 
-    public User addUser(User user) throws UserException {
+    public User addUser(User user) throws UserAlreadyExistsException {
         if (userRepository.findByEmailEquals(user.getEmail()).isPresent()) {
-            throw new UserException("user with email: " + user.getEmail().toString() + " already exists");
+            throw new UserAlreadyExistsException("User with email: " + user.getEmail().toString() + " already exists.");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
