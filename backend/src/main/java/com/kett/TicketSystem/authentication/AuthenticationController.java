@@ -20,6 +20,7 @@ public class AuthenticationController {
         this.ticketSystemService = ticketSystemService;
     }
 
+
     @PostMapping
     public ResponseEntity<String> authenticateUser(@RequestBody AuthenticationPostDto authenticationPostDto) {
         String jwt = ticketSystemService.authenticateUser(authenticationPostDto);

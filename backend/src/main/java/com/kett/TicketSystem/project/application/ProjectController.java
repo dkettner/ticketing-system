@@ -28,8 +28,6 @@ public class ProjectController {
     }
 
 
-    // rest endpoints
-
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable UUID id) {
         ProjectResponseDto projectResponseDto = ticketSystemService.fetchProjectById(id);

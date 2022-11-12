@@ -28,8 +28,6 @@ public class UserController {
     }
 
 
-    // endpoints
-
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable UUID id) {
         UserResponseDto userResponseDto = ticketSystemService.getUserById(id);

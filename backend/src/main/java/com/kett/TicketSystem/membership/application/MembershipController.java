@@ -32,8 +32,6 @@ public class MembershipController {
     }
 
 
-    // endpoints
-
     @GetMapping("/{id}")
     public ResponseEntity<MembershipResponseDto> getMembershipById(@PathVariable UUID id) {
         MembershipResponseDto membershipResponseDto = ticketSystemService.getMemberShipById(id);

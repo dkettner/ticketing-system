@@ -30,8 +30,6 @@ public class PhaseController {
     }
 
 
-    // endpoints
-
     @GetMapping("/{id}")
     public ResponseEntity<PhaseResponseDto> getPhaseById(@PathVariable UUID id) {
         PhaseResponseDto phaseResponseDto = ticketSystemService.getPhaseById(id);
