@@ -30,6 +30,21 @@ public class UserService implements UserDetailsService {
         this.membershipService = membershipService;
     }
 
+
+    // create
+
+    public User addUser(User user) {
+        if (userRepository.findByEmailEquals(user.getEmail()).isPresent()) {
+            throw new UserException("user with email: " + user.getEmail().toString() + " already exists");
+        }
+
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+
+    // read
+
     public User getUserById(UUID id) {
         return userRepository
                 .findById(id)
@@ -54,15 +69,6 @@ public class UserService implements UserDetailsService {
         return userRepository.existsById(id);
     }
 
-    public User addUser(User user) {
-        if (userRepository.findByEmailEquals(user.getEmail()).isPresent()) {
-            throw new UserException("user with email: " + user.getEmail().toString() + " already exists");
-        }
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
-    }
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = this.getUserByEMailAddress(EmailAddress.fromString(email));
@@ -81,4 +87,12 @@ public class UserService implements UserDetailsService {
 
         return grantedAuthorities;
     }
+
+
+    // update
+
+
+    // delete
+
+
 }
