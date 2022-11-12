@@ -18,6 +18,7 @@ import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
+import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
@@ -25,6 +26,7 @@ import com.kett.TicketSystem.phase.application.PhaseService;
 import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.ticket.application.TicketService;
+import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
@@ -325,6 +327,40 @@ public class TicketSystemService {
                 dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, phaseId)
         );
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
+    }
+
+    @PreAuthorize("hasAnyAuthority(" +
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
+    public void patchTicketById(UUID id, TicketPatchDto ticketPatchDto) {
+        UUID projectIdOfTicket = ticketService.getProjectIdByTicketId(id);
+        if (ticketPatchDto.getPhaseId() != null) {
+            UUID projectIdOfNewPhase = phaseService.getProjectIdByPhaseId(ticketPatchDto.getPhaseId());
+            if (!projectIdOfTicket.equals(projectIdOfNewPhase)) {
+                throw new UnrelatedPhaseException(
+                        "The ticket with id: " + id +
+                        "belongs to the project with id: " + projectIdOfTicket + ". " +
+                        "But the new phase with id: " + ticketPatchDto.getPhaseId() +
+                        "does not.");
+            }
+        }
+
+        if (ticketPatchDto.getAssigneeIds() != null) {
+            if (!membershipService.areAllUsersProjectMembers(ticketPatchDto.getAssigneeIds(), projectIdOfTicket)) {
+                throw new InvalidProjectMembersException(
+                        "not all assignees are part of the project with id: " + projectIdOfTicket
+                );
+            }
+        }
+
+        ticketService.patchTicket(
+                id,
+                ticketPatchDto.getTitle(),
+                ticketPatchDto.getDescription(),
+                ticketPatchDto.getDueTime(),
+                ticketPatchDto.getPhaseId(),
+                ticketPatchDto.getAssigneeIds()
+        );
     }
 
     private void removeUserFromAllTicketsOfProject(UUID userId, UUID projectId) {

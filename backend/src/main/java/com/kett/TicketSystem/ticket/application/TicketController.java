@@ -3,6 +3,7 @@ package com.kett.TicketSystem.ticket.application;
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
+import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,5 +74,11 @@ public class TicketController {
         return ResponseEntity
                 .created(returnURI)
                 .body(ticketResponseDto);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> patchTicket(@PathVariable UUID id, @RequestBody TicketPatchDto ticketPatchDto) {
+        ticketSystemService.patchTicketById(id, ticketPatchDto);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
