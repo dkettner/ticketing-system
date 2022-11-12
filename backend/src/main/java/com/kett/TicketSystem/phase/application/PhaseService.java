@@ -147,4 +147,8 @@ public class PhaseService {
             );
         }
     }
+
+    public void deletePhasesByProjectId(UUID projectId) {
+        phaseRepository.deleteByProjectId(projectId);
+    }
 }

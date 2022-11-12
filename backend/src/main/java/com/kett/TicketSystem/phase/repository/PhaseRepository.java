@@ -12,5 +12,7 @@ import java.util.UUID;
 public interface PhaseRepository extends JpaRepository<Phase, UUID> {
     List<Phase> findByProjectId(UUID projectId);
     Optional<Phase> findByProjectIdAndPreviousPhaseIsNull(UUID projectId);
+
     Long removeById(UUID id);
+    void deleteByProjectId(UUID projectId);
 }
