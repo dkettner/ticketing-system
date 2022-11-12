@@ -40,7 +40,7 @@ public class ProjectService {
 
     // update
 
-    public void patchProjectById(UUID id, String newName, String newDescription) {
+    public void patchProjectById(UUID id, String newName, String newDescription) throws ProjectException, NoProjectFoundException {
         Project existingProject = getProjectById(id);
         if (newName != null) {
             existingProject.setName(newName);
@@ -54,7 +54,7 @@ public class ProjectService {
 
     // delete
 
-    public void deleteProjectById(UUID id) {
+    public void deleteProjectById(UUID id) throws NoProjectFoundException {
         Long numOfDeletedProjects = projectRepository.removeById(id);
 
         if (numOfDeletedProjects == 0) {
