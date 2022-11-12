@@ -33,7 +33,7 @@ public class UserService implements UserDetailsService {
 
     // create
 
-    public User addUser(User user) {
+    public User addUser(User user) throws UserException {
         if (userRepository.findByEmailEquals(user.getEmail()).isPresent()) {
             throw new UserException("user with email: " + user.getEmail().toString() + " already exists");
         }
@@ -45,23 +45,23 @@ public class UserService implements UserDetailsService {
 
     // read
 
-    public User getUserById(UUID id) {
+    public User getUserById(UUID id) throws NoUserFoundException {
         return userRepository
                 .findById(id)
                 .orElseThrow(() -> new NoUserFoundException("could not find user with id: " + id));
     }
 
-    public User getUserByEMailAddress(EmailAddress eMailAddress) {
+    public User getUserByEMailAddress(EmailAddress eMailAddress) throws NoUserFoundException {
         return userRepository
                 .findByEmailEquals(eMailAddress)
                 .orElseThrow(() -> new NoUserFoundException("could not find user with eMailAddress: " + eMailAddress));
     }
 
-    public UUID getUserIdByEmail(EmailAddress postingUserEmail) {
+    public UUID getUserIdByEmail(EmailAddress postingUserEmail) throws NoUserFoundException {
         return this.getUserByEMailAddress(postingUserEmail).getId();
     }
 
-    public UUID getUserIdByEmail(String postingUserEmail) {
+    public UUID getUserIdByEmail(String postingUserEmail) throws NoUserFoundException {
         return this.getUserIdByEmail(EmailAddress.fromString(postingUserEmail));
     }
 
@@ -70,7 +70,7 @@ public class UserService implements UserDetailsService {
     }
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) throws NoUserFoundException, UsernameNotFoundException {
         User user = this.getUserByEMailAddress(EmailAddress.fromString(email));
         List<GrantedAuthority> grantedAuthorities = this.getAllUserAuthoritiesByUserId(user.getId());
 
