@@ -31,9 +31,9 @@ public class MembershipService {
     public Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
         if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
             throw new MembershipAlreadyExistsException(
-                    "membership for userId: " + membership.getUserId() +
-                            " and projectId: " + membership.getProjectId() +
-                            " already exists"
+                    "Membership for userId: " + membership.getUserId() +
+                    " and projectId: " + membership.getProjectId() +
+                    " already exists."
             );
         }
         return membershipRepository.save(membership);
