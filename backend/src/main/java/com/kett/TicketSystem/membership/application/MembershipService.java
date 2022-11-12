@@ -25,13 +25,29 @@ public class MembershipService {
         this.membershipRepository = membershipRepository;
     }
 
+
+    // create
+
+    public Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
+        if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
+            throw new MembershipAlreadyExistsException(
+                    "membership for userId: " + membership.getUserId() +
+                            " and projectId: " + membership.getProjectId() +
+                            " already exists"
+            );
+        }
+        return membershipRepository.save(membership);
+    }
+
+
+    // read
+
     public Membership getMembershipById(UUID id) throws NoMembershipFoundException {
         return membershipRepository
                 .findById(id)
                 .orElseThrow(() -> new NoMembershipFoundException("could not find membership with id: " + id));
     }
 
-    // TODO: Throw exception when empty or just return empty list?
     public List<Membership> getMembershipsByUserId(UUID userId) throws NoMembershipFoundException {
         List<Membership> memberships =  membershipRepository.findByUserId(userId);
         if (memberships.isEmpty()) {
@@ -64,30 +80,6 @@ public class MembershipService {
         return this.getMembershipById(id).getProjectId();
     }
 
-    public Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
-        if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
-            throw new MembershipAlreadyExistsException(
-                    "membership for userId: " + membership.getUserId() +
-                    " and projectId: " + membership.getProjectId() +
-                    " already exists"
-            );
-        }
-        return membershipRepository.save(membership);
-    }
-
-    public void deleteMembershipById(UUID id) throws NoMembershipFoundException {
-        Long numOfDeletedMemberships = membershipRepository.removeById(id);
-
-        if (numOfDeletedMemberships == 0) {
-            throw new NoMembershipFoundException("could not delete because there was no membership with id: " + id);
-        } else if (numOfDeletedMemberships > 1) {
-            throw new ImpossibleException(
-                    "!!! This should not happen. " +
-                    "Multiple memberships were deleted when deleting membership with id: " + id
-            );
-        }
-    }
-
     // TODO: Write query in repository for this?
     public Boolean areAllUsersProjectMembers(List<UUID> assigneeIds, UUID projectId) {
         HashSet<UUID> projectMemberIds =
@@ -101,6 +93,9 @@ public class MembershipService {
         return projectMemberIds.containsAll(assigneeIds);
     }
 
+
+    // update
+
     public void patchMemberShipState(UUID id, State state) throws NoMembershipFoundException {
         Membership existingMembership = this.getMembershipById(id);
         existingMembership.setState(state);
@@ -111,6 +106,22 @@ public class MembershipService {
         Membership existingMembership = this.getMembershipById(id);
         existingMembership.setRole(role);
         membershipRepository.save(existingMembership);
+    }
+
+
+    // delete
+
+    public void deleteMembershipById(UUID id) throws NoMembershipFoundException {
+        Long numOfDeletedMemberships = membershipRepository.removeById(id);
+
+        if (numOfDeletedMemberships == 0) {
+            throw new NoMembershipFoundException("could not delete because there was no membership with id: " + id);
+        } else if (numOfDeletedMemberships > 1) {
+            throw new ImpossibleException(
+                    "!!! This should not happen. " +
+                    "Multiple memberships were deleted when deleting membership with id: " + id
+            );
+        }
     }
 
     public void deleteMembershipsByProjectId(UUID projectId) {
