@@ -21,7 +21,6 @@ public class Ticket {
     private UUID id;
 
     @Getter
-    @Setter
     private String title;
 
     @Getter
@@ -36,24 +35,49 @@ public class Ticket {
     private LocalDateTime dueTime;
 
     @Getter
-    @Setter(AccessLevel.PROTECTED)
     private UUID projectId;
 
     @Getter
-    @Setter
     @Column(length = 16)
     private UUID phaseId;
 
     @Getter
-    @Setter
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> assigneeIds = new ArrayList<>();
+
+    public void setTitle(String title) {
+        if (title == null || title.isEmpty()) {
+            throw new TicketException("title must not be null or empty");
+        }
+        this.title = title;
+    }
 
     public void setDueTime(LocalDateTime newDueTime) {
         if (newDueTime != null && newDueTime.isBefore(LocalDateTime.now())) {
             throw new TicketException("dueTime cannot be in the past");
         }
         this.dueTime = newDueTime;
+    }
+
+    public void setPhaseId(UUID phaseId) {
+        if (phaseId == null) {
+            throw new TicketException("phaseId must not be null");
+        }
+        this.phaseId = phaseId;
+    }
+
+    protected void setProjectId(UUID projectId) {
+        if (projectId == null) {
+            throw new TicketException("projectId must not be null");
+        }
+        this.projectId = projectId;
+    }
+
+    public void setAssigneeIds(List<UUID> assigneeIds) {
+        if (assigneeIds == null) {
+            throw new TicketException("assigneeIds must not be null but it may be empty");
+        }
+        this.assigneeIds.addAll(assigneeIds);
     }
 
     public void removeAssignee(UUID userId) {
@@ -65,25 +89,12 @@ public class Ticket {
     }
 
     public Ticket(String title, String description, LocalDateTime dueTime, UUID projectId, UUID phaseId, List<UUID> assigneeIds) {
-        if (title == null || title.isEmpty()) {
-            throw new TicketException("title must not be null or empty");
-        }
-        if (phaseId == null) {
-            throw new TicketException("phaseId must not be null");
-        }
-        if (projectId == null) {
-            throw new TicketException("phaseId must not be null");
-        }
-        if (assigneeIds == null) {
-            throw new TicketException("memberIds must not be null but it may be empty");
-        }
-
-        this.title = title;
+        this.setTitle(title);
         this.description = description;
         this.creationTime = LocalDateTime.now();
         this.setDueTime(dueTime);
-        this.phaseId = phaseId;
-        this.projectId = projectId;
-        this.assigneeIds.addAll(assigneeIds);
+        this.setPhaseId(phaseId);
+        this.setProjectId(projectId);
+        this.setAssigneeIds(assigneeIds);
     }
 }
