@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.phase.domain;
 
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
+import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import lombok.*;
 
 import javax.persistence.*;
@@ -25,12 +26,10 @@ public class Phase {
     private String name;
 
     @Getter
-    @Setter
     @OneToOne(fetch = FetchType.LAZY)
     private Phase previousPhase;
 
     @Getter
-    @Setter
     @OneToOne(fetch = FetchType.LAZY)
     private Phase nextPhase;
 
@@ -46,6 +45,24 @@ public class Phase {
             throw new PhaseException("name must not be null or empty");
         }
         this.name = name;
+    }
+
+    public void setPreviousPhase(Phase phase) {
+        if (phase != null && !this.projectId.equals(phase.getProjectId())) {
+            throw new UnrelatedPhaseException(
+                    "The new previousPhase with id: " + phase.getId() + " belongs to the project with id: " + phase.getProjectId() +
+                    " but the phase with id: " + this.id + " does not. It belongs to the project with id: " + this.projectId
+            );
+        }
+    }
+
+    public void setNextPhase(Phase phase) {
+        if (phase != null && !this.projectId.equals(phase.getProjectId())) {
+            throw new UnrelatedPhaseException(
+                    "The new nextPhase with id: " + phase.getId() + " belongs to the project with id: " + phase.getProjectId() +
+                    " but the phase with id: " + this.id + " does not. It belongs to the project with id: " + this.projectId
+            );
+        }
     }
 
     public Boolean isFirst() {
