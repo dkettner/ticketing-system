@@ -38,7 +38,7 @@ public class User {
 
     public void setEmail(EmailAddress email) {
         if (email == null) {
-            throw new UserException("email must not be null or empty");
+            throw new UserException("email must not be null");
         }
 
         this.email = email;
