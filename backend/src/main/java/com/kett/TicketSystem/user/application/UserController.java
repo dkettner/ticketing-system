@@ -3,6 +3,7 @@ package com.kett.TicketSystem.user.application;
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.application.exceptions.NoParametersException;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.user.application.dto.UserPatchDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,5 +59,11 @@ public class UserController {
         return ResponseEntity
                 .created(returnURI)
                 .body(userResponseDto);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> patchUserById(@PathVariable UUID id, @RequestBody UserPatchDto userPatchDto) {
+        ticketSystemService.patchUserById(id, userPatchDto);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

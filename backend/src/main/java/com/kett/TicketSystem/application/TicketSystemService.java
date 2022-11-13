@@ -31,6 +31,7 @@ import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.user.application.UserService;
+import com.kett.TicketSystem.user.application.dto.UserPatchDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
@@ -404,5 +405,14 @@ public class TicketSystemService {
         this.addDefaultProjectForNewUser(user.getId());
 
         return dtoMapper.mapUserToUserResponseDto(user);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#id))")
+    public void patchUserById(UUID id, UserPatchDto userPatchDto) {
+        userService.patchUserById(
+                id,
+                userPatchDto.getName(),
+                EmailAddress.fromString(userPatchDto.getEmail())
+        );
     }
 }

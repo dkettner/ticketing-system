@@ -14,7 +14,7 @@ import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
-import com.kett.TicketSystem.user.domain.exceptions.UserAlreadyExistsException;
+import com.kett.TicketSystem.user.domain.exceptions.EmailAlreadyInUseException;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +56,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
             PhaseIsNotEmptyException.class,
             LastPhaseException.class,
             InvalidProjectMembersException.class,
-            UserAlreadyExistsException.class
+            EmailAlreadyInUseException.class
     })
     public ResponseEntity<String> handleConflictException(RuntimeException runtimeException) {
         return new ResponseEntity<>(runtimeException.getMessage(), HttpStatus.CONFLICT);

@@ -4,7 +4,8 @@ import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
-import com.kett.TicketSystem.user.domain.exceptions.UserAlreadyExistsException;
+import com.kett.TicketSystem.user.domain.exceptions.EmailAlreadyInUseException;
+import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -33,9 +34,9 @@ public class UserService implements UserDetailsService {
 
     // create
 
-    public User addUser(User user) throws UserAlreadyExistsException {
-        if (userRepository.findByEmailEquals(user.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("User with email: " + user.getEmail().toString() + " already exists.");
+    public User addUser(User user) throws EmailAlreadyInUseException {
+        if (userRepository.existsByEmailEquals(user.getEmail())) {
+            throw new EmailAlreadyInUseException("email: " + user.getEmail().toString() + " is already in use.");
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -90,6 +91,22 @@ public class UserService implements UserDetailsService {
 
 
     // update
+
+    public void patchUserById(UUID id, String name, EmailAddress email) throws UserException, NoUserFoundException {
+        User user = this.getUserById(id);
+
+        if (name != null) {
+            user.setName(name);
+        }
+        if (email != null) {
+            if (userRepository.existsByEmailEquals(email)) {
+                throw new EmailAlreadyInUseException("New email: " + email.toString() + " is already in use.");
+            }
+            user.setEmail(email);
+        }
+
+        userRepository.save(user);
+    }
 
 
     // delete
