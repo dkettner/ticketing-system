@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.user.application;
 
+import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.user.domain.User;
@@ -111,5 +112,16 @@ public class UserService implements UserDetailsService {
 
     // delete
 
+    public void deleteById(UUID id) {
+        Long numOfDeletedUsers = userRepository.removeById(id);
 
+        if (numOfDeletedUsers == 0) {
+            throw new NoUserFoundException("could not delete because there was no user with id: " + id);
+        } else if (numOfDeletedUsers > 1) {
+            throw new ImpossibleException(
+                    "!!! This should not happen. " +
+                    "Multiple users were deleted when deleting user with id: " + id
+            );
+        }
+    }
 }

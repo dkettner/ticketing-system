@@ -415,4 +415,9 @@ public class TicketSystemService {
                 EmailAddress.fromString(userPatchDto.getEmail())
         );
     }
+
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#id))")
+    public void deleteUserById(UUID id) {
+        userService.deleteById(id);
+    }
 }
