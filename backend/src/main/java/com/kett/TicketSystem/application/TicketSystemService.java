@@ -107,7 +107,6 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipPostDto.projectId))")
     public MembershipResponseDto addMembership(MembershipPostDto membershipPostDto) {
-        // TODO: add proper validation once authentication is possible
         UUID projectId = membershipPostDto.getProjectId();
         if (!projectService.isExistentById(projectId)) {
             throw new NoProjectFoundException("could not find project with id: " + projectId);
