@@ -54,6 +54,7 @@ public class Phase {
                     " but the phase with id: " + this.id + " does not. It belongs to the project with id: " + this.projectId
             );
         }
+        this.previousPhase = phase;
     }
 
     public void setNextPhase(Phase phase) {
@@ -63,6 +64,7 @@ public class Phase {
                     " but the phase with id: " + this.id + " does not. It belongs to the project with id: " + this.projectId
             );
         }
+        this.nextPhase = phase;
     }
 
     public Boolean isFirst() {
