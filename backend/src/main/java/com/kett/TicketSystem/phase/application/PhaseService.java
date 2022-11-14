@@ -49,6 +49,9 @@ public class PhaseService {
 
     private Phase addFirst(Phase phase) {
         Optional<Phase> nextPhase = getFirstPhaseByProjectId(phase.getProjectId());
+
+        phaseRepository.save(phase);    // make sure that phase has an id, may be redundant
+
         if (nextPhase.isPresent()) {
             phase.setNextPhase(nextPhase.get());
             nextPhase.get().setPreviousPhase(phase);
