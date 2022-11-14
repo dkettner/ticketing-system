@@ -54,16 +54,23 @@ public class Membership implements GrantedAuthority {
     }
 
     public void setState(State state) {
-        if (this.state.equals(state)) {
-            throw new IllegalStateUpdateException("state of membership with id: " + this.id + " is already " + this.state);
+        if (state == null) {
+            throw new MembershipException("state must not be null");
         }
 
-        if (this.state.equals(State.ACCEPTED) && state.equals(State.OPEN)) {
-            throw new IllegalStateUpdateException(
-                    "Once state as been changed to ACCEPTED, it cannot go back to OPEN. " +
-                    "To revoke Membership, use delete."
-            );
+        if (this.state != null) {
+            if (this.state.equals(state)) {
+                throw new IllegalStateUpdateException("state of membership with id: " + this.id + " is already " + this.state);
+            }
+
+            if (this.state.equals(State.ACCEPTED) && state.equals(State.OPEN)) {
+                throw new IllegalStateUpdateException(
+                        "Once state as been changed to ACCEPTED, it cannot go back to OPEN. " +
+                        "To revoke Membership, use delete."
+                );
+            }
         }
+
 
         this.state = state;
     }
