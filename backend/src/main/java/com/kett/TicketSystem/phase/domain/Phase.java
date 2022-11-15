@@ -51,7 +51,7 @@ public class Phase {
         if (phase != null && !this.projectId.equals(phase.getProjectId())) {
             throw new UnrelatedPhaseException(
                     "The new previousPhase with id: " + phase.getId() + " belongs to the project with id: " + phase.getProjectId() +
-                    " but the phase with id: " + this.id + " does not. It belongs to the project with id: " + this.projectId
+                    " but the phase with id: " + this.id + " does not. It belongs to the project with id: " + this.projectId + "."
             );
         }
         this.previousPhase = phase;
