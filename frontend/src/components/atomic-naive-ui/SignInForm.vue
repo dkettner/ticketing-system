@@ -2,13 +2,27 @@
   import { useRouter } from 'vue-router';
   import { NCard, NTabs, NTabPane, NForm, NFormItemRow, NInput, NButton, NIcon } from 'naive-ui';
   import { GlassesOutline, Glasses } from "@vicons/ionicons5";
+import { ref } from 'vue';
+import axios from 'axios';
 
   const router = useRouter()
+
+  const signUpFormValue = ref({
+    userPostData: {
+      username: '',
+      email: '',
+      password: ''
+    },
+    reenteredPassword: ''
+  })
 
   function handleSignInClick(clickEvent) {
     router.push('/dashboard')
   }
-  function handleSignUpClick(clickEvent) {
+  async function handleSignUpClick(clickEvent) {
+    console.log(signUpFormValue.value);
+    const postUserResult = await axios.post('http://localhost:8080/users', signUpFormValue.value.userPostData);
+    console.log(postUserResult);
     router.push('/dashboard')
   }
 </script>
@@ -51,14 +65,15 @@
       <n-tab-pane name="signup" tab="Sign up">
         <n-form>
           <n-form-item-row label="Username">
-            <n-input />
+            <n-input v-model:value="signUpFormValue.userPostData.username"/>
           </n-form-item-row>
           <n-form-item-row label="E-Mail">
-            <n-input />
+            <n-input v-model:value="signUpFormValue.userPostData.email"/>
           </n-form-item-row>
           <n-form-item-row label="Password">
             <n-input
               type="password"
+              v-model:value="signUpFormValue.userPostData.password"
               show-password-on="click"
               placeholder="Please Input"
               :maxlength="32"
@@ -74,6 +89,7 @@
           <n-form-item-row label="Reenter Password">
             <n-input
               type="password"
+              v-model:value="signUpFormValue.reenteredPassword"
               show-password-on="click"
               placeholder="Please Input"
               :maxlength="32"
