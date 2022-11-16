@@ -25,7 +25,7 @@
     >
       <n-tab-pane name="signin" tab="Sign in">
         <n-form>
-          <n-form-item-row label="Username">
+          <n-form-item-row label="E-Mail">
             <n-input />
           </n-form-item-row>
           <n-form-item-row label="Password">
@@ -51,6 +51,9 @@
       <n-tab-pane name="signup" tab="Sign up">
         <n-form>
           <n-form-item-row label="Username">
+            <n-input />
+          </n-form-item-row>
+          <n-form-item-row label="E-Mail">
             <n-input />
           </n-form-item-row>
           <n-form-item-row label="Password">
