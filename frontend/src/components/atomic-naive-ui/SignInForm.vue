@@ -9,7 +9,7 @@ import axios from 'axios';
 
   const signUpFormValue = ref({
     userPostData: {
-      username: '',
+      name: '',
       email: '',
       password: ''
     },
@@ -65,7 +65,7 @@ import axios from 'axios';
       <n-tab-pane name="signup" tab="Sign up">
         <n-form>
           <n-form-item-row label="Username">
-            <n-input v-model:value="signUpFormValue.userPostData.username"/>
+            <n-input v-model:value="signUpFormValue.userPostData.name"/>
           </n-form-item-row>
           <n-form-item-row label="E-Mail">
             <n-input v-model:value="signUpFormValue.userPostData.email"/>
