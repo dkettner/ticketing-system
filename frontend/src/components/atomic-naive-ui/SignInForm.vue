@@ -4,7 +4,6 @@
   import { GlassesOutline, Glasses } from "@vicons/ionicons5";
   import { ref } from 'vue';
   import axios from 'axios';
-  import { sleep } from 'seemly';
 
   const router = useRouter()
   const notificationAgent = useNotification();
@@ -17,7 +16,6 @@
     },
     reenteredPassword: ''
   })
-  
   const signInFormValue = ref({
     authenticationPostData: {
       email: '',
@@ -64,7 +62,6 @@
       size="large"
       animated
       style="margin: 0 -4px"
-      ref="tabPosition"
       pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
     >
       <n-tab-pane name="signin" tab="Sign in">
