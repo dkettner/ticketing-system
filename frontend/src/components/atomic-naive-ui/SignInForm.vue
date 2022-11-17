@@ -1,11 +1,13 @@
 <script setup>
   import { useRouter } from 'vue-router';
-  import { NCard, NTabs, NTabPane, NForm, NFormItemRow, NInput, NButton, NIcon } from 'naive-ui';
+  import { NCard, NTabs, NTabPane, NForm, NFormItemRow, NInput, NButton, NIcon, useNotification } from 'naive-ui';
   import { GlassesOutline, Glasses } from "@vicons/ionicons5";
-import { ref } from 'vue';
-import axios from 'axios';
+  import { ref } from 'vue';
+  import axios from 'axios';
+  import { sleep } from 'seemly';
 
   const router = useRouter()
+  const notificationAgent = useNotification();
 
   const signUpFormValue = ref({
     userPostData: {
@@ -15,15 +17,42 @@ import axios from 'axios';
     },
     reenteredPassword: ''
   })
+  
+  const signInFormValue = ref({
+    authenticationPostData: {
+      email: '',
+      password: ''
+    }
+  });
 
+  function sendNotification(_title, _content) {
+    notificationAgent.create({
+      title: _title,
+      content: _content
+    });
+  }
   function handleSignInClick(clickEvent) {
     router.push('/dashboard')
   }
   async function handleSignUpClick(clickEvent) {
-    console.log(signUpFormValue.value);
-    const postUserResult = await axios.post('http://localhost:8080/users', signUpFormValue.value.userPostData);
-    console.log(postUserResult);
-    router.push('/dashboard')
+    try {
+      const postUserResponse = await axios.post('http://localhost:8080/users', signUpFormValue.value.userPostData);
+      
+      sendNotification(
+        "Success", 
+        "Created your new account with E-Mail:\n" + 
+        postUserResponse.data.email + "\n\n" + 
+
+        "You will now be redirected to Sign In ..."
+      );
+      
+      setTimeout(() => {
+        router.go();
+      }, 5000);
+      
+    } catch(exception) {
+      sendNotification("Error", exception);
+    }
   }
 </script>
 
@@ -35,6 +64,7 @@ import axios from 'axios';
       size="large"
       animated
       style="margin: 0 -4px"
+      ref="tabPosition"
       pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
     >
       <n-tab-pane name="signin" tab="Sign in">
