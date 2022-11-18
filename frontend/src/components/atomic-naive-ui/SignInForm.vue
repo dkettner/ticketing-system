@@ -29,18 +29,24 @@
       content: _content
     });
   }
-  function handleSignInClick(clickEvent) {
-    router.push('/dashboard')
+  async function handleSignInClick(clickEvent) {
+    try {
+      const postAuthenticationResponse = await axios.post('/authentication', signInFormValue.value.authenticationPostData);
+      const AUTH_TOKEN = postAuthenticationResponse.data
+      document.cookie = "jwt=" + AUTH_TOKEN + "; httpOnly; sameSite=Lax;" // + secure; for https later
+      router.push('/dashboard');
+    } catch(error) {
+      console.log(error);
+    }
   }
   async function handleSignUpClick(clickEvent) {
     try {
-      const postUserResponse = await axios.post('http://localhost:8080/users', signUpFormValue.value.userPostData);
+      const postUserResponse = await axios.post('/users', signUpFormValue.value.userPostData);
       
       sendNotification(
         "Success", 
         "Created your new account with E-Mail:\n" + 
         postUserResponse.data.email + "\n\n" + 
-
         "You will now be redirected to Sign In ..."
       );
       
@@ -49,7 +55,7 @@
       }, 5000);
       
     } catch(exception) {
-      sendNotification("Error", exception);
+      sendNotification("Error", exception.message);
     }
   }
 </script>
@@ -67,11 +73,12 @@
       <n-tab-pane name="signin" tab="Sign in">
         <n-form>
           <n-form-item-row label="E-Mail">
-            <n-input />
+            <n-input v-model:value="signInFormValue.authenticationPostData.email"/>
           </n-form-item-row>
           <n-form-item-row label="Password">
             <n-input
               type="password"
+              v-model:value="signInFormValue.authenticationPostData.password"
               show-password-on="click"
               placeholder="Please Input"
               :maxlength="32"
@@ -91,7 +98,7 @@
       </n-tab-pane>
       <n-tab-pane name="signup" tab="Sign up">
         <n-form>
-          <n-form-item-row label="Username">
+          <n-form-item-row label="Name">
             <n-input v-model:value="signUpFormValue.userPostData.name"/>
           </n-form-item-row>
           <n-form-item-row label="E-Mail">
