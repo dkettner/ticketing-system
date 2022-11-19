@@ -10,7 +10,11 @@ export const useUserStore = defineStore("user", () => {
     name: ""
   });
 
-  const updateUserById = async (id = this.id) => {
+  const setEmail = (email) => {
+    user.value.email = email;
+  }
+
+  const updateUserById = async (id = user.value.id) => {
     try {
       const getUserResponse = await axios.get(usersPath + '/' + id);
       if (getUserResponse.status != 200) {
@@ -26,7 +30,7 @@ export const useUserStore = defineStore("user", () => {
       console.log(error);
     }
   }
-  const updateUserByEmail = async (email = this.email) => {
+  const updateUserByEmail = async (email = user.value.email) => {
     try {
       const getUserResponse = await axios.get(usersPath + '?email=' + email);
       if (getUserResponse.status != 200) {
@@ -45,6 +49,7 @@ export const useUserStore = defineStore("user", () => {
 
   return {
     user,
+    setEmail,
     updateUserById,
     updateUserByEmail
   };
