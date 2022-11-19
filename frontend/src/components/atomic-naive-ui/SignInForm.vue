@@ -4,9 +4,11 @@
   import { GlassesOutline, Glasses } from "@vicons/ionicons5";
   import { ref } from 'vue';
   import axios from 'axios';
+  import { useUserStore } from '../../stores/user';
 
-  const router = useRouter()
+  const router = useRouter();
   const notificationAgent = useNotification();
+  const userStore = useUserStore();
 
   const signUpFormValue = ref({
     userPostData: {
@@ -32,8 +34,9 @@
   async function handleSignInClick(clickEvent) {
     try {
       const postAuthenticationResponse = await axios.post('/authentication', signInFormValue.value.authenticationPostData);
-      const AUTH_TOKEN = postAuthenticationResponse.data
-      document.cookie = "jwt=" + AUTH_TOKEN + "; httpOnly; sameSite=Lax;" // + secure; for https later
+      const AUTH_TOKEN = postAuthenticationResponse.data;
+      //document.cookie = "jwt=" + AUTH_TOKEN + "; httpOnly; sameSite=Lax;" // + secure; for https later
+      userStore.setEmail(signInFormValue.value.authenticationPostData.email);
       router.push('/dashboard');
     } catch(error) {
       console.log(error);
