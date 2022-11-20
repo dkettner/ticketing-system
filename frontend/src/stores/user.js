@@ -32,7 +32,7 @@ export const useUserStore = defineStore("user", () => {
   }
   const updateUserByEmail = async (email = user.value.email) => {
     try {
-      const getUserResponse = await axios.get(usersPath + '?email=' + email);
+      const getUserResponse = await axios.get(usersPath + '?email=' + email, {withCredentials: true});
       if (getUserResponse.status != 200) {
         console.log("getUserByEmail failed with:");
         console.log(getUserResponse.status);
