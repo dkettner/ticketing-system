@@ -34,8 +34,6 @@
   async function handleSignInClick(clickEvent) {
     try {
       const postAuthenticationResponse = await axios.post('/authentication', signInFormValue.value.authenticationPostData);
-      const AUTH_TOKEN = postAuthenticationResponse.data;
-      //document.cookie = "jwt=" + AUTH_TOKEN + "; httpOnly; sameSite=Lax;" // + secure; for https later
       userStore.setEmail(signInFormValue.value.authenticationPostData.email);
       router.push('/dashboard');
     } catch(error) {
