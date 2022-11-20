@@ -9,7 +9,7 @@ import { onMounted } from 'vue';
   const { user } = storeToRefs(userStore);
 
   onMounted( async () => {
-    userStore.updateUserByEmail()
+    await userStore.updateUserByEmail()
   });
 </script>
 
