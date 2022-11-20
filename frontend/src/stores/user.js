@@ -38,9 +38,9 @@ export const useUserStore = defineStore("user", () => {
         console.log(getUserResponse.status);
         console.log(getUserResponse.data);
       } else {
-        user.value.id = getUserResponse.data[0].id;
-        user.value.email = getUserResponse.data[0].email;
-        user.value.name = getUserResponse.data[0].name;
+        user.value.id = getUserResponse.data.id;
+        user.value.email = getUserResponse.data.email;
+        user.value.name = getUserResponse.data.name;
       }
     } catch(error) {
       console.log(error);
