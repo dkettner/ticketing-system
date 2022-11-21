@@ -6,7 +6,7 @@ export const useUserStore = defineStore("user", () => {
   const usersPath = "/users";
   const user = ref({
     id: "",
-    email: "",
+    email: "", 
     name: ""
   });
 

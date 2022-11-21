@@ -2,14 +2,17 @@
   import SidebarMenuVue from '../components/atomic-naive-ui/SidebarMenu.vue';
   import { NNotificationProvider } from 'naive-ui';
   import { storeToRefs } from 'pinia';
-  import { useUserStore } from '../stores/user.js'
-import { onMounted } from 'vue';
+  import { useUserStore } from '../stores/user.js';
+  import { useSessionStore } from '../stores/session';
+  import { onMounted } from 'vue';
   
   const userStore = useUserStore()
+  const sessionStore = useSessionStore();
   const { user } = storeToRefs(userStore);
 
   onMounted( async () => {
-    await userStore.updateUserByEmail()
+    userStore.setEmail(sessionStore.email);
+    await userStore.updateUserByEmail();
   });
 </script>
 

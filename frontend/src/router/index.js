@@ -6,7 +6,10 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: '/signin'
+      redirect: () => {
+        return '/signin';
+      }
+      
     },
     {
       path: '/signin',

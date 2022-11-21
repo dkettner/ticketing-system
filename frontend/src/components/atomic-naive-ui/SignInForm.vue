@@ -4,11 +4,11 @@
   import { GlassesOutline, Glasses } from "@vicons/ionicons5";
   import { ref } from 'vue';
   import axios from 'axios';
-  import { useUserStore } from '../../stores/user';
+  import { useSessionStore } from '../../stores/session';
 
   const router = useRouter();
   const notificationAgent = useNotification();
-  const userStore = useUserStore();
+  const sessionStore = useSessionStore();
 
   const signUpFormValue = ref({
     userPostData: {
@@ -19,7 +19,7 @@
     reenteredPassword: ''
   })
   const signInFormValue = ref({
-    authenticationPostData: {
+    credentials: {
       email: '',
       password: ''
     }
@@ -32,13 +32,8 @@
     });
   }
   async function handleSignInClick(clickEvent) {
-    try {
-      const postAuthenticationResponse = await axios.post('/authentication', signInFormValue.value.authenticationPostData);
-      userStore.setEmail(signInFormValue.value.authenticationPostData.email);
-      router.push('/dashboard');
-    } catch(error) {
-      console.log(error);
-    }
+    sessionStore.login(signInFormValue.value.credentials.email, signInFormValue.value.credentials.password);
+    router.push("/dashboard");
   }
   async function handleSignUpClick(clickEvent) {
     try {
@@ -74,12 +69,12 @@
       <n-tab-pane name="signin" tab="Sign in">
         <n-form>
           <n-form-item-row label="E-Mail">
-            <n-input v-model:value="signInFormValue.authenticationPostData.email"/>
+            <n-input v-model:value="signInFormValue.credentials.email"/>
           </n-form-item-row>
           <n-form-item-row label="Password">
             <n-input
               type="password"
-              v-model:value="signInFormValue.authenticationPostData.password"
+              v-model:value="signInFormValue.credentials.password"
               show-password-on="click"
               placeholder="Please Input"
               :maxlength="32"
