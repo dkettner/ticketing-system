@@ -1,6 +1,7 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import axios from 'axios';
+import { useSessionStore } from "./session";
 
 export const useUserStore = defineStore("user", () => {
   const usersPath = "/users";
@@ -17,33 +18,31 @@ export const useUserStore = defineStore("user", () => {
   const updateUserById = async (id = user.value.id) => {
     try {
       const getUserResponse = await axios.get(usersPath + '/' + id);
-      if (getUserResponse.status != 200) {
-        console.log("getUserById failed with:");
-        console.log(getUserResponse.status);
-        console.log(getUserResponse.data);
-      } else {
-        user.value.id = getUserResponse.data.id;
-        user.value.email = getUserResponse.data.email;
-        user.value.name = getUserResponse.data.name;
-      }
+      user.value.id = getUserResponse.data.id;
+      user.value.email = getUserResponse.data.email;
+      user.value.name = getUserResponse.data.name;
     } catch(error) {
       console.log(error);
+      
+      if (error.response.status == 401) {
+        const sessionStore = useSessionStore();
+        await sessionStore.logout();
+      }
     }
   }
   const updateUserByEmail = async (email = user.value.email) => {
     try {
       const getUserResponse = await axios.get(usersPath + '?email=' + email, {withCredentials: true});
-      if (getUserResponse.status != 200) {
-        console.log("getUserByEmail failed with:");
-        console.log(getUserResponse.status);
-        console.log(getUserResponse.data);
-      } else {
-        user.value.id = getUserResponse.data.id;
-        user.value.email = getUserResponse.data.email;
-        user.value.name = getUserResponse.data.name;
-      }
+      user.value.id = getUserResponse.data.id;
+      user.value.email = getUserResponse.data.email;
+      user.value.name = getUserResponse.data.name;
     } catch(error) {
       console.log(error);
+
+      if (error.response.status == 401) {
+        const sessionStore = useSessionStore();
+        await sessionStore.logout();
+      }
     }
   }
 
