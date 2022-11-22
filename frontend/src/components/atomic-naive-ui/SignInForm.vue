@@ -32,8 +32,15 @@
     });
   }
   async function handleSignInClick(clickEvent) {
-    sessionStore.login(signInFormValue.value.credentials.email, signInFormValue.value.credentials.password);
-    router.push("/dashboard");
+    const loginResult = await sessionStore.login(signInFormValue.value.credentials.email, signInFormValue.value.credentials.password);
+    if (loginResult.isLoginSuccessful) {
+      router.push('/dashboard');
+    } else {
+      sendNotification(
+        "Error",
+        loginResult.message
+      )
+    }
   }
   async function handleSignUpClick(clickEvent) {
     try {
@@ -50,8 +57,9 @@
         router.go();
       }, 5000);
       
-    } catch(exception) {
-      sendNotification("Error", exception.message);
+    } catch(error) {
+      console.log(error)
+      sendNotification("Error", error.message);
     }
   }
 </script>
