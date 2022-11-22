@@ -17,9 +17,26 @@ const router = createRouter({
       }
     },
     {
-      path: '/dashboard',
-      name: 'dashboard',
-      component: () => import('../views/DashboardView.vue'),
+      path: '/',
+      name: 'main',
+      component: () => import('../views/MainView.vue'),
+      children: [
+        {
+          path: 'dashboard',
+          name: 'dashboard',
+          component: () => import('../views/DashboardView.vue'),
+        },
+        {
+          path: 'tickets',
+          name: 'tickets',
+          component: () => import('../views/TicketsView.vue'),
+        },
+        {
+          path: 'projects',
+          name: 'projects',
+          component: () => import('../views/ProjectsView.vue'),
+        }
+      ]
     },
     {
       path: '/:pathMatch(.*)',
