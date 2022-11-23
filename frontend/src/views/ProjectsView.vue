@@ -2,7 +2,7 @@
   import { useProjectStore } from '../stores/project';
   import { useMembershipStore } from '../stores/membership';
   import { storeToRefs } from 'pinia';
-  import { NCard } from 'naive-ui';
+  import { NCard, NEllipsis, NRow, NCol } from 'naive-ui';
 
   import NewProjectButton from '../components/atomic-naive-ui/NewProjectButton.vue';
 
@@ -17,11 +17,22 @@
     <h1>Projects</h1>
     <NewProjectButton />
     <br>
-    <div v-for="project in projects">
-      <n-card :title="project.name" embedded hoverable style="max-width: 400px; ">
-        {{project.description}}
-        <p style="font-style: italic;">created at: {{project.creationTime}}</p>
-      </n-card>
-    </div>
+    <n-row :gutter="[10,10]">
+      <div v-for="project in projects">
+        <n-col :span="100">
+          <n-card :title="project.name" embedded hoverable style="width: 40vh; height: 25vh;">
+            <n-ellipsis line-clamp="3" >
+              {{project.description}}
+              <template #tooltip>
+                <div style="text-align: center; max-width: 40vh;">
+                  {{project.description}}
+                </div>
+              </template>
+            </n-ellipsis>
+            <p style="font-style: italic;">created at: {{project.creationTime}}</p>
+          </n-card>
+        </n-col>
+      </div>
+    </n-row>
   </div>
 </template>
