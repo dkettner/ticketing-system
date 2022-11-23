@@ -5,18 +5,13 @@ import { useSessionStore } from "./session";
 
 export const useMembershipStore = defineStore("membership", () => {
   const membershipsPath = "/memberships";
-  const memberships = ref({});
+  const memberships = ref([]);
   const sessionStore = useSessionStore();
 
   const updateMembershipsByEmail = async (email = sessionStore.email) => {
     try {
       const getMembershipsResponse = await axios.get(membershipsPath + '?email=' + email, {withCredentials: true});
-      const membershipsArray = getMembershipsResponse.data;
-
-      memberships.value = {};
-      for (let index in membershipsArray) {
-        memberships.value[membershipsArray[index].id] = membershipsArray[index];
-      }
+      memberships.value = getMembershipsResponse.data;
     } catch(error) {
       console.log(error);
 
@@ -26,8 +21,23 @@ export const useMembershipStore = defineStore("membership", () => {
     }
   }
 
+  function getAcceptedMembershipsProjectIds() {
+    return memberships
+        .value
+        .filter(membership => membership.state === 'ACCEPTED')
+        .map(membership => membership.projectId);
+  }
+  function getOpenMembershipsProjectIds() {
+    return memberships
+        .value
+        .filter(membership => {membership.state === "OPEN"})
+        .map(membership => membership.projectId);
+  }
+
   return {
     memberships,
-    updateMembershipsByEmail
+    updateMembershipsByEmail,
+    getAcceptedMembershipsProjectIds,
+    getOpenMembershipsProjectIds
   };
 });
