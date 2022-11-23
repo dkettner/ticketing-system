@@ -23,6 +23,7 @@ public class Project {
 
     @Getter
     @Setter
+    @Column(length = 1000)
     private String description;
 
     @Getter
