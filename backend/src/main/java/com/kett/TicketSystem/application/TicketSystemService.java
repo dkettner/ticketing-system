@@ -263,7 +263,7 @@ public class TicketSystemService {
     private void addDefaultProjectForNewUser(UUID userId) {
         ProjectPostDto defaultProject = new ProjectPostDto(
                 "Example Project",
-                "This project was automatically created. Use it to get accustomed to everything."
+                "This project was created automatically. Use it to get accustomed to everything."
         );
 
         this.addProject(defaultProject, userId);
