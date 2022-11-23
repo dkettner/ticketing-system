@@ -11,10 +11,10 @@ export const useSessionStore = defineStore("session", () => {
         await axios.post('/authentication', { email: loginEmail, password: loginPassword });
       
       setEmail(loginEmail);
-      return { isLoginSuccessful: true, message: "Logged in with email: " + loginEmail};
+      return { isLoginSuccessful: true, message: "Logged in with email: " + loginEmail };
     } catch(error) {
       console.log(error);
-      return { isLoginSuccessful: false, message: error.message};
+      return { isLoginSuccessful: false, message: error.message };
     }
   }
   const logout = async () => {
