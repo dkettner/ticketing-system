@@ -59,7 +59,7 @@
       
     } catch(error) {
       console.log(error)
-      sendNotification("Error", error.message);
+      sendNotification("Error", error.response.data);
     }
   }
 </script>
