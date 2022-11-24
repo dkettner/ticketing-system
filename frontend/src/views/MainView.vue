@@ -5,7 +5,7 @@
   import { useSessionStore } from '../stores/session';
   import { useProjectStore } from '../stores/project';
   import { useMembershipStore } from '../stores/membership';
-  import { NSpace, NLayout, NLayoutHeader} from 'naive-ui';
+  import { NSpace, NLayout, NLayoutHeader, NNotificationProvider } from 'naive-ui';
 
   import SidebarMenuVue from '../components/atomic-naive-ui/SidebarMenu.vue';
 
@@ -24,13 +24,15 @@
 </script>
 
 <template>
-  <n-space vertical>
-    <n-layout>
-      <n-layout-header>Hello {{user.name}}! After login this should always be visible.</n-layout-header>
-      <n-layout has-sider>
-        <SidebarMenuVue />
-        <RouterView />
+  <n-notification-provider>
+    <n-space vertical>
+      <n-layout>
+        <n-layout-header>Hello {{user.name}}! After login this should always be visible.</n-layout-header>
+        <n-layout has-sider>
+          <SidebarMenuVue />
+          <RouterView />
+        </n-layout>
       </n-layout>
-    </n-layout>
-  </n-space>
+    </n-space>
+  </n-notification-provider>
 </template>

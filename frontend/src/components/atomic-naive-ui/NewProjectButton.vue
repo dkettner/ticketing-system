@@ -15,13 +15,13 @@
 </script>
 
 <template>
-  <n-notification-provider>
+
     <n-modal v-model:show=activateProjectForm :trap-focus="false">
       <NewProjectForm 
         @closeProjectForm="handleCloseProjectForm" 
       />
     </n-modal>
-  </n-notification-provider>
+
   <n-button @click="handleNewProjectButtonClicked" type="primary" block primary strong style="max-width: 125px">
     + New Project
   </n-button>
