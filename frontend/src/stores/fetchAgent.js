@@ -33,8 +33,16 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   // projects
   const projectsPath = backendBaseURL + "/projects";
 
+  const postProject = async (postProjectData) => {
+    try {
+      const response = await axios.post(projectsPath, postProjectData, {withCredentials: true});
+      return response.data;
+    } catch (error) {
+      await handleError(error);
+      return null; // TODO: useful return value?
+    }
+  }
   
-
 
   // tickets
   const ticketsPath = backendBaseURL + "/tickets";
