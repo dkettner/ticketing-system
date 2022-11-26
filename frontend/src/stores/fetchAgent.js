@@ -42,6 +42,16 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       return null; // TODO: useful return value?
     }
   }
+
+  const getProjectById = async (id) => {
+    try {
+      const response = await axios.get(projectsPath + "/" + id,  {withCredentials: true});
+      return response.data;
+    } catch (error) {
+      await handleError(error);
+      return null; // TODO: useful return value?
+    }
+  }
   
 
   // tickets
