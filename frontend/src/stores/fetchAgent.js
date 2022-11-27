@@ -12,6 +12,15 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   // authentication
   const authenticationPath = backendBaseURL + "/authentication";
 
+  const postAuthentication = async (loginEmail, loginPassword) => {
+    try {
+      const response = await axios.post(authenticationPath, {email: loginEmail, password: loginPassword}, {withCredentials: true});
+      return response.data;
+    } catch (error) {
+      await handleError(error);
+      return null; // TODO: useful return value?
+    }
+  }
 
   // memberships
   const membershipsPath = backendBaseURL + "/memberships";
