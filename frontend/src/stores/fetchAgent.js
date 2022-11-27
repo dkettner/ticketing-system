@@ -106,6 +106,11 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
 
   return {
-
+    getMembershipsByEmail,
+    postProject,
+    getProjectById,
+    getMultipleProjectsByIds,
+    getUserById,
+    getUserByEmail
   };
 });
