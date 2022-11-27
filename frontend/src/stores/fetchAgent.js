@@ -115,6 +115,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
 
   return {
+    postAuthentication,
     getMembershipsByEmail,
     postProject,
     getProjectById,
