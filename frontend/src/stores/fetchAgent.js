@@ -15,10 +15,10 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   const postAuthentication = async (loginEmail, loginPassword) => {
     try {
       const response = await axios.post(authenticationPath, {email: loginEmail, password: loginPassword}, {withCredentials: true});
-      return response.data;
+      return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return null; // TODO: useful return value?
+      return { isSuccessful: false, data: error };
     }
   }
 
@@ -28,10 +28,10 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   const getMembershipsByEmail = async (email) => {
     try {
       const response = await axios.get(membershipsPath + '?email=' + email, {withCredentials: true});
-      return response.data;
+      return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return null; // TODO: useful return value?
+      return { isSuccessful: false, data: error };
     }
   }
 
@@ -45,20 +45,20 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   const postProject = async (postProjectData) => {
     try {
       const response = await axios.post(projectsPath, postProjectData, {withCredentials: true});
-      return response.data;
+      return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return null; // TODO: useful return value?
+      return { isSuccessful: false, data: error };
     }
   }
 
   const getProjectById = async (id) => {
     try {
       const response = await axios.get(projectsPath + "/" + id,  {withCredentials: true});
-      return response.data;
+      return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return null; // TODO: useful return value?
+      return { isSuccessful: false, data: error };
     }
   }
 
@@ -81,20 +81,20 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   const getUserById = async (id) => {
     try {
       const response = await axios.get(usersPath + '/' + id, {withCredentials: true});
-      return response.data;
+      return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return null; // TODO: useful return value?
+      return { isSuccessful: false, data: error };
     }
   }
 
   const getUserByEmail = async (email) => {
     try {
       const response = await axios.get(usersPath + '?email=' + email, {withCredentials: true});
-      return response.data;
+      return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return null; // TODO: useful return value?
+      return { isSuccessful: false, data: error };
     }
   }
 
