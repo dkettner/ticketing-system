@@ -63,11 +63,16 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   }
 
   const getMultipleProjectsByIds = async (projectIds) => {
-    const projects = [];
-    for (let index in projectIds) {
-      projects.push(await getProjectById(projectIds[index]));
+    try {
+      const projects = [];
+      for (let index in projectIds) {
+        projects.push(await axios.get(projectsPath + "/" + projectIds[index],  {withCredentials: true}));
+      }
+      return { isSuccessful: true, data: projects };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
     }
-    return projects;
   }
   
 
