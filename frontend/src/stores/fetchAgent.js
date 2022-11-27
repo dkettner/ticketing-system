@@ -52,6 +52,14 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       return null; // TODO: useful return value?
     }
   }
+
+  const getMultipleProjectsByIds = async (projectIds) => {
+    const projects = [];
+    for (let index in projectIds) {
+      projects.push(await getProjectById(projectIds[index]));
+    }
+    return projects;
+  }
   
 
   // tickets
