@@ -110,7 +110,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       await sessionStore.logout();
       notificationAgent.create({
         title: "Error",
-        content: error.response.data
+        content: "You got logged out because of error code: " + error.response.status
       });
     }
 
