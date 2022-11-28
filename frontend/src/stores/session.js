@@ -1,22 +1,23 @@
 import { defineStore } from "pinia";
-import axios from 'axios';
 import Cookies from "js-cookie";
 import { computed } from "vue";
 import { useRouter } from 'vue-router';
+import { useFetchAgent } from "./fetchAgent";
 
 export const useSessionStore = defineStore("session", () => {
+  const fetchAgent = useFetchAgent();
+
   const login = async (loginEmail, loginPassword) => {
-    try {
-      const postAuthenticationResponse = 
-        await axios.post('/authentication', { email: loginEmail, password: loginPassword });
-      
+    const postAuthenticationResponse = await fetchAgent.postAuthentication(loginEmail, loginPassword);
+    if (postAuthenticationResponse.isSuccessful) {
       setEmail(loginEmail);
       return { isLoginSuccessful: true, message: "Logged in with email: " + loginEmail };
-    } catch(error) {
-      console.log(error);
+    } else {
+      deleteEmail();
       return { isLoginSuccessful: false, message: error.message };
     }
   }
+
   const logout = async () => {
     // TODO: delete jwt in cookies -> delete call on backend
 
