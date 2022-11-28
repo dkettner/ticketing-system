@@ -6,6 +6,7 @@ import { useSessionStore } from "./session";
 
 export const useFetchAgent = defineStore("fetchAgent", () => {
   const sessionStore = useSessionStore();
+  const notificationAgent = useNotification();
 
   const backendBaseURL = "https://localhost:8080";
   
@@ -107,15 +108,13 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   async function handleError(error) {
     if (error.response.status == 400 || error.response.status == 401) {
       await sessionStore.logout();
+      notificationAgent.create({
+        title: "Error",
+        content: error.response.data
+      });
     }
 
     console.log(error);
-
-    const notificationAgent = useNotification();
-    notificationAgent.create({
-      title: "Error",
-      content: error.response.data
-    });
   }
 
 
