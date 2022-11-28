@@ -2,47 +2,47 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import axios from 'axios';
 import { useSessionStore } from "./session";
+import { useFetchAgent } from "./fetchAgent";
+import { useNotification } from "naive-ui";
 
 export const useUserStore = defineStore("user", () => {
-  const usersPath = "/users";
   const user = ref({
     id: "",
     email: "", 
     name: ""
   });
 
+  const fetchAgent = useFetchAgent();
+  const notificationAgent = useNotification();
+
   const setEmail = (email) => {
     user.value.email = email;
   }
 
   const updateUserById = async (id = user.value.id) => {
-    try {
-      const getUserResponse = await axios.get(usersPath + '/' + id);
+    const getUserResponse = await fetchAgent.getUserById(id);
+    if (getUserResponse.isSuccessful) {
       user.value.id = getUserResponse.data.id;
       user.value.email = getUserResponse.data.email;
       user.value.name = getUserResponse.data.name;
-    } catch(error) {
-      console.log(error);
-      
-      if (error.response.status == 401) {
-        const sessionStore = useSessionStore();
-        await sessionStore.logout();
-      }
+    } else {
+      notificationAgent.create({
+        title: "Error",
+        content: getUserResponse.data.response.data
+      });
     }
   }
   const updateUserByEmail = async (email = user.value.email) => {
-    try {
-      const getUserResponse = await axios.get(usersPath + '?email=' + email, {withCredentials: true});
+    const getUserResponse = await fetchAgent.getUserByEmail(email);
+    if (getUserResponse.isSuccessful) {
       user.value.id = getUserResponse.data.id;
       user.value.email = getUserResponse.data.email;
       user.value.name = getUserResponse.data.name;
-    } catch(error) {
-      console.log(error);
-
-      if (error.response.status == 401) {
-        const sessionStore = useSessionStore();
-        await sessionStore.logout();
-      }
+    } else {
+      notificationAgent.create({
+        title: "Error",
+        content: getUserResponse.data.response.data
+      });
     }
   }
 
