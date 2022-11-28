@@ -1,7 +1,5 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import axios from 'axios';
-import { useSessionStore } from "./session";
 import { useFetchAgent } from "./fetchAgent";
 import { useNotification } from "naive-ui";
 
