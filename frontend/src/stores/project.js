@@ -1,25 +1,21 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import axios from 'axios';
+import { useFetchAgent } from "./fetchAgent";m
 import { useMembershipStore } from "./membership";
 
 export const useProjectStore = defineStore("project", () => {
-  const projectsPath = "/projects";
+  const fetchAgent = useFetchAgent();
   const projects = ref([]);
   const membershipStore = useMembershipStore();
 
   const postNewProject = async (postProjectData) => {
-    try {
-      const postProjectResponse = await axios.post(projectsPath, postProjectData);
+    const postProjectResponse = await fetchAgent.postProject(postProjectData);
+    if (postProjectResponse.isSuccessful) {
       await membershipStore.updateMembershipsByEmail();
       await updateProjectsByAcceptedMemberships();
       return { isPostSuccessful: true, message: "Created a new project with name: " + postProjectData.name };
-    } catch(error) {
-      console.log(error)
-      if (error.response.status == 401) {
-        await sessionStore.logout();
-      }
-      return { isPostSuccessful: false, message: error.response.message };
+    } else {
+      return { isPostSuccessful: false, message: error.response.data };
     }
   }
 
