@@ -15,7 +15,7 @@ export const useProjectStore = defineStore("project", () => {
       await updateProjectsByAcceptedMemberships();
       return { isPostSuccessful: true, message: "Created a new project with name: " + postProjectData.name };
     } else {
-      return { isPostSuccessful: false, message: error.response.data };
+      return { isPostSuccessful: false, message: postProjectResponse.data.response.data };
     }
   }
 
