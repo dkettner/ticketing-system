@@ -20,21 +20,26 @@ export const useProjectStore = defineStore("project", () => {
   }
 
   const updateProjectsByAcceptedMemberships = async () => {
-    try {
-      const projectIds = membershipStore.getAcceptedMembershipsProjectIds();
+    const projectIds = membershipStore.getAcceptedMembershipsProjectIds();
 
-      projects.value = [];
-      for (let index in projectIds) {
-        const getProjectResponse = await axios.get(projectsPath + '/' + projectIds[index], {withCredentials: true});
-        projects.value.push(getProjectResponse.data);
-      }
-    } catch(error) {
-      console.log(error);
-
-      if (error.response.status == 401) {
-        await sessionStore.logout();
+    const newProjects = [];
+    for (let index in projectIds) {
+      const getProjectResponse = await fetchAgent.getProjectById(projectIds[index]);
+      if (getProjectResponse.isSuccessful) {
+        newProjects.push(getProjectResponse.data);
+      } else {
+        console.log("error while updated projects:")
+        console.log(getProjectResponse.data.response.data);
+        return;
       }
     }
+
+    projects.value = [];
+    for (let i in newProjects) {
+      projects.value.push(newProjects[i]);
+    }
+    console.log("updated projects successfully");
+    return;
   }
 
   return {
