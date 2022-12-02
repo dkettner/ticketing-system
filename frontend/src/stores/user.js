@@ -1,7 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
 import { useFetchAgent } from "./fetchAgent";
-import { useNotification } from "naive-ui";
 
 export const useUserStore = defineStore("user", () => {
   const user = ref({
@@ -11,7 +10,6 @@ export const useUserStore = defineStore("user", () => {
   });
 
   const fetchAgent = useFetchAgent();
-  const notificationAgent = useNotification();
 
   const setEmail = (email) => {
     user.value.email = email;
@@ -23,11 +21,9 @@ export const useUserStore = defineStore("user", () => {
       user.value.id = getUserResponse.data.id;
       user.value.email = getUserResponse.data.email;
       user.value.name = getUserResponse.data.name;
+      return { isSuccessful: true, data: getUserResponse.data };
     } else {
-      notificationAgent.create({
-        title: "Error",
-        content: getUserResponse.data.response.data
-      });
+      return { isSuccessful: false, data: getUserResponse.data.response.data };
     }
   }
   const updateUserByEmail = async (email = user.value.email) => {
@@ -36,11 +32,9 @@ export const useUserStore = defineStore("user", () => {
       user.value.id = getUserResponse.data.id;
       user.value.email = getUserResponse.data.email;
       user.value.name = getUserResponse.data.name;
+      return { isSuccessful: true, data: getUserResponse.data };
     } else {
-      notificationAgent.create({
-        title: "Error",
-        content: getUserResponse.data.response.data
-      });
+      return { isSuccessful: false, data: getUserResponse.data.response.data };
     }
   }
 
