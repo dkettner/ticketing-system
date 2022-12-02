@@ -1,6 +1,6 @@
 import { ref } from "vue";
 import { defineStore } from "pinia";
-import { useFetchAgent } from "./fetchAgent";m
+import { useFetchAgent } from "./fetchAgent";
 import { useMembershipStore } from "./membership";
 
 export const useProjectStore = defineStore("project", () => {
@@ -28,7 +28,7 @@ export const useProjectStore = defineStore("project", () => {
       if (getProjectResponse.isSuccessful) {
         newProjects.push(getProjectResponse.data);
       } else {
-        console.log("error while updated projects:")
+        console.log("error while updating projects:")
         console.log(getProjectResponse.data.response.data);
         return;
       }
