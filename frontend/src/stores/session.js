@@ -14,7 +14,7 @@ export const useSessionStore = defineStore("session", () => {
       return { isLoginSuccessful: true, message: "Logged in with email: " + loginEmail };
     } else {
       deleteEmail();
-      return { isLoginSuccessful: false, message: error.message };
+      return { isLoginSuccessful: false, message: postAuthenticationResponse.data.response.data };
     }
   }
 
@@ -23,7 +23,7 @@ export const useSessionStore = defineStore("session", () => {
 
     deleteEmail();
     const router = useRouter();
-    router.go();
+    router.push('/');
   };
   function isLoggedIn() {
     return (Cookies.get("email") !== undefined);
