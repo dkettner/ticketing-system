@@ -25,6 +25,19 @@
     }
   });
 
+  const rules =  {
+    signin_email: {
+      required: true,
+      trigger: ["blur", "input"],
+      message: "Please input email"
+    },
+    signin_password: {
+      required: true,
+      trigger: ["blur", "input"],
+      message: "Please input password"
+    }
+  };
+
   function sendNotification(_title, _content) {
     notificationAgent.create({
       title: _title,
@@ -75,11 +88,13 @@
       pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
     >
       <n-tab-pane name="signin" tab="Sign in">
-        <n-form>
-          <n-form-item-row label="E-Mail">
+        <n-form
+          :rules="rules"
+        >
+          <n-form-item-row label="E-Mail" path="signin_email">
             <n-input v-model:value="signInFormValue.credentials.email"/>
           </n-form-item-row>
-          <n-form-item-row label="Password">
+          <n-form-item-row label="Password" path="signin_password">
             <n-input
               type="password"
               v-model:value="signInFormValue.credentials.password"
