@@ -35,6 +35,26 @@
       required: true,
       trigger: ["blur", "input"],
       message: "Please input password"
+    },
+    signup_name: {
+      required: true,
+      trigger: ["blur", "input"],
+      message: "Please input name"
+    },
+    signup_email: {
+      required: true,
+      trigger: ["blur", "input"],
+      message: "Please input email"
+    },
+    signup_password: {
+      required: true,
+      trigger: ["blur", "input"],
+      message: "Please input password"
+    },
+    signup_reentered_password: {
+      required: true,
+      trigger: ["blur", "input"],
+      message: "Please input password"
     }
   };
 
@@ -116,14 +136,16 @@
         </n-button>
       </n-tab-pane>
       <n-tab-pane name="signup" tab="Sign up">
-        <n-form>
-          <n-form-item-row label="Name">
+        <n-form
+          :rules="rules"
+        >
+          <n-form-item-row label="Name" path="signup_name">
             <n-input v-model:value="signUpFormValue.userPostData.name"/>
           </n-form-item-row>
-          <n-form-item-row label="E-Mail">
+          <n-form-item-row label="E-Mail" path="signup_email">
             <n-input v-model:value="signUpFormValue.userPostData.email"/>
           </n-form-item-row>
-          <n-form-item-row label="Password">
+          <n-form-item-row label="Password" path="signup_password">
             <n-input
               type="password"
               v-model:value="signUpFormValue.userPostData.password"
@@ -139,7 +161,7 @@
               </template>
             </n-input>
           </n-form-item-row>
-          <n-form-item-row label="Reenter Password">
+          <n-form-item-row label="Reenter Password" path="signup_reentered_password">
             <n-input
               type="password"
               v-model:value="signUpFormValue.reenteredPassword"
