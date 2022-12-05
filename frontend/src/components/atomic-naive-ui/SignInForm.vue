@@ -9,6 +9,8 @@
   const router = useRouter();
   const notificationAgent = useNotification();
   const sessionStore = useSessionStore();
+  const signInFormRef = ref(null);
+  const signUpFormRef = ref(null);
 
   const signUpFormValue = ref({
     userPostData: {
@@ -25,38 +27,44 @@
     }
   });
 
-  const rules =  {
-    signin_email: {
-      required: true,
-      trigger: ["blur", "input"],
-      message: "Please input email"
+  const signInRules = {
+    credentials : {
+      email: {
+        required: true,
+        trigger: ["blur", "input"],
+        message: "Please input email"
+      },
+      password: {
+        required: true,
+        trigger: ["blur", "input"],
+        message: "Please input password"
+      }
+    }
+  }
+  const signUpRules = {
+    userPostData: {
+      name: {
+        required: true,
+        trigger: ["blur", "input"],
+        message: "Please input name"
+      },
+      email: {
+        required: true,
+        trigger: ["blur", "input"],
+        message: "Please input email"
+      },
+      password: {
+        required: true,
+        trigger: ["blur", "input"],
+        message: "Please input password"
+      }
     },
-    signin_password: {
-      required: true,
-      trigger: ["blur", "input"],
-      message: "Please input password"
-    },
-    signup_name: {
-      required: true,
-      trigger: ["blur", "input"],
-      message: "Please input name"
-    },
-    signup_email: {
-      required: true,
-      trigger: ["blur", "input"],
-      message: "Please input email"
-    },
-    signup_password: {
-      required: true,
-      trigger: ["blur", "input"],
-      message: "Please input password"
-    },
-    signup_reentered_password: {
+    reenteredPassword: {
       required: true,
       trigger: ["blur", "input"],
       message: "Please input password"
     }
-  };
+  }
 
   function sendNotification(_title, _content) {
     notificationAgent.create({
@@ -109,12 +117,14 @@
     >
       <n-tab-pane name="signin" tab="Sign in">
         <n-form
-          :rules="rules"
+          ref="signInFormRef"
+          :model="signInFormValue"
+          :rules="signInRules"
         >
-          <n-form-item-row label="E-Mail" path="signin_email">
+          <n-form-item-row label="E-Mail" path="credentials.email">
             <n-input v-model:value="signInFormValue.credentials.email"/>
           </n-form-item-row>
-          <n-form-item-row label="Password" path="signin_password">
+          <n-form-item-row label="Password" path="credentials.password">
             <n-input
               type="password"
               v-model:value="signInFormValue.credentials.password"
@@ -137,15 +147,17 @@
       </n-tab-pane>
       <n-tab-pane name="signup" tab="Sign up">
         <n-form
-          :rules="rules"
+          ref="signUpFormRef"
+          :model="signUpFormValue"
+          :rules="signUpRules"
         >
-          <n-form-item-row label="Name" path="signup_name">
+          <n-form-item-row label="Name" path="userPostData.name">
             <n-input v-model:value="signUpFormValue.userPostData.name"/>
           </n-form-item-row>
-          <n-form-item-row label="E-Mail" path="signup_email">
+          <n-form-item-row label="E-Mail" path="userPostData.email">
             <n-input v-model:value="signUpFormValue.userPostData.email"/>
           </n-form-item-row>
-          <n-form-item-row label="Password" path="signup_password">
+          <n-form-item-row label="Password" path="userPostData.password">
             <n-input
               type="password"
               v-model:value="signUpFormValue.userPostData.password"
@@ -161,7 +173,7 @@
               </template>
             </n-input>
           </n-form-item-row>
-          <n-form-item-row label="Reenter Password" path="signup_reentered_password">
+          <n-form-item-row label="Reenter Password" path="reenteredPassword">
             <n-input
               type="password"
               v-model:value="signUpFormValue.reenteredPassword"
