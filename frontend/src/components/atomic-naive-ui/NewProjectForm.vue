@@ -1,43 +1,3 @@
-<template>
-  <n-form
-    ref="formRef"
-    :model="projectPostData"
-    :rules="rules"
-    :size="medium"
-    label-placement="top"
-    style="min-width: 300px; width: 40%; max-width: 500px; background-color: #EEEEEE; padding: 20px;"
-  >
-    <n-grid :span="24" :x-gap="24" :cols ="1">
-      <n-form-item-gi :span="24" label="Project Name" path="name">
-        <n-input v-model:value="projectPostData.name" placeholder="Project Name" />
-      </n-form-item-gi>
-      <n-form-item-gi :span="24" label="Description" path="description">
-        <n-input
-          v-model:value="projectPostData.description"
-          placeholder="Description"
-          type="textarea"
-          :autosize="{
-            minRows: 5,
-            maxRows: 10
-          }"
-        />
-      </n-form-item-gi>
-
-      <n-gi :span="24">
-        <div style="display: flex; justify-content: flex-end">
-          <n-button type="error" @click="handleCancelButtonClick">
-            Cancel
-          </n-button>
-          &nbsp;
-          <n-button type="primary" @click="handleCreateButtonClick">
-            Create New Project
-          </n-button>
-        </div>
-      </n-gi>
-    </n-grid>
-  </n-form>
-</template>
-
 <script setup>
   import { ref, defineEmits } from "vue";
   import { useProjectStore } from "../../stores/project";
@@ -98,3 +58,43 @@
     });
   }
 </script>
+
+<template>
+  <n-form
+    ref="formRef"
+    :model="projectPostData"
+    :rules="rules"
+    :size="medium"
+    label-placement="top"
+    style="min-width: 300px; width: 40%; max-width: 500px; background-color: #EEEEEE; padding: 20px;"
+  >
+    <n-grid :span="24" :x-gap="24" :cols ="1">
+      <n-form-item-gi :span="24" label="Project Name" path="name">
+        <n-input v-model:value="projectPostData.name" placeholder="Project Name" />
+      </n-form-item-gi>
+      <n-form-item-gi :span="24" label="Description" path="description">
+        <n-input
+          v-model:value="projectPostData.description"
+          placeholder="Description"
+          type="textarea"
+          :autosize="{
+            minRows: 5,
+            maxRows: 10
+          }"
+        />
+      </n-form-item-gi>
+
+      <n-gi :span="24">
+        <div style="display: flex; justify-content: flex-end">
+          <n-button type="error" @click="handleCancelButtonClick">
+            Cancel
+          </n-button>
+          &nbsp;
+          <n-button type="primary" @click="handleCreateButtonClick">
+            Create New Project
+          </n-button>
+        </div>
+      </n-gi>
+    </n-grid>
+  </n-form>
+</template>
