@@ -80,7 +80,7 @@ public class TicketSystemService {
     @PreAuthorize("hasAnyAuthority(" +
             "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
             "'ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
-    public MembershipResponseDto getMemberShipById(UUID id) {
+    public MembershipResponseDto getMembershipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
