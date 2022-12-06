@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.common.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.common.events.UserCreatedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.Project;
@@ -27,8 +28,11 @@ public class ProjectService {
 
 
     // create
-    public Project addProject(Project project) {
-        return projectRepository.save(project);
+
+    public Project addProject(Project project, UUID userId) {
+        Project initializedProject = projectRepository.save(project);
+        eventPublisher.publishEvent(new ProjectCreatedEvent(initializedProject.getId(), userId));
+        return initializedProject;
     }
 
     @EventListener
@@ -38,8 +42,7 @@ public class ProjectService {
                 "Event Example Project",
                 "This project was created automatically. Use it to get accustomed to everything."
         );
-        Project initializedProject = this.addProject(defaultProject);
-
+        Project initializedProject = projectRepository.save(defaultProject);
         eventPublisher.publishEvent(new DefaultProjectCreatedEvent(initializedProject.getId(), userCreatedEvent.getUserId()));
     }
 
