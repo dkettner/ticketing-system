@@ -2,7 +2,6 @@ package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.phase.domain.Phase;
-import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
@@ -140,14 +139,8 @@ public class PhaseService {
 
     // delete
 
-    public void deleteById(UUID id) throws NoPhaseFoundException, LastPhaseException {
+    public void deleteById(UUID id) throws NoPhaseFoundException {
         Phase phase = this.getPhaseById(id);
-        if (phase.isFirst() && phase.isLast()) {
-            throw new LastPhaseException(
-                    "could not delete phase with id: " + id + " " +
-                            "because it is the last phase of the project with id: " + phase.getProjectId()
-            );
-        }
 
         this.removePhaseFromCurrentPosition(phase);
 
