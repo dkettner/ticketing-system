@@ -229,7 +229,8 @@ public class TicketSystemService {
 
     public ProjectResponseDto addProject(ProjectPostDto projectPostDto, UUID postingUserId) {
         Project project = projectService.addProject(
-                dtoMapper.mapProjectPostDtoToProject(projectPostDto)
+                dtoMapper.mapProjectPostDtoToProject(projectPostDto),
+                postingUserId
         );
 
         this.addDefaultMembershipForProject(project, postingUserId);
