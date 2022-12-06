@@ -10,8 +10,6 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
-import com.kett.TicketSystem.membership.domain.Role;
-import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
@@ -142,13 +140,6 @@ public class TicketSystemService {
         membershipService.deleteMembershipById(id);
     }
 
-    // TODO: too dirty, this bypasses some checks
-    private void addDefaultMembershipForProject(Project project, UUID postingUserId) {
-        Membership defaultMembership = new Membership(project.getId(), postingUserId, Role.ADMIN);
-        defaultMembership.setState(State.ACCEPTED);
-        this.membershipService.addMembership(defaultMembership);
-    }
-
 
     // phase
 
@@ -183,18 +174,6 @@ public class TicketSystemService {
                 dtoMapper.mapPhasePostDtoToPhase(phasePostDto), phasePostDto.getPreviousPhaseId()
         );
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
-    }
-
-    private void addDefaultPhasesForProject(Project project) {
-        PhasePostDto toDo = new PhasePostDto(project.getId(), "TO DO", null);
-        PhasePostDto doing = new PhasePostDto(project.getId(), "DOING", null);
-        PhasePostDto review = new PhasePostDto(project.getId(), "REVIEW", null);
-        PhasePostDto done = new PhasePostDto(project.getId(), "DONE", null);
-
-        this.addPhase(done);
-        this.addPhase(review);
-        this.addPhase(doing);
-        this.addPhase(toDo);
     }
 
 
@@ -232,10 +211,6 @@ public class TicketSystemService {
                 dtoMapper.mapProjectPostDtoToProject(projectPostDto),
                 postingUserId
         );
-
-        this.addDefaultMembershipForProject(project, postingUserId);
-        this.addDefaultPhasesForProject(project);
-
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
@@ -259,15 +234,6 @@ public class TicketSystemService {
                 projectPatchDto.getName(),
                 projectPatchDto.getDescription()
         );
-    }
-
-    private void addDefaultProjectForNewUser(UUID userId) {
-        ProjectPostDto defaultProject = new ProjectPostDto(
-                "Example Project",
-                "This project was created automatically. Use it to get accustomed to everything."
-        );
-
-        this.addProject(defaultProject, userId);
     }
 
 
@@ -401,8 +367,6 @@ public class TicketSystemService {
         User user = userService.addUser(
                 dtoMapper.mapUserPostDtoToUser(userPostDto)
         );
-
-        this.addDefaultProjectForNewUser(user.getId());
 
         return dtoMapper.mapUserToUserResponseDto(user);
     }
