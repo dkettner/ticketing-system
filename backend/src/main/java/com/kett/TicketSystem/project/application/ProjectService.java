@@ -1,10 +1,15 @@
 package com.kett.TicketSystem.project.application;
 
+import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.common.events.UserCreatedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.exceptions.*;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -12,16 +17,30 @@ import java.util.UUID;
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(ProjectRepository projectRepository, ApplicationEventPublisher eventPublisher) {
         this.projectRepository = projectRepository;
+        this.eventPublisher = eventPublisher;
     }
 
 
     // create
     public Project addProject(Project project) {
         return projectRepository.save(project);
+    }
+
+    @EventListener
+    @Async
+    public void handleUserCreated(UserCreatedEvent userCreatedEvent) {
+        Project defaultProject = new Project(
+                "Event Example Project",
+                "This project was created automatically. Use it to get accustomed to everything."
+        );
+        Project initializedProject = this.addProject(defaultProject);
+
+        eventPublisher.publishEvent(new DefaultProjectCreatedEvent(initializedProject.getId(), userCreatedEvent.getUserId()));
     }
 
 
