@@ -1,7 +1,7 @@
 package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
-import com.kett.TicketSystem.application.exceptions.NoParametersException;
+import com.kett.TicketSystem.common.exceptions.NoParametersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;

@@ -1,8 +1,8 @@
 package com.kett.TicketSystem.user.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
-import com.kett.TicketSystem.application.exceptions.NoParametersException;
-import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.exceptions.NoParametersException;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.application.dto.UserPatchDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;

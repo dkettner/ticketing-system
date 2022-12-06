@@ -1,9 +1,9 @@
 package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.application.exceptions.ImpossibleException;
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.authentication.AuthenticationService;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
-import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPatchRoleDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;

@@ -1,9 +1,9 @@
-package com.kett.TicketSystem.application;
+package com.kett.TicketSystem.common.exceptions;
 
-import com.kett.TicketSystem.application.exceptions.ImpossibleException;
-import com.kett.TicketSystem.application.exceptions.NoParametersException;
-import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
-import com.kett.TicketSystem.domainprimitives.EmailAddressException;
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
+import com.kett.TicketSystem.common.exceptions.NoParametersException;
+import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddressException;
 import com.kett.TicketSystem.membership.domain.exceptions.*;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;

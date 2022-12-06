@@ -1,9 +1,9 @@
 package com.kett.TicketSystem.membership.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
-import com.kett.TicketSystem.application.exceptions.NoParametersException;
-import com.kett.TicketSystem.application.exceptions.TooManyParametersException;
-import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.exceptions.NoParametersException;
+import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.dto.MembershipPatchRoleDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;

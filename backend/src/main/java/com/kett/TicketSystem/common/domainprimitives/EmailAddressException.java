@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.domainprimitives;
+package com.kett.TicketSystem.common.domainprimitives;
 
 public class EmailAddressException extends RuntimeException {
     public EmailAddressException(String message) {

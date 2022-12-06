@@ -6,7 +6,7 @@ import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
-import com.kett.TicketSystem.application.exceptions.ImpossibleException;
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;

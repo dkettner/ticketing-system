@@ -3,7 +3,7 @@ package com.kett.TicketSystem.restapitemporary;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
-import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.phase.application.PhaseService;

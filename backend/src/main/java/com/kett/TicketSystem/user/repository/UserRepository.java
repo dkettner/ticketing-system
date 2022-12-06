@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.user.repository;
 
-import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.domain.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

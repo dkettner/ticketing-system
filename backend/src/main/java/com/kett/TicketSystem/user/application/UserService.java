@@ -1,7 +1,7 @@
 package com.kett.TicketSystem.user.application;
 
-import com.kett.TicketSystem.application.exceptions.ImpossibleException;
-import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
