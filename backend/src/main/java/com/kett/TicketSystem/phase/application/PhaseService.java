@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.phase.application;
 
+import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
@@ -8,6 +9,8 @@ import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -78,6 +81,20 @@ public class PhaseService {
         phaseRepository.save(previousPhase);
 
         return phaseRepository.save(phase);
+    }
+
+    @EventListener
+    @Async
+    public void handleDefaultProjectCreated(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
+        Phase toDo = new Phase(defaultProjectCreatedEvent.getProjectId(), "TO DO", null, null);
+        Phase doing = new Phase(defaultProjectCreatedEvent.getProjectId(), "DOING", null, null);
+        Phase review = new Phase(defaultProjectCreatedEvent.getProjectId(), "REVIEW", null, null);
+        Phase done = new Phase(defaultProjectCreatedEvent.getProjectId(), "DONE", null, null);
+
+        this.addPhase(done, null);
+        this.addPhase(review, null);
+        this.addPhase(doing, null);
+        this.addPhase(toDo, null);
     }
 
 
