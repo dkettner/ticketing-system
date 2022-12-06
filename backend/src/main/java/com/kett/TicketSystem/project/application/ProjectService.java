@@ -39,7 +39,7 @@ public class ProjectService {
     @Async
     public void handleUserCreated(UserCreatedEvent userCreatedEvent) {
         Project defaultProject = new Project(
-                "Event Example Project",
+                "Example Project",
                 "This project was created automatically. Use it to get accustomed to everything."
         );
         Project initializedProject = projectRepository.save(defaultProject);
