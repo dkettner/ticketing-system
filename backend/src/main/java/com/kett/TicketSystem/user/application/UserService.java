@@ -4,11 +4,13 @@ import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.user.domain.User;
+import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.domain.exceptions.EmailAlreadyInUseException;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,14 +26,21 @@ import java.util.UUID;
 @Repository
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final MembershipService membershipService;
+    private final PasswordEncoder passwordEncoder;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MembershipService membershipService) {
+    public UserService(
+            UserRepository userRepository,
+            MembershipService membershipService,
+            PasswordEncoder passwordEncoder,
+            ApplicationEventPublisher eventPublisher
+    ) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
         this.membershipService = membershipService;
+        this.passwordEncoder = passwordEncoder;
+        this.eventPublisher = eventPublisher;
     }
 
 
@@ -43,7 +52,9 @@ public class UserService implements UserDetailsService {
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        User initializedUser = userRepository.save(user);
+        eventPublisher.publishEvent(new UserCreatedEvent(initializedUser.getId()));
+        return initializedUser;
     }
 
 
