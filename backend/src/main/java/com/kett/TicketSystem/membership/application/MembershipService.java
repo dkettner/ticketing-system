@@ -1,5 +1,7 @@
 package com.kett.TicketSystem.membership.application;
 
+import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.common.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
@@ -8,6 +10,7 @@ import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundExcep
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +40,28 @@ public class MembershipService {
             );
         }
         return membershipRepository.save(membership);
+    }
+
+    @EventListener
+    public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
+        Membership defaultMembership = new Membership(
+                projectCreatedEvent.getProjectId(),
+                projectCreatedEvent.getUserId(),
+                Role.ADMIN
+        );
+        defaultMembership.setState(State.ACCEPTED);
+        this.addMembership(defaultMembership);
+    }
+
+    @EventListener
+    public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
+        Membership defaultMembership = new Membership(
+                defaultProjectCreatedEvent.getProjectId(),
+                defaultProjectCreatedEvent.getUserId(),
+                Role.ADMIN
+        );
+        defaultMembership.setState(State.ACCEPTED);
+        this.addMembership(defaultMembership);
     }
 
 
