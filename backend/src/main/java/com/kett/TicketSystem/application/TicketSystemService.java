@@ -1,6 +1,5 @@
 package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.authentication.AuthenticationService;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
@@ -271,11 +270,6 @@ public class TicketSystemService {
         if (!projectService.isExistentById(projectId)) {
             throw new NoProjectFoundException("could not find project with id: " + projectId);
         }
-        if (!phaseService.hasPhasesWithProjectId(projectId)) {
-            throw new NoPhaseInProjectException(
-                    "Could not add ticket because the project with id: " + projectId + " has no phases."
-            );
-        }
         if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), projectId)) {
             throw new InvalidProjectMembersException(
                     "not all assignees are part of the project with id: " + projectId
@@ -284,9 +278,8 @@ public class TicketSystemService {
 
         UUID phaseId = phaseService
                 .getFirstPhaseByProjectId(projectId)
-                .orElseThrow(() -> new ImpossibleException(
-                        "!!! This should not happen. " +
-                        "The project with id: " + projectId + " exists but has no phases."
+                .orElseThrow(() -> new NoPhaseInProjectException(
+                        "Could not add ticket because the project with id: " + projectId + " has no phases."
                 ))
                 .getId();
 
