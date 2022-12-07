@@ -2,6 +2,7 @@ package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.common.events.ProjectCreatedEvent;
+import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.common.events.UserCreatedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.Project;
@@ -86,6 +87,8 @@ public class ProjectService {
                     "!!! This should not happen. " +
                     "Multiple projects were deleted when deleting project with id: " + id
             );
+        } else {
+            eventPublisher.publishEvent(new ProjectDeletedEvent(id));
         }
     }
 }
