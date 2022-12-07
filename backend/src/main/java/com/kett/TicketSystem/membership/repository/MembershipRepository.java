@@ -10,7 +10,8 @@ import java.util.UUID;
 public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     List<Membership> findByUserId(UUID userId);
     List<Membership> findByProjectId(UUID projectId);
-    List<Membership> findByUserIdAndStateEquals(UUID projectId, State state);
+    List<Membership> findByProjectIdAndStateEquals(UUID projectId, State state);
+    List<Membership> findByUserIdAndStateEquals(UUID userId, State state);
 
     Boolean existsByUserIdAndProjectId(UUID userId, UUID projectId);
 

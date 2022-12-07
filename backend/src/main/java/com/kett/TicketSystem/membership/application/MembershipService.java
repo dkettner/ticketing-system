@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -140,12 +141,9 @@ public class MembershipService {
     // delete
 
     public void deleteMembershipById(UUID id) throws NoMembershipFoundException {
-        // TODO: Check if last admin -> block? assign random other member as admin?
-        // TODO: check if last membership -> trigger delete project with event
-
         Membership membership = this.getMembershipById(id);
-        Long numOfDeletedMemberships = membershipRepository.removeById(id);
 
+        Long numOfDeletedMemberships = membershipRepository.removeById(id);
         if (numOfDeletedMemberships == 0) {
             throw new NoMembershipFoundException("could not delete because there was no membership with id: " + id);
         } else if (numOfDeletedMemberships > 1) {
@@ -156,6 +154,33 @@ public class MembershipService {
         } else {
             eventPublisher.publishEvent(new MembershipDeletedEvent(id, membership.getProjectId(), membership.getUserId()));
         }
+
+        // handle edge cases
+        if (projectHasNoMembers(membership.getProjectId())) {
+            eventPublisher.publishEvent(new LastProjectMemberDeletedEvent(membership.getUserId(), membership.getProjectId()));
+        } else if (projectHasNoAdmins(membership.getProjectId())) {
+            promoteRandomMemberToAdmin(membership.getProjectId());
+        }
+    }
+
+    private Boolean projectHasNoMembers(UUID projectId) {
+        return membershipRepository
+                .findByProjectIdAndStateEquals(projectId, State.ACCEPTED)
+                .isEmpty();
+    }
+
+    private Boolean projectHasNoAdmins(UUID projectId) {
+        return membershipRepository
+                .findByProjectIdAndStateEquals(projectId, State.ACCEPTED)
+                .stream()
+                .noneMatch(membership -> membership.getRole().equals(Role.ADMIN));
+    }
+
+    private void promoteRandomMemberToAdmin(UUID projectId) {
+        List<Membership> memberships = this.getMembershipsByProjectId(projectId);
+        Membership newAdmin = memberships.get(new Random().nextInt(memberships.size()));
+        newAdmin.setRole(Role.ADMIN);
+        membershipRepository.save(newAdmin);
     }
 
     @EventListener
