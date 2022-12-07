@@ -16,6 +16,7 @@ import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
+import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseInProjectException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
@@ -266,20 +267,26 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto) {
-        if (!projectService.isExistentById(ticketPostDto.getProjectId())) {
-            throw new NoProjectFoundException("could not find project with id: " + ticketPostDto.getProjectId());
+        UUID projectId = ticketPostDto.getProjectId();
+        if (!projectService.isExistentById(projectId)) {
+            throw new NoProjectFoundException("could not find project with id: " + projectId);
         }
-        if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
+        if (!phaseService.hasPhasesWithProjectId(projectId)) {
+            throw new NoPhaseInProjectException(
+                    "Could not add ticket because the project with id: " + projectId + " has no phases."
+            );
+        }
+        if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), projectId)) {
             throw new InvalidProjectMembersException(
-                    "not all assignees are part of the project with id: " + ticketPostDto.getProjectId()
+                    "not all assignees are part of the project with id: " + projectId
             );
         }
 
         UUID phaseId = phaseService
-                .getFirstPhaseByProjectId(ticketPostDto.getProjectId())
+                .getFirstPhaseByProjectId(projectId)
                 .orElseThrow(() -> new ImpossibleException(
                         "!!! This should not happen. " +
-                        "The project with id: " + ticketPostDto.getProjectId() + " exists but has no phases."
+                        "The project with id: " + projectId + " exists but has no phases."
                 ))
                 .getId();
 
