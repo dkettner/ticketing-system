@@ -1,9 +1,6 @@
 package com.kett.TicketSystem.membership.application;
 
-import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
-import com.kett.TicketSystem.common.events.MembershipDeletedEvent;
-import com.kett.TicketSystem.common.events.ProjectCreatedEvent;
-import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
+import com.kett.TicketSystem.common.events.*;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
@@ -169,5 +166,12 @@ public class MembershipService {
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deleteMembershipsByProjectId(projectDeletedEvent.getProjectId());
+    }
+
+    @EventListener
+    @Async
+    public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
+        List<Membership> memberships = getMembershipsByUserId(userDeletedEvent.getUserId());
+        memberships.forEach(membership -> this.deleteMembershipById(membership.getId()));
     }
 }
