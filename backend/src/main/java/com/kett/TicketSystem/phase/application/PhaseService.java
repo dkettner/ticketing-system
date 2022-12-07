@@ -183,4 +183,10 @@ public class PhaseService {
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deletePhasesByProjectId(projectDeletedEvent.getProjectId());
     }
+
+    public Boolean hasPhasesWithProjectId(UUID projectId) {
+        return phaseRepository
+                .findByProjectId(projectId)
+                .size() > 0;
+    }
 }
