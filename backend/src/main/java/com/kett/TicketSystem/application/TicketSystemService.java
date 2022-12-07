@@ -160,11 +160,7 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#phasePostDto.projectId))")
-    public PhaseResponseDto addPhaseAuthorized(PhasePostDto phasePostDto) {
-        return addPhase(phasePostDto);
-    }
-
-    private PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
+    public PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
         UUID projectId = phasePostDto.getProjectId();
         if (!projectService.isExistentById(projectId)) {
             throw new NoProjectFoundException("could not find project with id: " + projectId);

@@ -50,7 +50,7 @@ public class PhaseController {
 
     @PostMapping
     public ResponseEntity<PhaseResponseDto> postPhase(@RequestBody PhasePostDto phasePostDto) {
-        PhaseResponseDto phaseResponseDto = ticketSystemService.addPhaseAuthorized(phasePostDto);
+        PhaseResponseDto phaseResponseDto = ticketSystemService.addPhase(phasePostDto);
         URI returnURI = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
