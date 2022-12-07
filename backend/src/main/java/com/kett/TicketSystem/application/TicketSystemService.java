@@ -221,9 +221,6 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")
     public void deleteProjectById(UUID id) {
-        ticketService.deleteTicketsByProjectId(id);
-        phaseService.deletePhasesByProjectId(id);
-        membershipService.deleteMembershipsByProjectId(id);
         projectService.deleteProjectById(id);
     }
 
