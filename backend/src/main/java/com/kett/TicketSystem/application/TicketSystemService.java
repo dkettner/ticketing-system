@@ -134,9 +134,6 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
             "'ROLE_USER'.concat(@membershipService.getUserIdByMembershipId(#id)))")
     public void deleteMembershipById(UUID id) {
-        Membership membership = membershipService.getMembershipById(id);
-        this.removeUserFromAllTicketsOfProject(membership.getUserId(), membership.getProjectId());
-
         membershipService.deleteMembershipById(id);
     }
 
@@ -328,19 +325,6 @@ public class TicketSystemService {
             "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
     public void deleteTicketById(UUID id) {
         ticketService.deleteTicketById(id);
-    }
-
-    private void removeUserFromAllTicketsOfProject(UUID userId, UUID projectId) {
-        List<UUID> projectPhaseIds =
-                phaseService
-                        .getPhasesByProjectId(projectId)
-                        .stream()
-                        .map(Phase::getId)
-                        .toList();
-
-        List<Ticket> tickets = ticketService.getTicketsByPhaseIdsAndAssigneeId(projectPhaseIds, userId);
-        tickets.forEach(ticket -> ticket.removeAssignee(userId));
-        ticketService.saveAll(tickets);
     }
 
 
