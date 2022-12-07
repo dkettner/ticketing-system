@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.domainprimitives;
+package com.kett.TicketSystem.common.domainprimitives;
 
 import lombok.*;
 import org.apache.commons.validator.routines.EmailValidator;

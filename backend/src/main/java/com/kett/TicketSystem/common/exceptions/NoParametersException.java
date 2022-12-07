@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.application.exceptions;
+package com.kett.TicketSystem.common.exceptions;
 
 public class NoParametersException extends RuntimeException {
     public NoParametersException(String message) {

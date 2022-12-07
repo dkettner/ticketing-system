@@ -1,5 +1,7 @@
 package com.kett.TicketSystem.domainprimitives;
 
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddressException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

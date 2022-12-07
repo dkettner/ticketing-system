@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.user.domain;
 
-import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import lombok.*;
 

@@ -2,7 +2,7 @@ package com.kett.TicketSystem.project.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
 
-import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.project.application.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

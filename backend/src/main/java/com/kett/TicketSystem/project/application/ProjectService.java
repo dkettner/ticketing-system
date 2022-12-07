@@ -1,10 +1,14 @@
 package com.kett.TicketSystem.project.application;
 
-import com.kett.TicketSystem.application.exceptions.ImpossibleException;
+import com.kett.TicketSystem.common.events.*;
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.exceptions.*;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -12,16 +16,32 @@ import java.util.UUID;
 @Service
 public class ProjectService {
     private final ProjectRepository projectRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository) {
+    public ProjectService(ProjectRepository projectRepository, ApplicationEventPublisher eventPublisher) {
         this.projectRepository = projectRepository;
+        this.eventPublisher = eventPublisher;
     }
 
 
     // create
-    public Project addProject(Project project) {
-        return projectRepository.save(project);
+
+    public Project addProject(Project project, UUID userId) {
+        Project initializedProject = projectRepository.save(project);
+        eventPublisher.publishEvent(new ProjectCreatedEvent(initializedProject.getId(), userId));
+        return initializedProject;
+    }
+
+    @EventListener
+    @Async
+    public void handleUserCreated(UserCreatedEvent userCreatedEvent) {
+        Project defaultProject = new Project(
+                "Example Project",
+                "This project was created automatically. Use it to get accustomed to everything."
+        );
+        Project initializedProject = projectRepository.save(defaultProject);
+        eventPublisher.publishEvent(new DefaultProjectCreatedEvent(initializedProject.getId(), userCreatedEvent.getUserId()));
     }
 
 
@@ -64,6 +84,14 @@ public class ProjectService {
                     "!!! This should not happen. " +
                     "Multiple projects were deleted when deleting project with id: " + id
             );
+        } else {
+            eventPublisher.publishEvent(new ProjectDeletedEvent(id));
         }
+    }
+
+    @EventListener
+    @Async
+    public void handleLastProjectMemberDeletedEvent(LastProjectMemberDeletedEvent lastProjectMemberDeletedEvent) {
+        this.deleteProjectById(lastProjectMemberDeletedEvent.getProjectId());
     }
 }

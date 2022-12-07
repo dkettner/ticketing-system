@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.authentication;
+package com.kett.TicketSystem.common;
 
 import com.kett.TicketSystem.authentication.jwt.JwtAuthenticationEntryPoint;
 import com.kett.TicketSystem.authentication.jwt.JwtAuthenticationFilter;

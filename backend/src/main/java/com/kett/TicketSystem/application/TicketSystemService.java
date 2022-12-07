@@ -1,23 +1,21 @@
 package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.application.exceptions.ImpossibleException;
 import com.kett.TicketSystem.authentication.AuthenticationService;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
-import com.kett.TicketSystem.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPatchRoleDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
-import com.kett.TicketSystem.membership.domain.Role;
-import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
+import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseInProjectException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
@@ -80,7 +78,7 @@ public class TicketSystemService {
     @PreAuthorize("hasAnyAuthority(" +
             "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
             "'ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
-    public MembershipResponseDto getMemberShipById(UUID id) {
+    public MembershipResponseDto getMembershipById(UUID id) {
         Membership membership = membershipService.getMembershipById(id);
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
@@ -136,17 +134,7 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
             "'ROLE_USER'.concat(@membershipService.getUserIdByMembershipId(#id)))")
     public void deleteMembershipById(UUID id) {
-        Membership membership = membershipService.getMembershipById(id);
-        this.removeUserFromAllTicketsOfProject(membership.getUserId(), membership.getProjectId());
-
         membershipService.deleteMembershipById(id);
-    }
-
-    // TODO: too dirty, this bypasses some checks
-    private void addDefaultMembershipForProject(Project project, UUID postingUserId) {
-        Membership defaultMembership = new Membership(project.getId(), postingUserId, Role.ADMIN);
-        defaultMembership.setState(State.ACCEPTED);
-        this.membershipService.addMembership(defaultMembership);
     }
 
 
@@ -169,11 +157,7 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#phasePostDto.projectId))")
-    public PhaseResponseDto addPhaseAuthorized(PhasePostDto phasePostDto) {
-        return addPhase(phasePostDto);
-    }
-
-    private PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
+    public PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
         UUID projectId = phasePostDto.getProjectId();
         if (!projectService.isExistentById(projectId)) {
             throw new NoProjectFoundException("could not find project with id: " + projectId);
@@ -183,18 +167,6 @@ public class TicketSystemService {
                 dtoMapper.mapPhasePostDtoToPhase(phasePostDto), phasePostDto.getPreviousPhaseId()
         );
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
-    }
-
-    private void addDefaultPhasesForProject(Project project) {
-        PhasePostDto toDo = new PhasePostDto(project.getId(), "TO DO", null);
-        PhasePostDto doing = new PhasePostDto(project.getId(), "DOING", null);
-        PhasePostDto review = new PhasePostDto(project.getId(), "REVIEW", null);
-        PhasePostDto done = new PhasePostDto(project.getId(), "DONE", null);
-
-        this.addPhase(done);
-        this.addPhase(review);
-        this.addPhase(doing);
-        this.addPhase(toDo);
     }
 
 
@@ -229,12 +201,9 @@ public class TicketSystemService {
 
     public ProjectResponseDto addProject(ProjectPostDto projectPostDto, UUID postingUserId) {
         Project project = projectService.addProject(
-                dtoMapper.mapProjectPostDtoToProject(projectPostDto)
+                dtoMapper.mapProjectPostDtoToProject(projectPostDto),
+                postingUserId
         );
-
-        this.addDefaultMembershipForProject(project, postingUserId);
-        this.addDefaultPhasesForProject(project);
-
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
@@ -246,9 +215,6 @@ public class TicketSystemService {
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")
     public void deleteProjectById(UUID id) {
         projectService.deleteProjectById(id);
-        phaseService.deletePhasesByProjectId(id);
-        ticketService.deleteTicketsByProjectId(id);
-        membershipService.deleteMembershipsByProjectId(id);
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")
@@ -258,15 +224,6 @@ public class TicketSystemService {
                 projectPatchDto.getName(),
                 projectPatchDto.getDescription()
         );
-    }
-
-    private void addDefaultProjectForNewUser(UUID userId) {
-        ProjectPostDto defaultProject = new ProjectPostDto(
-                "Example Project",
-                "This project was created automatically. Use it to get accustomed to everything."
-        );
-
-        this.addProject(defaultProject, userId);
     }
 
 
@@ -306,20 +263,20 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto) {
-        if (!projectService.isExistentById(ticketPostDto.getProjectId())) {
-            throw new NoProjectFoundException("could not find project with id: " + ticketPostDto.getProjectId());
+        UUID projectId = ticketPostDto.getProjectId();
+        if (!projectService.isExistentById(projectId)) {
+            throw new NoProjectFoundException("could not find project with id: " + projectId);
         }
-        if (!membershipService.areAllUsersProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
+        if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), projectId)) {
             throw new InvalidProjectMembersException(
-                    "not all assignees are part of the project with id: " + ticketPostDto.getProjectId()
+                    "not all assignees are part of the project with id: " + projectId
             );
         }
 
         UUID phaseId = phaseService
-                .getFirstPhaseByProjectId(ticketPostDto.getProjectId())
-                .orElseThrow(() -> new ImpossibleException(
-                        "!!! This should not happen. " +
-                        "The project with id: " + ticketPostDto.getProjectId() + " exists but has no phases."
+                .getFirstPhaseByProjectId(projectId)
+                .orElseThrow(() -> new NoPhaseInProjectException(
+                        "Could not add ticket because the project with id: " + projectId + " has no phases."
                 ))
                 .getId();
 
@@ -346,7 +303,7 @@ public class TicketSystemService {
         }
 
         if (ticketPatchDto.getAssigneeIds() != null) {
-            if (!membershipService.areAllUsersProjectMembers(ticketPatchDto.getAssigneeIds(), projectIdOfTicket)) {
+            if (!membershipService.allUsersAreProjectMembers(ticketPatchDto.getAssigneeIds(), projectIdOfTicket)) {
                 throw new InvalidProjectMembersException(
                         "not all assignees are part of the project with id: " + projectIdOfTicket
                 );
@@ -370,19 +327,6 @@ public class TicketSystemService {
         ticketService.deleteTicketById(id);
     }
 
-    private void removeUserFromAllTicketsOfProject(UUID userId, UUID projectId) {
-        List<UUID> projectPhaseIds =
-                phaseService
-                        .getPhasesByProjectId(projectId)
-                        .stream()
-                        .map(Phase::getId)
-                        .toList();
-
-        List<Ticket> tickets = ticketService.getTicketsByPhaseIdsAndAssigneeId(projectPhaseIds, userId);
-        tickets.forEach(ticket -> ticket.removeAssignee(userId));
-        ticketService.saveAll(tickets);
-    }
-
 
     // user
 
@@ -400,8 +344,6 @@ public class TicketSystemService {
         User user = userService.addUser(
                 dtoMapper.mapUserPostDtoToUser(userPostDto)
         );
-
-        this.addDefaultProjectForNewUser(user.getId());
 
         return dtoMapper.mapUserToUserResponseDto(user);
     }

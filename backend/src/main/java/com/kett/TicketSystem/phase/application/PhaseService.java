@@ -1,13 +1,16 @@
 package com.kett.TicketSystem.phase.application;
 
+import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.phase.domain.Phase;
-import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
-import com.kett.TicketSystem.application.exceptions.ImpossibleException;
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -80,6 +83,20 @@ public class PhaseService {
         return phaseRepository.save(phase);
     }
 
+    @EventListener
+    @Async
+    public void handleDefaultProjectCreated(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
+        Phase toDo = new Phase(defaultProjectCreatedEvent.getProjectId(), "TO DO", null, null);
+        Phase doing = new Phase(defaultProjectCreatedEvent.getProjectId(), "DOING", null, null);
+        Phase review = new Phase(defaultProjectCreatedEvent.getProjectId(), "REVIEW", null, null);
+        Phase done = new Phase(defaultProjectCreatedEvent.getProjectId(), "DONE", null, null);
+
+        this.addPhase(done, null);
+        this.addPhase(review, null);
+        this.addPhase(doing, null);
+        this.addPhase(toDo, null);
+    }
+
 
     // read
 
@@ -123,14 +140,8 @@ public class PhaseService {
 
     // delete
 
-    public void deleteById(UUID id) throws NoPhaseFoundException, LastPhaseException {
+    public void deleteById(UUID id) throws NoPhaseFoundException {
         Phase phase = this.getPhaseById(id);
-        if (phase.isFirst() && phase.isLast()) {
-            throw new LastPhaseException(
-                    "could not delete phase with id: " + id + " " +
-                            "because it is the last phase of the project with id: " + phase.getProjectId()
-            );
-        }
 
         this.removePhaseFromCurrentPosition(phase);
 
@@ -165,5 +176,17 @@ public class PhaseService {
 
     public void deletePhasesByProjectId(UUID projectId) {
         phaseRepository.deleteByProjectId(projectId);
+    }
+
+    @EventListener
+    @Async
+    public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
+        this.deletePhasesByProjectId(projectDeletedEvent.getProjectId());
+    }
+
+    public Boolean hasPhasesWithProjectId(UUID projectId) {
+        return phaseRepository
+                .findByProjectId(projectId)
+                .size() > 0;
     }
 }
