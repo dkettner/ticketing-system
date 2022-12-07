@@ -1,10 +1,13 @@
 package com.kett.TicketSystem.ticket.application;
 
+import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -126,5 +129,11 @@ public class TicketService {
 
     public void deleteTicketsByProjectId(UUID projectId) {
         ticketRepository.deleteByProjectId(projectId);
+    }
+
+    @EventListener
+    @Async
+    public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
+        this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
     }
 }
