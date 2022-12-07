@@ -2,6 +2,7 @@ package com.kett.TicketSystem.membership.application;
 
 import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.common.events.ProjectCreatedEvent;
+import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
@@ -11,6 +12,7 @@ import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
@@ -151,5 +153,11 @@ public class MembershipService {
 
     public void deleteMembershipsByProjectId(UUID projectId) {
         membershipRepository.deleteByProjectId(projectId);
+    }
+
+    @EventListener
+    @Async
+    public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
+        this.deleteMembershipsByProjectId(projectDeletedEvent.getProjectId());
     }
 }
