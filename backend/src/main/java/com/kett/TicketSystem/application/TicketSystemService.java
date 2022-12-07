@@ -269,7 +269,7 @@ public class TicketSystemService {
         if (!projectService.isExistentById(ticketPostDto.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + ticketPostDto.getProjectId());
         }
-        if (!membershipService.areAllUsersProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
+        if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
             throw new InvalidProjectMembersException(
                     "not all assignees are part of the project with id: " + ticketPostDto.getProjectId()
             );
@@ -306,7 +306,7 @@ public class TicketSystemService {
         }
 
         if (ticketPatchDto.getAssigneeIds() != null) {
-            if (!membershipService.areAllUsersProjectMembers(ticketPatchDto.getAssigneeIds(), projectIdOfTicket)) {
+            if (!membershipService.allUsersAreProjectMembers(ticketPatchDto.getAssigneeIds(), projectIdOfTicket)) {
                 throw new InvalidProjectMembersException(
                         "not all assignees are part of the project with id: " + projectIdOfTicket
                 );
