@@ -158,14 +158,10 @@ public class MembershipService {
         }
     }
 
-    public void deleteMembershipsByProjectId(UUID projectId) {
-        membershipRepository.deleteByProjectId(projectId);
-    }
-
     @EventListener
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
-        this.deleteMembershipsByProjectId(projectDeletedEvent.getProjectId());
+        membershipRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
     }
 
     @EventListener
