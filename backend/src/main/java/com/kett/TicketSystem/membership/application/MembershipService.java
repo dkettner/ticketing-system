@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.membership.application;
 
 import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.common.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.common.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.membership.domain.Membership;
@@ -11,6 +12,7 @@ import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundExcep
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
@@ -24,10 +26,12 @@ import java.util.stream.Collectors;
 @Service
 public class MembershipService {
     private final MembershipRepository membershipRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public MembershipService(MembershipRepository membershipRepository) {
+    public MembershipService(MembershipRepository membershipRepository, ApplicationEventPublisher eventPublisher) {
         this.membershipRepository = membershipRepository;
+        this.eventPublisher = eventPublisher;
     }
 
 
@@ -139,6 +143,10 @@ public class MembershipService {
     // delete
 
     public void deleteMembershipById(UUID id) throws NoMembershipFoundException {
+        // TODO: Check if last admin -> block? assign random other member as admin?
+        // TODO: check if last membership -> trigger delete project with event
+
+        Membership membership = this.getMembershipById(id);
         Long numOfDeletedMemberships = membershipRepository.removeById(id);
 
         if (numOfDeletedMemberships == 0) {
@@ -148,6 +156,8 @@ public class MembershipService {
                     "!!! This should not happen. " +
                     "Multiple memberships were deleted when deleting membership with id: " + id
             );
+        } else {
+            eventPublisher.publishEvent(new MembershipDeletedEvent(id, membership.getProjectId(), membership.getUserId()));
         }
     }
 
