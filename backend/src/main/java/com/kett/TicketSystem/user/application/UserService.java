@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.user.application;
 
+import com.kett.TicketSystem.common.events.UserDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
@@ -139,6 +140,8 @@ public class UserService implements UserDetailsService {
                     "!!! This should not happen. " +
                     "Multiple users were deleted when deleting user with id: " + id
             );
+        } else {
+            eventPublisher.publishEvent(new UserDeletedEvent(id));
         }
     }
 }
