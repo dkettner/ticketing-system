@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
@@ -175,5 +176,11 @@ public class PhaseService {
 
     public void deletePhasesByProjectId(UUID projectId) {
         phaseRepository.deleteByProjectId(projectId);
+    }
+
+    @EventListener
+    @Async
+    public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
+        this.deletePhasesByProjectId(projectDeletedEvent.getProjectId());
     }
 }
