@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.ticket.application;
 
+import com.kett.TicketSystem.common.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.ticket.domain.Ticket;
@@ -135,5 +136,19 @@ public class TicketService {
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
+    }
+
+    @EventListener
+    @Async
+    public void handleMembershipDeletedEvent(MembershipDeletedEvent membershipDeletedEvent) {
+        List<Ticket> tickets =
+                ticketRepository
+                        .findByProjectId(membershipDeletedEvent.getProjectId())
+                        .stream()
+                        .filter(ticket -> ticket.isAssignee(membershipDeletedEvent.getUserId()))
+                        .toList();
+
+        tickets.forEach(ticket -> ticket.removeAssignee(membershipDeletedEvent.getUserId()));
+        ticketRepository.saveAll(tickets);
     }
 }
