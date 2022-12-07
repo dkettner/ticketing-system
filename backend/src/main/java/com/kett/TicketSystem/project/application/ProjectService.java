@@ -1,9 +1,6 @@
 package com.kett.TicketSystem.project.application;
 
-import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
-import com.kett.TicketSystem.common.events.ProjectCreatedEvent;
-import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
-import com.kett.TicketSystem.common.events.UserCreatedEvent;
+import com.kett.TicketSystem.common.events.*;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.exceptions.*;
@@ -90,5 +87,11 @@ public class ProjectService {
         } else {
             eventPublisher.publishEvent(new ProjectDeletedEvent(id));
         }
+    }
+
+    @EventListener
+    @Async
+    public void handleLastProjectMemberDeletedEvent(LastProjectMemberDeletedEvent lastProjectMemberDeletedEvent) {
+        this.deleteProjectById(lastProjectMemberDeletedEvent.getProjectId());
     }
 }
