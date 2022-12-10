@@ -33,6 +33,9 @@ public class Phase {
     @OneToOne(fetch = FetchType.LAZY)
     private Phase nextPhase;
 
+    @Getter
+    private Integer numOfTickets;
+
     protected void setProjectId(UUID projectId) {
         if (projectId == null) {
             throw new PhaseException("projectId must not be null");
@@ -67,6 +70,25 @@ public class Phase {
         this.nextPhase = phase;
     }
 
+    public void setNumOfTickets(int numOfTickets) throws PhaseException {
+        if (numOfTickets < 0) {
+            throw new PhaseException("numOfTickets cannot be negative");
+        }
+        this.numOfTickets = numOfTickets;
+    }
+
+    public void increaseNumOfTickets() throws PhaseException {
+        this.setNumOfTickets(
+                this.getNumOfTickets() + 1
+        );
+    }
+
+    public void decreaseNumOfTickets() throws PhaseException {
+        this.setNumOfTickets(
+                this.getNumOfTickets() - 1
+        );
+    }
+
     public Boolean isFirst() {
         return previousPhase == null;
     }
@@ -80,5 +102,6 @@ public class Phase {
         this.setName(name);
         this.setPreviousPhase(previousPhase);
         this.setNextPhase(nextPhase);
+        this.setNumOfTickets(0);
     }
 }
