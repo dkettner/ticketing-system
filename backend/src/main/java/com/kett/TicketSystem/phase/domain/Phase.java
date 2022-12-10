@@ -34,7 +34,7 @@ public class Phase {
     private Phase nextPhase;
 
     @Getter
-    private Integer numOfTickets;
+    private Integer ticketCount;
 
     protected void setProjectId(UUID projectId) {
         if (projectId == null) {
@@ -70,22 +70,22 @@ public class Phase {
         this.nextPhase = phase;
     }
 
-    public void setNumOfTickets(int numOfTickets) throws PhaseException {
-        if (numOfTickets < 0) {
-            throw new PhaseException("numOfTickets cannot be negative");
+    public void setTicketCount(int ticketCount) throws PhaseException {
+        if (ticketCount < 0) {
+            throw new PhaseException("ticketCount cannot be negative");
         }
-        this.numOfTickets = numOfTickets;
+        this.ticketCount = ticketCount;
     }
 
-    public void increaseNumOfTickets() throws PhaseException {
-        this.setNumOfTickets(
-                this.getNumOfTickets() + 1
+    public void increaseTicketCount() throws PhaseException {
+        this.setTicketCount(
+                this.getTicketCount() + 1
         );
     }
 
-    public void decreaseNumOfTickets() throws PhaseException {
-        this.setNumOfTickets(
-                this.getNumOfTickets() - 1
+    public void decreaseTicketCount() throws PhaseException {
+        this.setTicketCount(
+                this.getTicketCount() - 1
         );
     }
 
@@ -102,6 +102,6 @@ public class Phase {
         this.setName(name);
         this.setPreviousPhase(previousPhase);
         this.setNextPhase(nextPhase);
-        this.setNumOfTickets(0);
+        this.setTicketCount(0);
     }
 }
