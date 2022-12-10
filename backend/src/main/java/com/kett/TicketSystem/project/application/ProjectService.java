@@ -33,17 +33,6 @@ public class ProjectService {
         return initializedProject;
     }
 
-    @EventListener
-    @Async
-    public void handleUserCreated(UserCreatedEvent userCreatedEvent) {
-        Project defaultProject = new Project(
-                "Example Project",
-                "This project was created automatically. Use it to get accustomed to everything."
-        );
-        Project initializedProject = projectRepository.save(defaultProject);
-        eventPublisher.publishEvent(new DefaultProjectCreatedEvent(initializedProject.getId(), userCreatedEvent.getUserId()));
-    }
-
 
     // read
 
@@ -87,6 +76,20 @@ public class ProjectService {
         } else {
             eventPublisher.publishEvent(new ProjectDeletedEvent(id));
         }
+    }
+
+
+    // event listeners
+
+    @EventListener
+    @Async
+    public void handleUserCreated(UserCreatedEvent userCreatedEvent) {
+        Project defaultProject = new Project(
+                "Example Project",
+                "This project was created automatically. Use it to get accustomed to everything."
+        );
+        Project initializedProject = projectRepository.save(defaultProject);
+        eventPublisher.publishEvent(new DefaultProjectCreatedEvent(initializedProject.getId(), userCreatedEvent.getUserId()));
     }
 
     @EventListener

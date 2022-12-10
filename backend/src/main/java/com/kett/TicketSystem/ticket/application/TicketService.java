@@ -132,6 +132,9 @@ public class TicketService {
         ticketRepository.deleteByProjectId(projectId);
     }
 
+
+    // event listeners
+
     @EventListener
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {

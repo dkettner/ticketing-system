@@ -178,6 +178,9 @@ public class PhaseService {
         phaseRepository.deleteByProjectId(projectId);
     }
 
+
+    // event listeners
+
     @EventListener
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {

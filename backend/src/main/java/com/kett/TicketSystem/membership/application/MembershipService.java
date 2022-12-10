@@ -46,28 +46,6 @@ public class MembershipService {
         return membershipRepository.save(membership);
     }
 
-    @EventListener
-    public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-        Membership defaultMembership = new Membership(
-                projectCreatedEvent.getProjectId(),
-                projectCreatedEvent.getUserId(),
-                Role.ADMIN
-        );
-        defaultMembership.setState(State.ACCEPTED);
-        this.addMembership(defaultMembership);
-    }
-
-    @EventListener
-    public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        Membership defaultMembership = new Membership(
-                defaultProjectCreatedEvent.getProjectId(),
-                defaultProjectCreatedEvent.getUserId(),
-                Role.ADMIN
-        );
-        defaultMembership.setState(State.ACCEPTED);
-        this.addMembership(defaultMembership);
-    }
-
 
     // read
 
@@ -181,6 +159,31 @@ public class MembershipService {
         Membership newAdmin = memberships.get(new Random().nextInt(memberships.size()));
         newAdmin.setRole(Role.ADMIN);
         membershipRepository.save(newAdmin);
+    }
+
+
+    // event listeners
+
+    @EventListener
+    public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
+        Membership defaultMembership = new Membership(
+                projectCreatedEvent.getProjectId(),
+                projectCreatedEvent.getUserId(),
+                Role.ADMIN
+        );
+        defaultMembership.setState(State.ACCEPTED);
+        this.addMembership(defaultMembership);
+    }
+
+    @EventListener
+    public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
+        Membership defaultMembership = new Membership(
+                defaultProjectCreatedEvent.getProjectId(),
+                defaultProjectCreatedEvent.getUserId(),
+                Role.ADMIN
+        );
+        defaultMembership.setState(State.ACCEPTED);
+        this.addMembership(defaultMembership);
     }
 
     @EventListener
