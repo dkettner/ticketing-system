@@ -44,7 +44,6 @@ public class UserController {
         }
         UserResponseDto userResponseDto = ticketSystemService.getByEMailAddress(EmailAddress.fromString(email));
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
-
     }
 
     @PostMapping
