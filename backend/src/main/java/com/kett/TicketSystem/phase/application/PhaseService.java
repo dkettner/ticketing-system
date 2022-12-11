@@ -83,20 +83,6 @@ public class PhaseService {
         return phaseRepository.save(phase);
     }
 
-    @EventListener
-    @Async
-    public void handleDefaultProjectCreated(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        Phase toDo = new Phase(defaultProjectCreatedEvent.getProjectId(), "TO DO", null, null);
-        Phase doing = new Phase(defaultProjectCreatedEvent.getProjectId(), "DOING", null, null);
-        Phase review = new Phase(defaultProjectCreatedEvent.getProjectId(), "REVIEW", null, null);
-        Phase done = new Phase(defaultProjectCreatedEvent.getProjectId(), "DONE", null, null);
-
-        this.addPhase(done, null);
-        this.addPhase(review, null);
-        this.addPhase(doing, null);
-        this.addPhase(toDo, null);
-    }
-
 
     // read
 
@@ -180,6 +166,20 @@ public class PhaseService {
 
 
     // event listeners
+
+    @EventListener
+    @Async
+    public void handleDefaultProjectCreated(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
+        Phase toDo = new Phase(defaultProjectCreatedEvent.getProjectId(), "TO DO", null, null);
+        Phase doing = new Phase(defaultProjectCreatedEvent.getProjectId(), "DOING", null, null);
+        Phase review = new Phase(defaultProjectCreatedEvent.getProjectId(), "REVIEW", null, null);
+        Phase done = new Phase(defaultProjectCreatedEvent.getProjectId(), "DONE", null, null);
+
+        this.addPhase(done, null);
+        this.addPhase(review, null);
+        this.addPhase(doing, null);
+        this.addPhase(toDo, null);
+    }
 
     @EventListener
     @Async
