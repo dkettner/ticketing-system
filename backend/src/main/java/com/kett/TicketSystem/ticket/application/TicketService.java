@@ -1,7 +1,7 @@
 package com.kett.TicketSystem.ticket.application;
 
-import com.kett.TicketSystem.common.events.MembershipDeletedEvent;
-import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
+import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
+import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;

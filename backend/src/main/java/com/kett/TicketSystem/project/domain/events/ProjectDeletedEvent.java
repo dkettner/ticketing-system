@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.common.events;
+package com.kett.TicketSystem.project.domain.events;
 
 import lombok.Getter;
 
@@ -6,18 +6,14 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-public class MembershipDeletedEvent {
+public class ProjectDeletedEvent {
     private final UUID id;
     private final LocalDateTime timeStamp;
-    private final UUID membershipId;
     private final UUID projectId;
-    private final UUID userId;
 
-    public MembershipDeletedEvent(UUID membershipId, UUID projectId, UUID userId) {
+    public ProjectDeletedEvent(UUID projectId) {
         this.id = UUID.randomUUID();
         this.timeStamp = LocalDateTime.now();
-        this.membershipId = membershipId;
         this.projectId = projectId;
-        this.userId = userId;
     }
 }

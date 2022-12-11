@@ -1,13 +1,18 @@
 package com.kett.TicketSystem.membership.application;
 
-import com.kett.TicketSystem.common.events.*;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
+import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
+import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
+import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
+import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
+import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;

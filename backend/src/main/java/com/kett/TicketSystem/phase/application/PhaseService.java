@@ -1,7 +1,7 @@
 package com.kett.TicketSystem.phase.application;
 
-import com.kett.TicketSystem.common.events.DefaultProjectCreatedEvent;
-import com.kett.TicketSystem.common.events.ProjectDeletedEvent;
+import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
