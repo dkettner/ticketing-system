@@ -262,7 +262,7 @@ public class TicketSystemService {
     @PreAuthorize("hasAnyAuthority(" +
             "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
-    public TicketResponseDto addTicket(TicketPostDto ticketPostDto) {
+    public TicketResponseDto addTicket(TicketPostDto ticketPostDto, EmailAddress postingUserEmail) {
         UUID projectId = ticketPostDto.getProjectId();
         if (!projectService.isExistentById(projectId)) {
             throw new NoProjectFoundException("could not find project with id: " + projectId);
@@ -281,7 +281,8 @@ public class TicketSystemService {
                 .getId();
 
         Ticket ticket = ticketService.addTicket(
-                dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, phaseId)
+                dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, phaseId),
+                userService.getUserIdByEmail(postingUserEmail)
         );
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }

@@ -4,9 +4,11 @@ import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.ticket.domain.Ticket;
+import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -18,17 +20,21 @@ import java.util.UUID;
 @Service
 public class TicketService {
     private final TicketRepository ticketRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository) {
+    public TicketService(TicketRepository ticketRepository, ApplicationEventPublisher eventPublisher) {
         this.ticketRepository = ticketRepository;
+        this.eventPublisher = eventPublisher;
     }
 
 
     // create
 
-    public Ticket addTicket(Ticket ticket) {
-        return ticketRepository.save(ticket);
+    public Ticket addTicket(Ticket ticket, UUID postingUserId) {
+        Ticket initializedTicket = ticketRepository.save(ticket);
+        eventPublisher.publishEvent(new TicketCreatedEvent(initializedTicket.getId(), initializedTicket.getProjectId(), postingUserId));
+        return initializedTicket;
     }
 
     public void saveAll(List<Ticket> tickets) {

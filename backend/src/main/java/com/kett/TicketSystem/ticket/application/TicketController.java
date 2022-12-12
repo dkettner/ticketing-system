@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.ticket.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.NoParametersException;
 import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
@@ -9,6 +10,7 @@ import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -62,7 +64,8 @@ public class TicketController {
 
     @PostMapping
     public ResponseEntity<TicketResponseDto> postTicket(@RequestBody TicketPostDto ticketPostDto) {
-        TicketResponseDto ticketResponseDto = ticketSystemService.addTicket(ticketPostDto);
+        EmailAddress userEmail = EmailAddress.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
+        TicketResponseDto ticketResponseDto = ticketSystemService.addTicket(ticketPostDto, userEmail);
         URI returnURI = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
