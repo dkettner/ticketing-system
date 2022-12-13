@@ -204,10 +204,4 @@ public class PhaseService {
                 null
         );
     }
-
-    public Boolean hasPhasesWithProjectId(UUID projectId) {
-        return phaseRepository
-                .findByProjectId(projectId)
-                .size() > 0;
-    }
 }
