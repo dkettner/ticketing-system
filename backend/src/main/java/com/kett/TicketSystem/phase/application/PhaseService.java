@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
@@ -185,6 +186,15 @@ public class PhaseService {
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deletePhasesByProjectId(projectDeletedEvent.getProjectId());
+    }
+
+    @EventListener
+    @Async
+    public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
+        this.addPhase(
+                new Phase(projectCreatedEvent.getProjectId(), "Backlog", null, null),
+                null
+        );
     }
 
     public Boolean hasPhasesWithProjectId(UUID projectId) {
