@@ -2,6 +2,7 @@ package com.kett.TicketSystem.common.exceptions;
 
 import com.kett.TicketSystem.common.domainprimitives.EmailAddressException;
 import com.kett.TicketSystem.membership.domain.exceptions.*;
+import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseInProjectException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
@@ -52,6 +53,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
             IllegalStateUpdateException.class,
             PhaseIsNotEmptyException.class,
             NoPhaseInProjectException.class,
+            LastPhaseException.class,
             InvalidProjectMembersException.class,
             EmailAlreadyInUseException.class
     })
