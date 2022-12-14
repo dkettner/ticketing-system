@@ -38,6 +38,7 @@ public class Ticket {
     private UUID projectId;
 
     @Getter
+    @Setter
     @Column(length = 16)
     private UUID phaseId;
 
@@ -57,13 +58,6 @@ public class Ticket {
             throw new TicketException("dueTime cannot be in the past");
         }
         this.dueTime = newDueTime;
-    }
-
-    public void setPhaseId(UUID phaseId) {
-        if (phaseId == null) {
-            throw new TicketException("phaseId must not be null");
-        }
-        this.phaseId = phaseId;
     }
 
     protected void setProjectId(UUID projectId) {
