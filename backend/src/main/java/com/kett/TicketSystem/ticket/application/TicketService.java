@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.ticket.application;
 
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
+import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.ticket.domain.Ticket;
@@ -159,5 +160,13 @@ public class TicketService {
 
         tickets.forEach(ticket -> ticket.removeAssignee(membershipDeletedEvent.getUserId()));
         ticketRepository.saveAll(tickets);
+    }
+
+    @EventListener
+    @Async
+    public void handleNewTicketAssignedToPhaseEvent(NewTicketAssignedToPhaseEvent newTicketAssignedToPhaseEvent) {
+        Ticket ticket = this.getTicketById(newTicketAssignedToPhaseEvent.getTicketId());
+        ticket.setPhaseId(newTicketAssignedToPhaseEvent.getPhaseId());
+        ticketRepository.save(ticket);
     }
 }
