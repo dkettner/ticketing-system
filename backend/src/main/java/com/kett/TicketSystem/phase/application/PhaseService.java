@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.phase.application;
 
+import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
@@ -10,7 +11,9 @@ import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
+import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
@@ -22,10 +25,12 @@ import java.util.UUID;
 @Service
 public class PhaseService {
     private final PhaseRepository phaseRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public PhaseService(PhaseRepository phaseRepository) {
+    public PhaseService(PhaseRepository phaseRepository, ApplicationEventPublisher eventPublisher) {
         this.phaseRepository = phaseRepository;
+        this.eventPublisher = eventPublisher;
     }
 
 
@@ -202,6 +207,23 @@ public class PhaseService {
         this.addPhase(
                 new Phase(projectCreatedEvent.getProjectId(), "Backlog", null, null),
                 null
+        );
+    }
+
+    @EventListener
+    @Async
+    public void handleTicketCreatedEvent(TicketCreatedEvent ticketCreatedEvent) {
+        Phase firstPhaseOfProject =
+                getFirstPhaseByProjectId(ticketCreatedEvent.getProjectId())
+                .orElseThrow( () ->
+                    new ImpossibleException("The project with id: " + ticketCreatedEvent.getProjectId() + " has no phases.")
+                );
+
+        eventPublisher.publishEvent(
+                new NewTicketAssignedToPhaseEvent(
+                        firstPhaseOfProject.getId(),
+                        ticketCreatedEvent.getTicketId(),
+                        ticketCreatedEvent.getProjectId())
         );
     }
 }
