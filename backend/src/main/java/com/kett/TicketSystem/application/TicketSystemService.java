@@ -15,7 +15,6 @@ import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
-import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseInProjectException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
@@ -275,9 +274,7 @@ public class TicketSystemService {
 
         UUID phaseId = phaseService
                 .getFirstPhaseByProjectId(projectId)
-                .orElseThrow(() -> new NoPhaseInProjectException(
-                        "Could not add ticket because the project with id: " + projectId + " has no phases."
-                ))
+                .get()
                 .getId();
 
         Ticket ticket = ticketService.addTicket(
