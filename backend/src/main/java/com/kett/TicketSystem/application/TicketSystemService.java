@@ -272,13 +272,8 @@ public class TicketSystemService {
             );
         }
 
-        UUID phaseId = phaseService
-                .getFirstPhaseByProjectId(projectId)
-                .get()
-                .getId();
-
         Ticket ticket = ticketService.addTicket(
-                dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, phaseId),
+                dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, null),
                 userService.getUserIdByEmail(postingUserEmail)
         );
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
