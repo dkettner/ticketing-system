@@ -38,10 +38,6 @@ public class TicketService {
         return initializedTicket;
     }
 
-    public void saveAll(List<Ticket> tickets) {
-        ticketRepository.saveAll(tickets);
-    }
-
 
     // read
 
@@ -73,10 +69,6 @@ public class TicketService {
             throw new NoTicketFoundException("could not find tickets with assigneeId: " + assigneeId);
         }
         return tickets;
-    }
-
-    public List<Ticket> getTicketsByPhaseIdsAndAssigneeId(List<UUID> phaseIds, UUID assigneeId) {
-        return ticketRepository.findByPhaseIdInAndAssigneeIdsContaining(phaseIds, assigneeId);
     }
 
     public UUID getProjectIdByTicketId(UUID ticketId) throws NoTicketFoundException {
