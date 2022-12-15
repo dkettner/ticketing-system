@@ -32,7 +32,6 @@ import com.kett.TicketSystem.user.application.dto.UserPatchDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
 import com.kett.TicketSystem.user.domain.User;
-import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -109,11 +108,6 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipPostDto.projectId))")
     public MembershipResponseDto addMembership(MembershipPostDto membershipPostDto) {
-        UUID userId = membershipPostDto.getUserId();
-        if (!userService.isExistentById(userId)) {
-            throw new NoUserFoundException("could not find user with id: " + userId);
-        }
-
         Membership membership = membershipService.addMembership(
                 dtoMapper.mapMembershipPostDtoToMembership(membershipPostDto)
         );

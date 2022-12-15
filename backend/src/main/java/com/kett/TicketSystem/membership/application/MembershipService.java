@@ -13,7 +13,9 @@ import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
+import com.kett.TicketSystem.common.exceptions.NoUserFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -29,12 +31,14 @@ public class MembershipService {
     private final MembershipRepository membershipRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final List<UUID> existingProjects; // TODO: service is not stateless, consumed events are not idempotent.
+    private final List<UUID> existingUsers;
 
     @Autowired
     public MembershipService(MembershipRepository membershipRepository, ApplicationEventPublisher eventPublisher) {
         this.membershipRepository = membershipRepository;
         this.eventPublisher = eventPublisher;
         this.existingProjects = new ArrayList<>();
+        this.existingUsers = new ArrayList<>();
     }
 
 
@@ -43,6 +47,9 @@ public class MembershipService {
     public Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
         if (!existingProjects.contains(membership.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + membership.getProjectId());
+        }
+        if (!existingUsers.contains(membership.getUserId())) {
+            throw new NoUserFoundException("could not find user with id: " + membership.getUserId());
         }
 
         if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
@@ -205,8 +212,15 @@ public class MembershipService {
 
     @EventListener
     @Async
+    public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
+        this.existingUsers.add(userCreatedEvent.getUserId());
+    }
+
+    @EventListener
+    @Async
     public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
         List<Membership> memberships = getMembershipsByUserId(userDeletedEvent.getUserId());
         memberships.forEach(membership -> this.deleteMembershipById(membership.getId()));
+        this.existingUsers.remove(userDeletedEvent.getUserId());
     }
 }

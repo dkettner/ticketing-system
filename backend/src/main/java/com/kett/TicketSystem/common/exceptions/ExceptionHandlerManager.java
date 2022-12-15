@@ -10,7 +10,6 @@ import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
-import com.kett.TicketSystem.user.domain.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.domain.exceptions.EmailAlreadyInUseException;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import org.springframework.http.HttpStatus;
