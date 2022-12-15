@@ -3,9 +3,10 @@ package com.kett.TicketSystem.ticket.application;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
-import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketDeletedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketPhaseUpdatedEvent;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,7 +103,9 @@ public class TicketService {
             ticket.setDueTime(dueTime);
         }
         if (phaseId != null) {
+            UUID oldPhaseId = ticket.getPhaseId();
             ticket.setPhaseId(phaseId);
+            eventPublisher.publishEvent(new TicketPhaseUpdatedEvent(ticket.getId(), ticket.getProjectId(), oldPhaseId, phaseId));
         }
         if (assigneeIds != null) {
             ticket.setAssigneeIds(assigneeIds);
@@ -115,16 +118,10 @@ public class TicketService {
     // delete
 
     public void deleteTicketById(UUID id) throws NoTicketFoundException {
-        Long numOfDeletedTickets = ticketRepository.removeById(id);
+        Ticket ticket = this.getTicketById(id);
+        ticketRepository.removeById(id);
 
-        if (numOfDeletedTickets == 0) {
-            throw new NoTicketFoundException("could not delete because there was no ticket with id: " + id);
-        } else if (numOfDeletedTickets > 1) {
-            throw new ImpossibleException(
-                    "!!! This should not happen. " +
-                    "Multiple tickets were deleted when deleting tickets with id: " + id
-            );
-        }
+        eventPublisher.publishEvent(new TicketDeletedEvent(ticket.getId(), ticket.getProjectId(), ticket.getPhaseId()));
     }
 
     public void deleteTicketsByProjectId(UUID projectId) {
