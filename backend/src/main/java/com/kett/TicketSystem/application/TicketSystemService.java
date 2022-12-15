@@ -42,24 +42,29 @@ import java.util.UUID;
 
 @Service
 public class TicketSystemService {
-    private final ProjectService projectService;
+    private final AuthenticationService authenticationService;
+    private final MembershipService membershipService;
     private final PhaseService phaseService;
+    private final ProjectService projectService;
     private final TicketService ticketService;
     private final UserService userService;
-    private final MembershipService membershipService;
-    private final AuthenticationService authenticationService;
     private final DtoMapper dtoMapper;
 
     @Autowired
-    public TicketSystemService (ProjectService projectService, PhaseService phaseService,
-                                TicketService ticketService, UserService userService,
-                                MembershipService membershipService, AuthenticationService authenticationService) {
-        this.projectService = projectService;
+    public TicketSystemService (
+            AuthenticationService authenticationService,
+            MembershipService membershipService,
+            PhaseService phaseService,
+            ProjectService projectService,
+            TicketService ticketService,
+            UserService userService
+    ) {
+        this.authenticationService = authenticationService;
+        this.membershipService = membershipService;
         this.phaseService = phaseService;
+        this.projectService = projectService;
         this.ticketService = ticketService;
         this.userService = userService;
-        this.membershipService = membershipService;
-        this.authenticationService = authenticationService;
         this.dtoMapper = new DtoMapper();
     }
 
