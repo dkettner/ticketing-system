@@ -20,7 +20,7 @@ import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.phase.application.PhaseService;
-import com.kett.TicketSystem.project.domain.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.ticket.application.TicketService;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
@@ -109,10 +109,6 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipPostDto.projectId))")
     public MembershipResponseDto addMembership(MembershipPostDto membershipPostDto) {
-        UUID projectId = membershipPostDto.getProjectId();
-        if (!projectService.isExistentById(projectId)) {
-            throw new NoProjectFoundException("could not find project with id: " + projectId);
-        }
         UUID userId = membershipPostDto.getUserId();
         if (!userService.isExistentById(userId)) {
             throw new NoUserFoundException("could not find user with id: " + userId);

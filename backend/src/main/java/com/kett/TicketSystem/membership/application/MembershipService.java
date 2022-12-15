@@ -12,6 +12,7 @@ import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
+import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,27 +21,30 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
 public class MembershipService {
     private final MembershipRepository membershipRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final List<UUID> existingProjects; // TODO: service is not stateless, consumed events are not idempotent.
 
     @Autowired
     public MembershipService(MembershipRepository membershipRepository, ApplicationEventPublisher eventPublisher) {
         this.membershipRepository = membershipRepository;
         this.eventPublisher = eventPublisher;
+        this.existingProjects = new ArrayList<>();
     }
 
 
     // create
 
     public Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
+        if (!existingProjects.contains(membership.getProjectId())) {
+            throw new NoProjectFoundException("could not find project with id: " + membership.getProjectId());
+        }
+
         if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
             throw new MembershipAlreadyExistsException(
                     "Membership for userId: " + membership.getUserId() +
@@ -178,6 +182,7 @@ public class MembershipService {
         );
         defaultMembership.setState(State.ACCEPTED);
         this.addMembership(defaultMembership);
+        this.existingProjects.add(projectCreatedEvent.getProjectId());
     }
 
     @EventListener
@@ -195,6 +200,7 @@ public class MembershipService {
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         membershipRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
+        this.existingProjects.remove(projectDeletedEvent.getProjectId());
     }
 
     @EventListener

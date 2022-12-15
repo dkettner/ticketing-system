@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.project.domain.exceptions;
+package com.kett.TicketSystem.common.exceptions;
 
 public class NoProjectFoundException extends RuntimeException {
     public NoProjectFoundException(String message) {
