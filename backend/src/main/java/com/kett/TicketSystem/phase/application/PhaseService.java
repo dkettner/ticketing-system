@@ -11,7 +11,10 @@ import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
+import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketDeletedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketPhaseUpdatedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -133,7 +136,7 @@ public class PhaseService {
 
     // delete
 
-    public void deleteById(UUID id) throws NoPhaseFoundException {
+    public void deleteById(UUID id) throws NoPhaseFoundException, LastPhaseException {
         Phase phase = this.getPhaseById(id);
         if (phase.isFirst() && phase.isLast()) {
             throw new LastPhaseException(
@@ -141,6 +144,9 @@ public class PhaseService {
                     " is already the last phase of the project with id: " + phase.getProjectId() +
                     " and cannot be deleted."
             );
+        }
+        if (phase.getTicketCount() != 0) {
+            throw new PhaseIsNotEmptyException("phase with id: \" + id + \" is not empty and can not be deleted");
         }
 
         this.removePhaseFromCurrentPosition(phase);
@@ -219,11 +225,35 @@ public class PhaseService {
                     new ImpossibleException("The project with id: " + ticketCreatedEvent.getProjectId() + " has no phases.")
                 );
 
+        firstPhaseOfProject.increaseTicketCount();
+        phaseRepository.save(firstPhaseOfProject);
+
         eventPublisher.publishEvent(
                 new NewTicketAssignedToPhaseEvent(
                         firstPhaseOfProject.getId(),
                         ticketCreatedEvent.getTicketId(),
                         ticketCreatedEvent.getProjectId())
         );
+    }
+
+    @EventListener
+    @Async
+    public void handleTicketPhaseUpdatedEvent(TicketPhaseUpdatedEvent ticketPhaseUpdatedEvent) {
+        Phase oldPhase = this.getPhaseById(ticketPhaseUpdatedEvent.getOldPhaseId());
+        Phase newPhase = this.getPhaseById(ticketPhaseUpdatedEvent.getNewPhaseId());
+
+        oldPhase.decreaseTicketCount();
+        newPhase.increaseTicketCount();
+
+        phaseRepository.save(oldPhase);
+        phaseRepository.save(newPhase);
+    }
+
+    @EventListener
+    @Async
+    public void handleTicketDeletedEvent(TicketDeletedEvent ticketDeletedEvent) {
+        Phase phase = this.getPhaseById(ticketDeletedEvent.getPhaseId());
+        phase.decreaseTicketCount();
+        phaseRepository.save(phase);
     }
 }
