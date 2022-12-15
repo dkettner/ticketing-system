@@ -76,10 +76,6 @@ public class TicketService {
         return this.getTicketById(ticketId).getProjectId();
     }
 
-    public boolean hasTicketsWithPhaseId(UUID phaseId) {
-        return ticketRepository.existsByPhaseIdEquals(phaseId);
-    }
-
 
     // update
 
