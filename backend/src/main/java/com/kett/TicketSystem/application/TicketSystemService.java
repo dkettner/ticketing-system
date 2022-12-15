@@ -21,7 +21,6 @@ import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.phase.application.PhaseService;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
-import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.ticket.application.TicketService;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
@@ -176,9 +175,6 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
     public void deletePhaseById(UUID id) {
-        if (ticketService.hasTicketsWithPhaseId(id)) {
-            throw new PhaseIsNotEmptyException("phase with id: " + id + " is not empty and can not be deleted");
-        }
         phaseService.deleteById(id);
     }
 
