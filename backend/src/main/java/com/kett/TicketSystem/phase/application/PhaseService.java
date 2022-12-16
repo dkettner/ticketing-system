@@ -239,6 +239,8 @@ public class PhaseService {
     @EventListener
     @Async
     public void handleTicketPhaseUpdatedEvent(TicketPhaseUpdatedEvent ticketPhaseUpdatedEvent) {
+        // TODO: check if new phase exists and is related to old phase
+
         Phase oldPhase = this.getPhaseById(ticketPhaseUpdatedEvent.getOldPhaseId());
         Phase newPhase = this.getPhaseById(ticketPhaseUpdatedEvent.getNewPhaseId());
 
