@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.phase.application;
 
+import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
@@ -21,6 +22,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -29,17 +31,23 @@ import java.util.UUID;
 public class PhaseService {
     private final PhaseRepository phaseRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final List<UUID> existingProjects;
 
     @Autowired
     public PhaseService(PhaseRepository phaseRepository, ApplicationEventPublisher eventPublisher) {
         this.phaseRepository = phaseRepository;
         this.eventPublisher = eventPublisher;
+        this.existingProjects = new ArrayList<>();
     }
 
 
     // create
 
     public Phase addPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException {
+        if (!existingProjects.contains(phase.getProjectId())) {
+            throw new NoProjectFoundException("could not find project with id: " + phase.getProjectId());
+        }
+
         Phase previousPhase = null;
         if (previousPhaseId != null) {
             previousPhase = this.getPhaseById(previousPhaseId);
@@ -190,7 +198,9 @@ public class PhaseService {
     @EventListener
     @Async
     public void handleDefaultProjectCreated(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        Phase toDo = new Phase(defaultProjectCreatedEvent.getProjectId(), "TO DO", null, null);
+        this.existingProjects.add(defaultProjectCreatedEvent.getProjectId());
+
+        Phase backlog = new Phase(defaultProjectCreatedEvent.getProjectId(), "BACKLOG", null, null);
         Phase doing = new Phase(defaultProjectCreatedEvent.getProjectId(), "DOING", null, null);
         Phase review = new Phase(defaultProjectCreatedEvent.getProjectId(), "REVIEW", null, null);
         Phase done = new Phase(defaultProjectCreatedEvent.getProjectId(), "DONE", null, null);
@@ -198,20 +208,22 @@ public class PhaseService {
         this.addPhase(done, null);
         this.addPhase(review, null);
         this.addPhase(doing, null);
-        this.addPhase(toDo, null);
+        this.addPhase(backlog, null);
     }
 
     @EventListener
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
+        this.existingProjects.remove(projectDeletedEvent.getProjectId());
         this.deletePhasesByProjectId(projectDeletedEvent.getProjectId());
     }
 
     @EventListener
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
+        this.existingProjects.add(projectCreatedEvent.getProjectId());
         this.addPhase(
-                new Phase(projectCreatedEvent.getProjectId(), "Backlog", null, null),
+                new Phase(projectCreatedEvent.getProjectId(), "BACKLOG", null, null),
                 null
         );
     }
