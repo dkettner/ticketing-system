@@ -182,6 +182,7 @@ public class MembershipService {
 
     @EventListener
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
+        this.existingProjects.add(projectCreatedEvent.getProjectId());
         Membership defaultMembership = new Membership(
                 projectCreatedEvent.getProjectId(),
                 projectCreatedEvent.getUserId(),
@@ -189,11 +190,11 @@ public class MembershipService {
         );
         defaultMembership.setState(State.ACCEPTED);
         this.addMembership(defaultMembership);
-        this.existingProjects.add(projectCreatedEvent.getProjectId());
     }
 
     @EventListener
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
+        this.existingProjects.add(defaultProjectCreatedEvent.getProjectId());
         Membership defaultMembership = new Membership(
                 defaultProjectCreatedEvent.getProjectId(),
                 defaultProjectCreatedEvent.getUserId(),
