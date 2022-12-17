@@ -1,7 +1,10 @@
 package com.kett.TicketSystem.ticket.application;
 
+import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
+import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
@@ -16,6 +19,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,17 +27,23 @@ import java.util.UUID;
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final ApplicationEventPublisher eventPublisher;
+    private final List<UUID> existingProjects;
 
     @Autowired
     public TicketService(TicketRepository ticketRepository, ApplicationEventPublisher eventPublisher) {
         this.ticketRepository = ticketRepository;
         this.eventPublisher = eventPublisher;
+        this.existingProjects = new ArrayList<>();
     }
 
 
     // create
 
     public Ticket addTicket(Ticket ticket, UUID postingUserId) {
+        if (!existingProjects.contains(ticket.getProjectId())) {
+            throw new NoProjectFoundException("could not find project with id: " + ticket.getProjectId());
+        }
+
         Ticket initializedTicket = ticketRepository.save(ticket);
         eventPublisher.publishEvent(new TicketCreatedEvent(initializedTicket.getId(), initializedTicket.getProjectId(), postingUserId));
         return initializedTicket;
@@ -129,12 +139,6 @@ public class TicketService {
 
     @EventListener
     @Async
-    public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
-        this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
-    }
-
-    @EventListener
-    @Async
     public void handleMembershipDeletedEvent(MembershipDeletedEvent membershipDeletedEvent) {
         List<Ticket> tickets =
                 ticketRepository
@@ -153,5 +157,25 @@ public class TicketService {
         Ticket ticket = this.getTicketById(newTicketAssignedToPhaseEvent.getTicketId());
         ticket.setPhaseId(newTicketAssignedToPhaseEvent.getPhaseId());
         ticketRepository.save(ticket);
+    }
+
+    @EventListener
+    @Async
+    public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
+        this.existingProjects.add(projectCreatedEvent.getProjectId());
+    }
+
+    @EventListener
+    @Async
+    public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
+        this.existingProjects.add(defaultProjectCreatedEvent.getProjectId());
+    }
+
+
+    @EventListener
+    @Async
+    public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
+        this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
+        this.existingProjects.remove(projectDeletedEvent.getProjectId());
     }
 }
