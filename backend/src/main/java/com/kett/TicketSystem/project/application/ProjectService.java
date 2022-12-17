@@ -47,10 +47,6 @@ public class ProjectService {
                 .orElseThrow(() -> new NoProjectFoundException("could not find project with id: " + id));
     }
 
-    public Boolean isExistentById(UUID id) {
-        return projectRepository.existsById(id);
-    }
-
 
     // update
 
