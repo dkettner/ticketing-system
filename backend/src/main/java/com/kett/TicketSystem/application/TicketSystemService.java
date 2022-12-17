@@ -20,7 +20,6 @@ import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.phase.application.PhaseService;
-import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.ticket.application.TicketService;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
@@ -248,13 +247,9 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto, EmailAddress postingUserEmail) {
-        UUID projectId = ticketPostDto.getProjectId();
-        if (!projectService.isExistentById(projectId)) {
-            throw new NoProjectFoundException("could not find project with id: " + projectId);
-        }
-        if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), projectId)) {
+        if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
             throw new InvalidProjectMembersException(
-                    "not all assignees are part of the project with id: " + projectId
+                    "not all assignees are part of the project with id: " + ticketPostDto.getProjectId()
             );
         }
 
