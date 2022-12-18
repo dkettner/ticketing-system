@@ -163,16 +163,7 @@ public class PhaseService {
         }
 
         this.removePhaseFromCurrentPosition(phase);
-
-        Long numOfDeletedPhases = phaseRepository.removeById(id);
-        if (numOfDeletedPhases == 0) {
-            throw new NoPhaseFoundException("could not delete because there was no phase with id: " + id);
-        } else if (numOfDeletedPhases > 1) {
-            throw new ImpossibleException(
-                    "!!! This should not happen. " +
-                            "Multiple phases were deleted when deleting phase with id: " + id
-            );
-        }
+        phaseRepository.removeById(id);
         eventPublisher.publishEvent(new PhaseDeletedEvent(phase.getId(), phase.getProjectId()));
     }
 
