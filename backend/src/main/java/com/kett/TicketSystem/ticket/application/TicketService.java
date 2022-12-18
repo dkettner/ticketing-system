@@ -5,7 +5,7 @@ import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
-import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
+import com.kett.TicketSystem.common.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;

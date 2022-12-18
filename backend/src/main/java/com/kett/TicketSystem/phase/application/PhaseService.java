@@ -11,7 +11,7 @@ import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
-import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
+import com.kett.TicketSystem.common.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;

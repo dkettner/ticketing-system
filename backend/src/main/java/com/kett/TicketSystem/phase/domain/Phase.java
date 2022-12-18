@@ -1,7 +1,7 @@
 package com.kett.TicketSystem.phase.domain;
 
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
-import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
+import com.kett.TicketSystem.common.exceptions.UnrelatedPhaseException;
 import lombok.*;
 
 import javax.persistence.*;
