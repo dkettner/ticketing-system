@@ -5,6 +5,7 @@ import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
+import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -111,6 +112,15 @@ public class TicketService {
             ticket.setDueTime(dueTime);
         }
         if (phaseId != null) {
+            if (!phaseBelongsToProject(phaseId, ticket.getProjectId())) {
+                throw new UnrelatedPhaseException(
+                        "The ticket with id: " + ticket.getId() +
+                        " belongs to the project with id: " + ticket.getProjectId() + ". " +
+                        "But the new phase with id: " + phaseId +
+                        " does not."
+                );
+            }
+
             UUID oldPhaseId = ticket.getPhaseId();
             ticket.setPhaseId(phaseId);
             eventPublisher.publishEvent(new TicketPhaseUpdatedEvent(ticket.getId(), ticket.getProjectId(), oldPhaseId, phaseId));
@@ -120,6 +130,11 @@ public class TicketService {
         }
 
         ticketRepository.save(ticket);
+    }
+
+    private Boolean phaseBelongsToProject(UUID phaseId, UUID projectIdCandidate) {
+        UUID actualProjectId = phaseProjectDict.get(phaseId);
+        return actualProjectId.equals(projectIdCandidate);
     }
 
 

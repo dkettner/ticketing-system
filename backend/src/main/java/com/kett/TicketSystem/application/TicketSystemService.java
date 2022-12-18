@@ -15,7 +15,6 @@ import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
-import com.kett.TicketSystem.phase.domain.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
@@ -265,17 +264,6 @@ public class TicketSystemService {
             "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
     public void patchTicketById(UUID id, TicketPatchDto ticketPatchDto) {
         UUID projectIdOfTicket = ticketService.getProjectIdByTicketId(id);
-        if (ticketPatchDto.getPhaseId() != null) {
-            UUID projectIdOfNewPhase = phaseService.getProjectIdByPhaseId(ticketPatchDto.getPhaseId());
-            if (!projectIdOfTicket.equals(projectIdOfNewPhase)) {
-                throw new UnrelatedPhaseException(
-                        "The ticket with id: " + id +
-                        "belongs to the project with id: " + projectIdOfTicket + ". " +
-                        "But the new phase with id: " + ticketPatchDto.getPhaseId() +
-                        "does not.");
-            }
-        }
-
         if (ticketPatchDto.getAssigneeIds() != null) {
             if (!membershipService.allUsersAreProjectMembers(ticketPatchDto.getAssigneeIds(), projectIdOfTicket)) {
                 throw new InvalidProjectMembersException(
