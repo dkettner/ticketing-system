@@ -2,6 +2,7 @@ package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
+import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
@@ -61,11 +62,14 @@ public class PhaseService {
             );
         }
 
+        Phase initializedPhase;
         if (previousPhase == null) {
-            return addFirst(phase);
+            initializedPhase = addFirst(phase);
         } else {
-            return addAfterPrevious(phase, previousPhase);
+            initializedPhase = addAfterPrevious(phase, previousPhase);
         }
+        eventPublisher.publishEvent(new PhaseCreatedEvent(initializedPhase.getId(), initializedPhase.getProjectId()));
+        return initializedPhase;
     }
 
     private Phase addFirst(Phase phase) {
