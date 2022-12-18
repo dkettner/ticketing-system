@@ -3,6 +3,8 @@ package com.kett.TicketSystem.ticket.application;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
+import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
+import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -19,21 +21,21 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final List<UUID> existingProjects;
+    private final Hashtable<UUID, UUID> phaseProjectDict; // TODO: service is not stateless
 
     @Autowired
     public TicketService(TicketRepository ticketRepository, ApplicationEventPublisher eventPublisher) {
         this.ticketRepository = ticketRepository;
         this.eventPublisher = eventPublisher;
         this.existingProjects = new ArrayList<>();
+        this.phaseProjectDict = new Hashtable<>();
     }
 
 
@@ -177,5 +179,18 @@ public class TicketService {
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
         this.existingProjects.remove(projectDeletedEvent.getProjectId());
+        this.phaseProjectDict.values().removeAll(Collections.singleton(projectDeletedEvent.getProjectId())); // TODO: needs thorough testing
+    }
+
+    @EventListener
+    @Async
+    public void handlePhaseCreatedEvent(PhaseCreatedEvent phaseCreatedEvent) {
+        this.phaseProjectDict.put(phaseCreatedEvent.getPhaseId(), phaseCreatedEvent.getProjectId());
+    }
+
+    @EventListener
+    @Async
+    public void handlePhaseDeletedEvent(PhaseDeletedEvent phaseDeletedEvent) {
+        this.phaseProjectDict.remove(phaseDeletedEvent.getPhaseId());
     }
 }
