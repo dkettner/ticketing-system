@@ -3,6 +3,7 @@ package com.kett.TicketSystem.phase.application;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
+import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
@@ -172,6 +173,7 @@ public class PhaseService {
                             "Multiple phases were deleted when deleting phase with id: " + id
             );
         }
+        eventPublisher.publishEvent(new PhaseDeletedEvent(phase.getId(), phase.getProjectId()));
     }
 
     private void removePhaseFromCurrentPosition(Phase phase) {
