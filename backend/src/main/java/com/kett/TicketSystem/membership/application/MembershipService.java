@@ -25,7 +25,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class MembershipService {
@@ -102,19 +101,6 @@ public class MembershipService {
 
     public UUID getProjectIdByMembershipId(UUID id) throws NoMembershipFoundException {
         return this.getMembershipById(id).getProjectId();
-    }
-
-    // TODO: Write query in repository for this?
-    public Boolean allUsersAreProjectMembers(List<UUID> assigneeIds, UUID projectId) {
-        HashSet<UUID> projectMemberIds =
-                membershipRepository
-                        .findByProjectId(projectId)
-                        .stream()
-                        .filter(membership -> membership.getState().equals(State.ACCEPTED))
-                        .map(Membership::getUserId)
-                        .collect(Collectors.toCollection(HashSet::new));
-
-        return projectMemberIds.containsAll(assigneeIds);
     }
 
 
