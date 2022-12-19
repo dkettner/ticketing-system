@@ -9,7 +9,6 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
-import com.kett.TicketSystem.common.exceptions.InvalidProjectMembersException;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
@@ -246,12 +245,6 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto, EmailAddress postingUserEmail) {
-        if (!membershipService.allUsersAreProjectMembers(ticketPostDto.getAssigneeIds(), ticketPostDto.getProjectId())) {
-            throw new InvalidProjectMembersException(
-                    "not all assignees are part of the project with id: " + ticketPostDto.getProjectId()
-            );
-        }
-
         Ticket ticket = ticketService.addTicket(
                 dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, null),
                 userService.getUserIdByEmail(postingUserEmail)
@@ -263,15 +256,6 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
             "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
     public void patchTicketById(UUID id, TicketPatchDto ticketPatchDto) {
-        UUID projectIdOfTicket = ticketService.getProjectIdByTicketId(id);
-        if (ticketPatchDto.getAssigneeIds() != null) {
-            if (!membershipService.allUsersAreProjectMembers(ticketPatchDto.getAssigneeIds(), projectIdOfTicket)) {
-                throw new InvalidProjectMembersException(
-                        "not all assignees are part of the project with id: " + projectIdOfTicket
-                );
-            }
-        }
-
         ticketService.patchTicket(
                 id,
                 ticketPatchDto.getTitle(),
