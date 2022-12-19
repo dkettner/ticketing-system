@@ -4,6 +4,7 @@ import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
+import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
@@ -120,9 +121,16 @@ public class MembershipService {
     // update
 
     public void patchMemberShipState(UUID id, State state) throws NoMembershipFoundException {
-        Membership existingMembership = this.getMembershipById(id);
-        existingMembership.setState(state);
-        membershipRepository.save(existingMembership);
+        Membership membership = this.getMembershipById(id);
+        membership.setState(state);
+        membershipRepository.save(membership);
+        eventPublisher.publishEvent(
+                new MembershipAcceptedEvent(
+                        membership.getId(),
+                        membership.getProjectId(),
+                        membership.getUserId()
+                )
+        );
     }
 
     public void patchMembershipRole(UUID id, Role role) throws NoMembershipFoundException {
