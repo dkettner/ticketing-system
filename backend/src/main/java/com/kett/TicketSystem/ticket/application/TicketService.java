@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.ticket.application;
 
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
@@ -30,6 +31,7 @@ public class TicketService {
     private final ApplicationEventPublisher eventPublisher;
     private final List<UUID> existingProjects;
     private final Hashtable<UUID, UUID> phaseProjectDict; // TODO: service is not stateless
+    private final Hashtable<UUID, List<UUID>> projectMemberDict; // TODO: service is not stateless
 
     @Autowired
     public TicketService(TicketRepository ticketRepository, ApplicationEventPublisher eventPublisher) {
@@ -37,6 +39,7 @@ public class TicketService {
         this.eventPublisher = eventPublisher;
         this.existingProjects = new ArrayList<>();
         this.phaseProjectDict = new Hashtable<>();
+        this.projectMemberDict = new Hashtable<>();
     }
 
 
@@ -166,6 +169,18 @@ public class TicketService {
 
         tickets.forEach(ticket -> ticket.removeAssignee(membershipDeletedEvent.getUserId()));
         ticketRepository.saveAll(tickets);
+
+        List<UUID> projectMembers = this.projectMemberDict.get(membershipDeletedEvent.getProjectId());
+        projectMembers.remove(membershipDeletedEvent.getUserId());
+        this.projectMemberDict.put(membershipDeletedEvent.getProjectId(), projectMembers);
+    }
+
+    @EventListener
+    @Async
+    public void handleMembershipAcceptedEvent(MembershipAcceptedEvent membershipAcceptedEvent) {
+        List<UUID> projectMembers = this.projectMemberDict.get(membershipAcceptedEvent.getProjectId());
+        projectMembers.add(membershipAcceptedEvent.getUserId());
+        this.projectMemberDict.put(membershipAcceptedEvent.getProjectId(), projectMembers);
     }
 
     @EventListener
@@ -180,12 +195,14 @@ public class TicketService {
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
         this.existingProjects.add(projectCreatedEvent.getProjectId());
+        this.projectMemberDict.put(projectCreatedEvent.getProjectId(), new ArrayList<>());
     }
 
     @EventListener
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
         this.existingProjects.add(defaultProjectCreatedEvent.getProjectId());
+        this.projectMemberDict.put(defaultProjectCreatedEvent.getProjectId(), new ArrayList<>());
     }
 
 
@@ -194,6 +211,7 @@ public class TicketService {
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
         this.existingProjects.remove(projectDeletedEvent.getProjectId());
+        this.projectMemberDict.remove(projectDeletedEvent.getProjectId());
         this.phaseProjectDict.values().removeAll(Collections.singleton(projectDeletedEvent.getProjectId())); // TODO: needs thorough testing
     }
 
