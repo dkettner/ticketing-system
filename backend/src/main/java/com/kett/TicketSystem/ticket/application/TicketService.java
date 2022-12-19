@@ -3,6 +3,7 @@ package com.kett.TicketSystem.ticket.application;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
+import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
@@ -45,14 +46,24 @@ public class TicketService {
 
     // create
 
-    public Ticket addTicket(Ticket ticket, UUID postingUserId) {
+    public Ticket addTicket(Ticket ticket, UUID postingUserId) throws NoProjectFoundException, InvalidProjectMembersException {
         if (!existingProjects.contains(ticket.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + ticket.getProjectId());
+        }
+        if (!allAssigneesAreProjectMembers(ticket.getProjectId(), ticket.getAssigneeIds())) {
+            throw new InvalidProjectMembersException(
+                    "not all assignees are part of the project with id: " + ticket.getProjectId()
+            );
         }
 
         Ticket initializedTicket = ticketRepository.save(ticket);
         eventPublisher.publishEvent(new TicketCreatedEvent(initializedTicket.getId(), initializedTicket.getProjectId(), postingUserId));
         return initializedTicket;
+    }
+
+    private Boolean allAssigneesAreProjectMembers(UUID projectId, List<UUID> assigneeIds) {
+        List<UUID> projectMembers = projectMemberDict.get(projectId);
+        return new HashSet<>(projectMembers).containsAll(assigneeIds);
     }
 
 
@@ -102,7 +113,7 @@ public class TicketService {
             LocalDateTime dueTime,
             UUID phaseId,
             List<UUID> assigneeIds
-    ) throws NoTicketFoundException {
+    ) throws NoTicketFoundException, InvalidProjectMembersException, UnrelatedPhaseException {
         Ticket ticket = this.getTicketById(id);
 
         if (title != null) {
@@ -129,6 +140,11 @@ public class TicketService {
             eventPublisher.publishEvent(new TicketPhaseUpdatedEvent(ticket.getId(), ticket.getProjectId(), oldPhaseId, phaseId));
         }
         if (assigneeIds != null) {
+            if (!allAssigneesAreProjectMembers(ticket.getProjectId(), assigneeIds)) {
+                throw new InvalidProjectMembersException(
+                        "not all assignees are part of the project with id: " + ticket.getProjectId()
+                );
+            }
             ticket.setAssigneeIds(assigneeIds);
         }
 
