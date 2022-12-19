@@ -3,7 +3,7 @@ package com.kett.TicketSystem.ticket.application;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
-import com.kett.TicketSystem.membership.domain.exceptions.InvalidProjectMembersException;
+import com.kett.TicketSystem.common.exceptions.InvalidProjectMembersException;
 import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
