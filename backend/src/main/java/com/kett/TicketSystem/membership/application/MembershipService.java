@@ -197,7 +197,14 @@ public class MembershipService {
                 Role.ADMIN
         );
         defaultMembership.setState(State.ACCEPTED);
-        this.addMembership(defaultMembership);
+        Membership initializedMembership = this.addMembership(defaultMembership);
+        eventPublisher.publishEvent(
+                new MembershipAcceptedEvent(
+                        initializedMembership.getId(),
+                        initializedMembership.getProjectId(),
+                        initializedMembership.getUserId()
+                )
+        );
     }
 
     @EventListener
@@ -209,7 +216,14 @@ public class MembershipService {
                 Role.ADMIN
         );
         defaultMembership.setState(State.ACCEPTED);
-        this.addMembership(defaultMembership);
+        Membership initializedMembership = this.addMembership(defaultMembership);
+        eventPublisher.publishEvent(
+                new MembershipAcceptedEvent(
+                        initializedMembership.getId(),
+                        initializedMembership.getProjectId(),
+                        initializedMembership.getUserId()
+                )
+        );
     }
 
     @EventListener
