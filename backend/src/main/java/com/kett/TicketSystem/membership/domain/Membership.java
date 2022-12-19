@@ -65,7 +65,7 @@ public class Membership implements GrantedAuthority {
 
             if (this.state.equals(State.ACCEPTED) && state.equals(State.OPEN)) {
                 throw new IllegalStateUpdateException(
-                        "Once state as been changed to ACCEPTED, it cannot go back to OPEN. " +
+                        "Once state has been changed to ACCEPTED, it cannot go back to OPEN. " +
                         "To revoke Membership, use delete."
                 );
             }
