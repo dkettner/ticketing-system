@@ -7,8 +7,8 @@ import java.util.UUID;
 
 @Getter
 public abstract class DomainEvent {
-    private final UUID id;
-    private final LocalDateTime timeStamp;
+    protected final UUID id;
+    protected final LocalDateTime timeStamp;
 
     protected DomainEvent() {
         this.id = UUID.randomUUID();
