@@ -1,19 +1,16 @@
 package com.kett.TicketSystem.project.domain.events;
 
+import com.kett.TicketSystem.common.DomainEvent;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-public class ProjectDeletedEvent {
-    private final UUID id;
-    private final LocalDateTime timeStamp;
+public class ProjectDeletedEvent extends DomainEvent {
     private final UUID projectId;
 
     public ProjectDeletedEvent(UUID projectId) {
-        this.id = UUID.randomUUID();
-        this.timeStamp = LocalDateTime.now();
+        super();
         this.projectId = projectId;
     }
 }

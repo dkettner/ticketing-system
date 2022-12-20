@@ -1,20 +1,17 @@
 package com.kett.TicketSystem.project.domain.events;
 
+import com.kett.TicketSystem.common.DomainEvent;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
-public class DefaultProjectCreatedEvent {
-    private final UUID id;
-    private final LocalDateTime timeStamp;
+public class DefaultProjectCreatedEvent extends DomainEvent {
     private final UUID projectId;
     private final UUID userId;
 
     public DefaultProjectCreatedEvent(UUID projectId, UUID userId) {
-        this.id = UUID.randomUUID();
-        this.timeStamp = LocalDateTime.now();
+        super();
         this.projectId = projectId;
         this.userId = userId;
     }
