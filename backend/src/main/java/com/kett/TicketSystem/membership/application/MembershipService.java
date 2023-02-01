@@ -175,6 +175,7 @@ public class MembershipService {
     // event listeners
 
     @EventListener
+    @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
         this.existingProjects.add(projectCreatedEvent.getProjectId());
         Membership defaultMembership = new Membership(
@@ -194,6 +195,7 @@ public class MembershipService {
     }
 
     @EventListener
+    @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
         this.existingProjects.add(defaultProjectCreatedEvent.getProjectId());
         Membership defaultMembership = new Membership(
