@@ -2,6 +2,7 @@ package com.kett.TicketSystem.common.exceptions;
 
 import com.kett.TicketSystem.common.domainprimitives.EmailAddressException;
 import com.kett.TicketSystem.membership.domain.exceptions.*;
+import com.kett.TicketSystem.notification.domain.exceptions.NotificationException;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseInProjectException;
@@ -25,6 +26,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
             NoParametersException.class,
             TooManyParametersException.class,
             MembershipException.class,
+            NotificationException.class,
             PhaseException.class,
             ProjectException.class,
             TicketException.class,
