@@ -3,7 +3,7 @@ package com.kett.TicketSystem.membership;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
-import com.kett.TicketSystem.membership.domain.exceptions.IllegalStateUpdateException;
+import com.kett.TicketSystem.common.exceptions.IllegalStateUpdateException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import org.junit.jupiter.api.AfterEach;

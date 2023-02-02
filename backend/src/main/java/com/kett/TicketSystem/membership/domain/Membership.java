@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.membership.domain;
 
-import com.kett.TicketSystem.membership.domain.exceptions.IllegalStateUpdateException;
+import com.kett.TicketSystem.common.exceptions.IllegalStateUpdateException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipException;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
