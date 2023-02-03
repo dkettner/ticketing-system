@@ -2,6 +2,7 @@ package com.kett.TicketSystem.common.exceptions;
 
 import com.kett.TicketSystem.common.domainprimitives.EmailAddressException;
 import com.kett.TicketSystem.membership.domain.exceptions.*;
+import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
 import com.kett.TicketSystem.notification.domain.exceptions.NotificationException;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
@@ -39,6 +40,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {
             NoMembershipFoundException.class,
+            NoNotificationFoundException.class,
             NoPhaseFoundException.class,
             NoProjectFoundException.class,
             NoTicketFoundException.class,
