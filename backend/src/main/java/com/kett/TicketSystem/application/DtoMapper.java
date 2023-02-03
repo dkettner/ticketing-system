@@ -3,6 +3,8 @@ package com.kett.TicketSystem.application;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
+import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
@@ -30,6 +32,13 @@ public class DtoMapper {
             mapper.map(Membership::getUserId, MembershipResponseDto::setUserId);
             mapper.map(Membership::getRole, MembershipResponseDto::setRole);
             mapper.map(Membership::getState, MembershipResponseDto::setState);
+        });
+        modelMapper.typeMap(Notification.class, NotificationResponseDto.class).addMappings(mapper -> {
+           mapper.map(Notification::getId, NotificationResponseDto::setId);
+           mapper.map(Notification::getCreationTime, NotificationResponseDto::setCreationTime);
+           mapper.map(Notification::getRecipientId, NotificationResponseDto::setRecipientId);
+           mapper.map(Notification::getIsRead, NotificationResponseDto::setIsRead);
+           mapper.map(Notification::getContent, NotificationResponseDto::setContent);
         });
         modelMapper.typeMap(Phase.class, PhaseResponseDto.class).addMappings(mapper -> {
             mapper.map(Phase::getId, PhaseResponseDto::setId);
@@ -87,6 +96,13 @@ public class DtoMapper {
                 membershipPostDto.getUserId(),
                 membershipPostDto.getRole()
         );
+    }
+
+
+    // notification
+
+    public NotificationResponseDto mapNotificationToNotificationResponseDto(Notification notification) {
+        return modelMapper.map(notification, NotificationResponseDto.class);
     }
 
 
