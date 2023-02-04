@@ -9,6 +9,9 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.notification.application.NotificationService;
+import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
+import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
@@ -39,6 +42,7 @@ import java.util.UUID;
 public class TicketSystemService {
     private final AuthenticationService authenticationService;
     private final MembershipService membershipService;
+    private final NotificationService notificationService;
     private final PhaseService phaseService;
     private final ProjectService projectService;
     private final TicketService ticketService;
@@ -49,13 +53,14 @@ public class TicketSystemService {
     public TicketSystemService (
             AuthenticationService authenticationService,
             MembershipService membershipService,
-            PhaseService phaseService,
+            NotificationService notificationService, PhaseService phaseService,
             ProjectService projectService,
             TicketService ticketService,
             UserService userService
     ) {
         this.authenticationService = authenticationService;
         this.membershipService = membershipService;
+        this.notificationService = notificationService;
         this.phaseService = phaseService;
         this.projectService = projectService;
         this.ticketService = ticketService;
@@ -64,16 +69,16 @@ public class TicketSystemService {
     }
 
 
-    // authentication
 
+    // authentication
     public String authenticateUser(AuthenticationPostDto authenticationPostDto) {
         return authenticationService
                 .authenticateUser(authenticationPostDto.getEmail(), authenticationPostDto.getPassword());
     }
 
 
-    // membership
 
+    // membership
     @PreAuthorize("hasAnyAuthority(" +
             "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
             "'ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
@@ -126,6 +131,17 @@ public class TicketSystemService {
     public void deleteMembershipById(UUID id) {
         membershipService.deleteMembershipById(id);
     }
+
+
+
+    // notification
+
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationService.getGetRecipientIdByNotificationId(#id)))")
+    public NotificationResponseDto getNotificationById(UUID id) {
+        Notification notification = notificationService.getNotificationById(id);
+        return dtoMapper.mapNotificationToNotificationResponseDto(notification);
+    }
+
 
 
     // phase

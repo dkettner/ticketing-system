@@ -39,4 +39,10 @@ public class NotificationService {
         }
         return notifications;
     }
+
+    public UUID getGetRecipientIdByNotificationId(UUID id) throws NoNotificationFoundException {
+        return this
+                .getNotificationById(id)
+                .getRecipientId();
+    }
 }
