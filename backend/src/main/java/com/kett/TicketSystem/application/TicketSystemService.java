@@ -142,6 +142,17 @@ public class TicketSystemService {
         return dtoMapper.mapNotificationToNotificationResponseDto(notification);
     }
 
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#recipientId))")
+    public List<NotificationResponseDto> getNotificationsByRecipientId(UUID recipientId) {
+        List<Notification> notifications = notificationService.getNotificationsByRecipientId(recipientId);
+        return dtoMapper.mapNotificationListToNotificationResponseDtoList(notifications);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userService.getUserIdByEmail(#email)))")
+    public List<NotificationResponseDto> getNotificationsByEmail(EmailAddress email) {
+        UUID recipientId = userService.getUserIdByEmail(email);
+        return this.getNotificationsByRecipientId(recipientId);
+    }
 
 
     // phase

@@ -1,6 +1,9 @@
 package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.exceptions.NoParametersException;
+import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -8,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,4 +33,23 @@ public class NotificationController {
         return new ResponseEntity<>(notificationResponseDto, HttpStatus.OK);
     }
 
+    @GetMapping
+    public ResponseEntity<List<NotificationResponseDto>> getNotificationsByQuery(
+            @RequestParam(name = "recipientId", required = false) UUID recipientId,
+            @RequestParam(name = "email", required = false) String email
+    ) {
+        if (recipientId != null && email != null) {
+            throw new TooManyParametersException("cannot query by more than one parameter yet");
+        }
+
+        List<NotificationResponseDto> notificationResponseDtos;
+        if (recipientId != null) {
+            notificationResponseDtos = ticketSystemService.getNotificationsByRecipientId(recipientId);
+        } else if (email != null) {
+            notificationResponseDtos = ticketSystemService.getNotificationsByEmail(EmailAddress.fromString(email));
+        } else {
+            throw new NoParametersException("cannot query if no parameters are specified");
+        }
+        return new ResponseEntity<>(notificationResponseDtos, HttpStatus.OK);
+    }
 }
