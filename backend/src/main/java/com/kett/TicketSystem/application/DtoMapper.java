@@ -105,6 +105,13 @@ public class DtoMapper {
         return modelMapper.map(notification, NotificationResponseDto.class);
     }
 
+    public List<NotificationResponseDto> mapNotificationListToNotificationResponseDtoList(List<Notification> notifications) {
+        return notifications
+                .stream()
+                .map(notification -> modelMapper.map(notification, NotificationResponseDto.class))
+                .toList();
+    }
+
 
     // phase
 
