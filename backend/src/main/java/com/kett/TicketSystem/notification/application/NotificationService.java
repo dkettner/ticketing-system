@@ -1,9 +1,12 @@
 package com.kett.TicketSystem.notification.application;
 
+import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -44,5 +47,14 @@ public class NotificationService {
         return this
                 .getNotificationById(id)
                 .getRecipientId();
+    }
+
+    @EventListener
+    @Async
+    public void handleUnacceptedProjectMembershipCreatedEvent(UnacceptedProjectMembershipCreatedEvent unacceptedProjectMembershipCreatedEvent) {
+        String message = "You got invited to project " + unacceptedProjectMembershipCreatedEvent.getProjectId();
+
+        Notification notification = new Notification(unacceptedProjectMembershipCreatedEvent.getInviteeId(), message);
+        notificationRepository.save(notification);
     }
 }
