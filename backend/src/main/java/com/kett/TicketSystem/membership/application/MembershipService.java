@@ -6,6 +6,7 @@ import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
+import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
@@ -59,6 +60,8 @@ public class MembershipService {
                     " already exists."
             );
         }
+
+        eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(membership.getUserId(), membership.getProjectId()));
         return membershipRepository.save(membership);
     }
 
