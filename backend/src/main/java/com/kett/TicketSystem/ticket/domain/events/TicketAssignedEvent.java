@@ -9,12 +9,12 @@ import java.util.UUID;
 public class TicketAssignedEvent extends DomainEvent {
     private final UUID ticketId;
     private final UUID projectId;
-    private final UUID userId;
+    private final UUID assigneeId;
 
-    public TicketAssignedEvent(UUID ticketId, UUID projectId, UUID userId) {
+    public TicketAssignedEvent(UUID ticketId, UUID projectId, UUID assigneeId) {
         super();
         this.ticketId = ticketId;
         this.projectId = projectId;
-        this.userId = userId;
+        this.assigneeId = assigneeId;
     }
 }
