@@ -4,6 +4,8 @@ import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershi
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
+import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketUnassignedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -49,12 +51,37 @@ public class NotificationService {
                 .getRecipientId();
     }
 
+
+    // event listeners
+
     @EventListener
     @Async
     public void handleUnacceptedProjectMembershipCreatedEvent(UnacceptedProjectMembershipCreatedEvent unacceptedProjectMembershipCreatedEvent) {
-        String message = "You got invited to project " + unacceptedProjectMembershipCreatedEvent.getProjectId();
+        String message = "You got invited to project " + unacceptedProjectMembershipCreatedEvent.getProjectId() + ".";
 
         Notification notification = new Notification(unacceptedProjectMembershipCreatedEvent.getInviteeId(), message);
+        notificationRepository.save(notification);
+    }
+
+    @EventListener
+    @Async
+    public void handleTicketAssignedEvent(TicketAssignedEvent ticketAssignedEvent) {
+        String message =
+                "You got assigned to ticket " + ticketAssignedEvent.getTicketId() +
+                " of project " + ticketAssignedEvent.getProjectId() + ".";
+
+        Notification notification = new Notification(ticketAssignedEvent.getAssigneeId(), message);
+        notificationRepository.save(notification);
+    }
+
+    @EventListener
+    @Async
+    public void handleTicketUnassignedEvent(TicketUnassignedEvent ticketUnassignedEvent) {
+        String message =
+                "You got assigned to ticket " + ticketUnassignedEvent.getTicketId() +
+                " of project " + ticketUnassignedEvent.getProjectId() + ".";
+
+        Notification notification = new Notification(ticketUnassignedEvent.getAssigneeId(), message);
         notificationRepository.save(notification);
     }
 }
