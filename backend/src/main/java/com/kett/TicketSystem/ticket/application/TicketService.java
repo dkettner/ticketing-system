@@ -12,9 +12,7 @@ import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.ticket.domain.Ticket;
-import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
-import com.kett.TicketSystem.ticket.domain.events.TicketDeletedEvent;
-import com.kett.TicketSystem.ticket.domain.events.TicketPhaseUpdatedEvent;
+import com.kett.TicketSystem.ticket.domain.events.*;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,6 +143,7 @@ public class TicketService {
                         "not all assignees are part of the project with id: " + ticket.getProjectId()
                 );
             }
+            publishAssignmentEvents(ticket, assigneeIds, ticket.getAssigneeIds());
             ticket.setAssigneeIds(assigneeIds);
         }
 
@@ -154,6 +153,26 @@ public class TicketService {
     private Boolean phaseBelongsToProject(UUID phaseId, UUID projectIdCandidate) {
         UUID actualProjectId = phaseProjectDict.get(phaseId);
         return actualProjectId.equals(projectIdCandidate);
+    }
+
+    private void publishAssignmentEvents(Ticket ticket, List<UUID> newAssignees, List<UUID> oldAssignees) {
+        newAssignees
+                .stream()
+                .filter(assigneeId -> !oldAssignees.contains(assigneeId))
+                .forEach(assigneeId ->
+                        eventPublisher.publishEvent(
+                                new TicketAssignedEvent(ticket.getId(), ticket.getProjectId(), assigneeId)
+                        )
+                );
+
+        oldAssignees
+                .stream()
+                .filter(assigneeId -> !newAssignees.contains(assigneeId))
+                .forEach(assigneeId ->
+                        eventPublisher.publishEvent(
+                                new TicketUnassignedEvent(ticket.getId(), ticket.getProjectId(), assigneeId)
+                        )
+                );
     }
 
 
