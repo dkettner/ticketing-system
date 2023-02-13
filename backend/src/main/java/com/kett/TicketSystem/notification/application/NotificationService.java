@@ -78,8 +78,9 @@ public class NotificationService {
     @Async
     public void handleTicketUnassignedEvent(TicketUnassignedEvent ticketUnassignedEvent) {
         String message =
-                "You got assigned to ticket " + ticketUnassignedEvent.getTicketId() +
-                " of project " + ticketUnassignedEvent.getProjectId() + ".";
+                "Your assignment to ticket " + ticketUnassignedEvent.getTicketId() +
+                " of project " + ticketUnassignedEvent.getProjectId() +
+                " has been revoked" + ".";
 
         Notification notification = new Notification(ticketUnassignedEvent.getAssigneeId(), message);
         notificationRepository.save(notification);
