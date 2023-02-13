@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.phase.application;
+package com.kett.TicketSystem.notification.application;
 
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
