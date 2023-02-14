@@ -79,13 +79,13 @@ public class MembershipController {
     }
 
     @PatchMapping("/{id}/state")
-    public ResponseEntity<?> patchMemberShipState(@PathVariable UUID id, @RequestBody MembershipPatchStateDto membershipPatchStateDto) {
+    public ResponseEntity<?> patchMembershipState(@PathVariable UUID id, @RequestBody MembershipPatchStateDto membershipPatchStateDto) {
         ticketSystemService.patchMembershipState(id, membershipPatchStateDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PatchMapping("/{id}/role")
-    public ResponseEntity<?> patchMemberShipRole(@PathVariable UUID id, @RequestBody MembershipPatchRoleDto membershipPatchRoleDto) {
+    public ResponseEntity<?> patchMembershipRole(@PathVariable UUID id, @RequestBody MembershipPatchRoleDto membershipPatchRoleDto) {
         ticketSystemService.patchMembershipRole(id, membershipPatchRoleDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
