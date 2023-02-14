@@ -10,6 +10,7 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.notification.application.NotificationService;
+import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
 import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
@@ -77,7 +78,6 @@ public class TicketSystemService {
     }
 
 
-
     // membership
     @PreAuthorize("hasAnyAuthority(" +
             "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
@@ -133,9 +133,7 @@ public class TicketSystemService {
     }
 
 
-
     // notification
-
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationService.getGetRecipientIdByNotificationId(#id)))")
     public NotificationResponseDto getNotificationById(UUID id) {
         Notification notification = notificationService.getNotificationById(id);
@@ -152,6 +150,11 @@ public class TicketSystemService {
     public List<NotificationResponseDto> getNotificationsByEmail(EmailAddress email) {
         UUID recipientId = userService.getUserIdByEmail(email);
         return this.getNotificationsByRecipientId(recipientId);
+    }
+
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationService.getGetRecipientIdByNotificationId(#id)))")
+    public void patchNotificationReadState(UUID id, NotificationPatchIsReadDto notificationPatchIsReadDto) {
+        notificationService.patchReadState(id, notificationPatchIsReadDto.getIsRead());
     }
 
 

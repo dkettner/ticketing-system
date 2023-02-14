@@ -1,8 +1,10 @@
 package com.kett.TicketSystem.notification.application;
 
+import com.kett.TicketSystem.common.exceptions.IllegalStateUpdateException;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
+import com.kett.TicketSystem.notification.domain.exceptions.NotificationException;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
 import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketUnassignedEvent;
@@ -49,6 +51,12 @@ public class NotificationService {
         return this
                 .getNotificationById(id)
                 .getRecipientId();
+    }
+
+    public void patchReadState(UUID id, Boolean isRead) throws NoNotificationFoundException, NotificationException, IllegalStateUpdateException {
+        Notification notification = this.getNotificationById(id);
+        notification.setIsRead(isRead);
+        notificationRepository.save(notification);
     }
 
 

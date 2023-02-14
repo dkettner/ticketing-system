@@ -4,6 +4,7 @@ import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.NoParametersException;
 import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
+import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
 import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -51,5 +52,11 @@ public class NotificationController {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
         return new ResponseEntity<>(notificationResponseDtos, HttpStatus.OK);
+    }
+
+    @PatchMapping("/{id}/is-read")
+    public ResponseEntity<?> patchNotificationReadState(@PathVariable UUID id, @RequestBody NotificationPatchIsReadDto notificationPatchIsReadDto) {
+        ticketSystemService.patchNotificationReadState(id, notificationPatchIsReadDto);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
