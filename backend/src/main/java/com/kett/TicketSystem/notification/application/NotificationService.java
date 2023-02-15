@@ -8,6 +8,7 @@ import com.kett.TicketSystem.notification.domain.exceptions.NotificationExceptio
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
 import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketUnassignedEvent;
+import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -59,6 +60,10 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    public void deleteByRecipientId(UUID recipientId) {
+        notificationRepository.deleteByRecipientId(recipientId);
+    }
+
 
     // event listeners
 
@@ -92,5 +97,11 @@ public class NotificationService {
 
         Notification notification = new Notification(ticketUnassignedEvent.getAssigneeId(), message);
         notificationRepository.save(notification);
+    }
+
+    @EventListener
+    @Async
+    public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
+        this.deleteByRecipientId(userDeletedEvent.getUserId());
     }
 }

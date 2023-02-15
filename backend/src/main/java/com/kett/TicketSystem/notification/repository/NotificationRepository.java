@@ -11,4 +11,5 @@ import java.util.UUID;
 public interface NotificationRepository extends JpaRepository<Notification, UUID> {
     List<Notification> findByRecipientId(UUID recipientId);
     List<Notification> findByRecipientIdAndIsReadFalse(UUID recipientId);
+    void deleteByRecipientId(UUID recipientId);
 }
