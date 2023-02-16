@@ -157,6 +157,11 @@ public class TicketSystemService {
         notificationService.patchReadState(id, notificationPatchIsReadDto.getIsRead());
     }
 
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationService.getGetRecipientIdByNotificationId(#id)))")
+    public void deleteNotificationById(UUID id) {
+        notificationService.deleteById(id);
+    }
+
 
     // phase
 

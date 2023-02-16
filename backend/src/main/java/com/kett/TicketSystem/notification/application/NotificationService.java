@@ -60,6 +60,13 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
+    public void deleteById(UUID id) throws NoNotificationFoundException {
+        Long numOfDeletedNotifications = notificationRepository.removeById(id);
+        if (numOfDeletedNotifications == 0) {
+            throw new NoNotificationFoundException("Could not find notification with id: " + id);
+        }
+    }
+
     public void deleteByRecipientId(UUID recipientId) {
         notificationRepository.deleteByRecipientId(recipientId);
     }

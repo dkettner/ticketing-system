@@ -59,4 +59,10 @@ public class NotificationController {
         ticketSystemService.patchNotificationReadState(id, notificationPatchIsReadDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteNotification(@PathVariable UUID id) {
+        ticketSystemService.deleteNotificationById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
