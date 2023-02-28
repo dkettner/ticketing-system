@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.ticket.application;
 
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
@@ -29,7 +30,7 @@ public class TicketService {
     private final TicketRepository ticketRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final ConsumedProjectDataManager consumedProjectDataManager;
-    private final Hashtable<UUID, UUID> phaseProjectDict; // TODO: service is not stateless
+    private final ConsumedPhaseDataManager consumedPhaseDataManager;
     private final Hashtable<UUID, List<UUID>> projectMemberDict; // TODO: service is not stateless
 
     @Autowired
@@ -37,7 +38,7 @@ public class TicketService {
         this.ticketRepository = ticketRepository;
         this.eventPublisher = eventPublisher;
         this.consumedProjectDataManager = new ConsumedProjectDataManager();
-        this.phaseProjectDict = new Hashtable<>();
+        this.consumedPhaseDataManager = new ConsumedPhaseDataManager();
         this.projectMemberDict = new Hashtable<>();
     }
 
@@ -150,9 +151,11 @@ public class TicketService {
         ticketRepository.save(ticket);
     }
 
-    private Boolean phaseBelongsToProject(UUID phaseId, UUID projectIdCandidate) {
-        UUID actualProjectId = phaseProjectDict.get(phaseId);
-        return actualProjectId.equals(projectIdCandidate);
+    private Boolean phaseBelongsToProject(UUID phaseId, UUID projectIdCandidate) throws ImpossibleException {
+        Optional<PhaseVO> phaseVO = consumedPhaseDataManager.get(phaseId);
+        return phaseVO
+                .map(it -> it.projectId().equals(projectIdCandidate))
+                .orElse(false);
     }
 
     private void publishAssignmentEvents(Ticket ticket, List<UUID> newAssignees, List<UUID> oldAssignees) {
@@ -246,19 +249,21 @@ public class TicketService {
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
         this.consumedProjectDataManager.remove(projectDeletedEvent.getProjectId());
+        this.consumedPhaseDataManager.removeByPredicate(phaseVO ->
+                phaseVO.projectId().equals(projectDeletedEvent.getProjectId())
+        );
         this.projectMemberDict.remove(projectDeletedEvent.getProjectId());
-        this.phaseProjectDict.values().removeAll(Collections.singleton(projectDeletedEvent.getProjectId())); // TODO: needs thorough testing
     }
 
     @EventListener
     @Async
     public void handlePhaseCreatedEvent(PhaseCreatedEvent phaseCreatedEvent) {
-        this.phaseProjectDict.put(phaseCreatedEvent.getPhaseId(), phaseCreatedEvent.getProjectId());
+        this.consumedPhaseDataManager.add(new PhaseVO(phaseCreatedEvent.getPhaseId(), phaseCreatedEvent.getProjectId()));
     }
 
     @EventListener
     @Async
     public void handlePhaseDeletedEvent(PhaseDeletedEvent phaseDeletedEvent) {
-        this.phaseProjectDict.remove(phaseDeletedEvent.getPhaseId());
+        this.consumedPhaseDataManager.remove(phaseDeletedEvent.getPhaseId());
     }
 }
