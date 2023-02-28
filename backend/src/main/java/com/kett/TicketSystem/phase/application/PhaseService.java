@@ -24,7 +24,6 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,20 +32,20 @@ import java.util.UUID;
 public class PhaseService {
     private final PhaseRepository phaseRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final List<UUID> existingProjects;
+    private final ConsumedProjectDataManager consumedProjectDataManager;
 
     @Autowired
     public PhaseService(PhaseRepository phaseRepository, ApplicationEventPublisher eventPublisher) {
         this.phaseRepository = phaseRepository;
         this.eventPublisher = eventPublisher;
-        this.existingProjects = new ArrayList<>();
+        this.consumedProjectDataManager = new ConsumedProjectDataManager();
     }
 
 
     // create
 
     public Phase addPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException {
-        if (!existingProjects.contains(phase.getProjectId())) {
+        if (!consumedProjectDataManager.exists(phase.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + phase.getProjectId());
         }
 
@@ -195,7 +194,7 @@ public class PhaseService {
     @EventListener
     @Async
     public void handleDefaultProjectCreated(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        this.existingProjects.add(defaultProjectCreatedEvent.getProjectId());
+        this.consumedProjectDataManager.add(defaultProjectCreatedEvent.getProjectId());
 
         Phase backlog = new Phase(defaultProjectCreatedEvent.getProjectId(), "BACKLOG", null, null);
         Phase doing = new Phase(defaultProjectCreatedEvent.getProjectId(), "DOING", null, null);
@@ -211,14 +210,14 @@ public class PhaseService {
     @EventListener
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
-        this.existingProjects.remove(projectDeletedEvent.getProjectId());
+        this.consumedProjectDataManager.remove(projectDeletedEvent.getProjectId());
         this.deletePhasesByProjectId(projectDeletedEvent.getProjectId());
     }
 
     @EventListener
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-        this.existingProjects.add(projectCreatedEvent.getProjectId());
+        this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
         this.addPhase(
                 new Phase(projectCreatedEvent.getProjectId(), "BACKLOG", null, null),
                 null
