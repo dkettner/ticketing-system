@@ -32,14 +32,14 @@ public class MembershipService {
     private final MembershipRepository membershipRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final ConsumedProjectDataManager consumedProjectDataManager;
-    private final List<UUID> existingUsers;
+    private final ConsumedUserDataManager consumedUserDataManager;
 
     @Autowired
     public MembershipService(MembershipRepository membershipRepository, ApplicationEventPublisher eventPublisher) {
         this.membershipRepository = membershipRepository;
         this.eventPublisher = eventPublisher;
         this.consumedProjectDataManager = new ConsumedProjectDataManager();
-        this.existingUsers = new ArrayList<>();
+        this.consumedUserDataManager = new ConsumedUserDataManager();
     }
 
 
@@ -49,7 +49,7 @@ public class MembershipService {
         if (!consumedProjectDataManager.exists(membership.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + membership.getProjectId());
         }
-        if (!existingUsers.contains(membership.getUserId())) {
+        if (!consumedUserDataManager.exists(membership.getUserId())) {
             throw new NoUserFoundException("could not find user with id: " + membership.getUserId());
         }
 
@@ -227,7 +227,7 @@ public class MembershipService {
     @EventListener
     @Async
     public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
-        this.existingUsers.add(userCreatedEvent.getUserId());
+        this.consumedUserDataManager.add(userCreatedEvent.getUserId());
     }
 
     @EventListener
@@ -235,6 +235,6 @@ public class MembershipService {
     public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
         List<Membership> memberships = getMembershipsByUserId(userDeletedEvent.getUserId());
         memberships.forEach(membership -> this.deleteMembershipById(membership.getId()));
-        this.existingUsers.remove(userDeletedEvent.getUserId());
+        this.consumedUserDataManager.remove(userDeletedEvent.getUserId());
     }
 }
