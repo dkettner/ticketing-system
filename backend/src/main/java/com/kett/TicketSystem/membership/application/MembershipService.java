@@ -109,7 +109,7 @@ public class MembershipService {
 
     // update
 
-    public void patchMemberShipState(UUID id, State state) throws NoMembershipFoundException {
+    public void updateMemberShipState(UUID id, State state) throws NoMembershipFoundException {
         Membership membership = this.getMembershipById(id);
         membership.setState(state);
         membershipRepository.save(membership);
@@ -122,7 +122,7 @@ public class MembershipService {
         );
     }
 
-    public void patchMembershipRole(UUID id, Role role) throws NoMembershipFoundException {
+    public void updateMembershipRole(UUID id, Role role) throws NoMembershipFoundException {
         Membership existingMembership = this.getMembershipById(id);
         existingMembership.setRole(role);
         membershipRepository.save(existingMembership);

@@ -78,15 +78,15 @@ public class MembershipController {
                 .body(membershipResponseDto);
     }
 
-    @PatchMapping("/{id}/state")
-    public ResponseEntity<?> patchMembershipState(@PathVariable UUID id, @RequestBody MembershipPatchStateDto membershipPatchStateDto) {
-        ticketSystemService.patchMembershipState(id, membershipPatchStateDto);
+    @PutMapping("/{id}/state")
+    public ResponseEntity<?> updateMembershipState(@PathVariable UUID id, @RequestBody MembershipPatchStateDto membershipPatchStateDto) {
+        ticketSystemService.updateMembershipState(id, membershipPatchStateDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping("/{id}/role")
-    public ResponseEntity<?> patchMembershipRole(@PathVariable UUID id, @RequestBody MembershipPatchRoleDto membershipPatchRoleDto) {
-        ticketSystemService.patchMembershipRole(id, membershipPatchRoleDto);
+    @PutMapping("/{id}/role")
+    public ResponseEntity<?> updateMembershipRole(@PathVariable UUID id, @RequestBody MembershipPatchRoleDto membershipPatchRoleDto) {
+        ticketSystemService.updateMembershipRole(id, membershipPatchRoleDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 

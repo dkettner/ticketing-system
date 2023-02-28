@@ -116,13 +116,13 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER'.concat(@membershipService.getUserIdByMembershipId(#id)))")
-    public void patchMembershipState(UUID id, MembershipPatchStateDto membershipPatchStateDto) {
-        membershipService.patchMemberShipState(id, membershipPatchStateDto.getState());
+    public void updateMembershipState(UUID id, MembershipPatchStateDto membershipPatchStateDto) {
+        membershipService.updateMemberShipState(id, membershipPatchStateDto.getState());
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id)))")
-    public void patchMembershipRole(UUID id, MembershipPatchRoleDto membershipPatchRoleDto) {
-        membershipService.patchMembershipRole(id, membershipPatchRoleDto.getRole());
+    public void updateMembershipRole(UUID id, MembershipPatchRoleDto membershipPatchRoleDto) {
+        membershipService.updateMembershipRole(id, membershipPatchRoleDto.getRole());
     }
 
     @PreAuthorize("hasAnyAuthority(" +
