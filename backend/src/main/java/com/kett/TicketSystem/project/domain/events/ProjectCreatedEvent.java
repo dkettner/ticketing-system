@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.project.domain.events;
 
-import com.kett.TicketSystem.common.events.DomainEvent;
+import com.kett.TicketSystem.common.domainprimitives.DomainEvent;
 import lombok.Getter;
 
 import java.util.UUID;
