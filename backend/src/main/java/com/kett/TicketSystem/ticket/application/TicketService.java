@@ -28,7 +28,7 @@ import java.util.*;
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final List<UUID> existingProjects;
+    private final ConsumedProjectDataManager consumedProjectDataManager;
     private final Hashtable<UUID, UUID> phaseProjectDict; // TODO: service is not stateless
     private final Hashtable<UUID, List<UUID>> projectMemberDict; // TODO: service is not stateless
 
@@ -36,7 +36,7 @@ public class TicketService {
     public TicketService(TicketRepository ticketRepository, ApplicationEventPublisher eventPublisher) {
         this.ticketRepository = ticketRepository;
         this.eventPublisher = eventPublisher;
-        this.existingProjects = new ArrayList<>();
+        this.consumedProjectDataManager = new ConsumedProjectDataManager();
         this.phaseProjectDict = new Hashtable<>();
         this.projectMemberDict = new Hashtable<>();
     }
@@ -45,7 +45,7 @@ public class TicketService {
     // create
 
     public Ticket addTicket(Ticket ticket, UUID postingUserId) throws NoProjectFoundException, InvalidProjectMembersException {
-        if (!existingProjects.contains(ticket.getProjectId())) {
+        if (!consumedProjectDataManager.exists(ticket.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + ticket.getProjectId());
         }
         if (!allAssigneesAreProjectMembers(ticket.getProjectId(), ticket.getAssigneeIds())) {
@@ -229,14 +229,14 @@ public class TicketService {
     @EventListener
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-        this.existingProjects.add(projectCreatedEvent.getProjectId());
+        this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
         this.projectMemberDict.put(projectCreatedEvent.getProjectId(), new ArrayList<>());
     }
 
     @EventListener
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        this.existingProjects.add(defaultProjectCreatedEvent.getProjectId());
+        this.consumedProjectDataManager.add(defaultProjectCreatedEvent.getProjectId());
         this.projectMemberDict.put(defaultProjectCreatedEvent.getProjectId(), new ArrayList<>());
     }
 
@@ -245,7 +245,7 @@ public class TicketService {
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
-        this.existingProjects.remove(projectDeletedEvent.getProjectId());
+        this.consumedProjectDataManager.remove(projectDeletedEvent.getProjectId());
         this.projectMemberDict.remove(projectDeletedEvent.getProjectId());
         this.phaseProjectDict.values().removeAll(Collections.singleton(projectDeletedEvent.getProjectId())); // TODO: needs thorough testing
     }
