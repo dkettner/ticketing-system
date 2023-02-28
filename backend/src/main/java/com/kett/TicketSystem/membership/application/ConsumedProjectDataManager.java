@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public class ConsumedProjectDataManager implements IConsumedDataManager<UUID> {
+    // TODO: use persistent storage instead
     List<UUID> existingProjects = new ArrayList<>(); // MembershipService only cares about the IDs of the projects
 
     @Override
