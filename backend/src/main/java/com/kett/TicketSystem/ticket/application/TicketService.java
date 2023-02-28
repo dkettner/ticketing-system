@@ -31,7 +31,7 @@ public class TicketService {
     private final ApplicationEventPublisher eventPublisher;
     private final ConsumedProjectDataManager consumedProjectDataManager;
     private final ConsumedPhaseDataManager consumedPhaseDataManager;
-    private final Hashtable<UUID, List<UUID>> projectMemberDict; // TODO: service is not stateless
+    private final ConsumedMembershipDataManager consumedMembershipDataManager;
 
     @Autowired
     public TicketService(TicketRepository ticketRepository, ApplicationEventPublisher eventPublisher) {
@@ -39,7 +39,7 @@ public class TicketService {
         this.eventPublisher = eventPublisher;
         this.consumedProjectDataManager = new ConsumedProjectDataManager();
         this.consumedPhaseDataManager = new ConsumedPhaseDataManager();
-        this.projectMemberDict = new Hashtable<>();
+        this.consumedMembershipDataManager = new ConsumedMembershipDataManager();
     }
 
 
@@ -61,8 +61,13 @@ public class TicketService {
     }
 
     private Boolean allAssigneesAreProjectMembers(UUID projectId, List<UUID> assigneeIds) {
-        List<UUID> projectMembers = projectMemberDict.get(projectId);
-        return new HashSet<>(projectMembers).containsAll(assigneeIds);
+        Optional<ProjectMembersVO> projectMembersVO = consumedMembershipDataManager.get(projectId);
+        if (projectMembersVO.isEmpty()) {
+            return false;
+        }
+
+        List<UUID> projectMemberIds = projectMembersVO.get().memberIds();
+        return new HashSet<>(projectMemberIds).containsAll(assigneeIds);
     }
 
 
@@ -151,7 +156,7 @@ public class TicketService {
         ticketRepository.save(ticket);
     }
 
-    private Boolean phaseBelongsToProject(UUID phaseId, UUID projectIdCandidate) throws ImpossibleException {
+    private Boolean phaseBelongsToProject(UUID phaseId, UUID projectIdCandidate) {
         Optional<PhaseVO> phaseVO = consumedPhaseDataManager.get(phaseId);
         return phaseVO
                 .map(it -> it.projectId().equals(projectIdCandidate))
@@ -208,17 +213,28 @@ public class TicketService {
         tickets.forEach(ticket -> ticket.removeAssignee(membershipDeletedEvent.getUserId()));
         ticketRepository.saveAll(tickets);
 
-        List<UUID> projectMembers = this.projectMemberDict.get(membershipDeletedEvent.getProjectId());
+        // Update projectMembersVO
+        Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(membershipDeletedEvent.getProjectId());
+        if (projectMembersVO.isEmpty()) {
+            throw new ImpossibleException("There is no projectMembersVO with projectId: " + membershipDeletedEvent.getProjectId());
+        }
+
+        List<UUID> projectMembers = projectMembersVO.get().memberIds();
         projectMembers.remove(membershipDeletedEvent.getUserId());
-        this.projectMemberDict.put(membershipDeletedEvent.getProjectId(), projectMembers);
+        this.consumedMembershipDataManager.overwrite(new ProjectMembersVO(membershipDeletedEvent.getProjectId(), projectMembers));
     }
 
     @EventListener
     @Async
     public void handleMembershipAcceptedEvent(MembershipAcceptedEvent membershipAcceptedEvent) {
-        List<UUID> projectMembers = this.projectMemberDict.get(membershipAcceptedEvent.getProjectId());
+        Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(membershipAcceptedEvent.getProjectId());
+        if (projectMembersVO.isEmpty()) {
+            throw new ImpossibleException("There is no projectMembersVO with projectId: " + membershipAcceptedEvent.getProjectId());
+        }
+
+        List<UUID> projectMembers = projectMembersVO.get().memberIds();
         projectMembers.add(membershipAcceptedEvent.getUserId());
-        this.projectMemberDict.put(membershipAcceptedEvent.getProjectId(), projectMembers);
+        this.consumedMembershipDataManager.overwrite(new ProjectMembersVO(membershipAcceptedEvent.getProjectId(), projectMembers));
     }
 
     @EventListener
@@ -233,14 +249,14 @@ public class TicketService {
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
         this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
-        this.projectMemberDict.put(projectCreatedEvent.getProjectId(), new ArrayList<>());
+        this.consumedMembershipDataManager.add(new ProjectMembersVO(projectCreatedEvent.getProjectId(), new ArrayList<>()));
     }
 
     @EventListener
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
         this.consumedProjectDataManager.add(defaultProjectCreatedEvent.getProjectId());
-        this.projectMemberDict.put(defaultProjectCreatedEvent.getProjectId(), new ArrayList<>());
+        this.consumedMembershipDataManager.add(new ProjectMembersVO(defaultProjectCreatedEvent.getProjectId(), new ArrayList<>()));
     }
 
 
@@ -252,7 +268,7 @@ public class TicketService {
         this.consumedPhaseDataManager.removeByPredicate(phaseVO ->
                 phaseVO.projectId().equals(projectDeletedEvent.getProjectId())
         );
-        this.projectMemberDict.remove(projectDeletedEvent.getProjectId());
+        this.consumedMembershipDataManager.remove(projectDeletedEvent.getProjectId());
     }
 
     @EventListener
