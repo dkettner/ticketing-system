@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.common;
+package com.kett.TicketSystem.common.events;
 
 import lombok.Getter;
 
