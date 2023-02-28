@@ -31,14 +31,14 @@ import java.util.*;
 public class MembershipService {
     private final MembershipRepository membershipRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final List<UUID> existingProjects; // TODO: service is not stateless, consumed events are not idempotent.
+    private final ConsumedProjectDataManager consumedProjectDataManager;
     private final List<UUID> existingUsers;
 
     @Autowired
     public MembershipService(MembershipRepository membershipRepository, ApplicationEventPublisher eventPublisher) {
         this.membershipRepository = membershipRepository;
         this.eventPublisher = eventPublisher;
-        this.existingProjects = new ArrayList<>();
+        this.consumedProjectDataManager = new ConsumedProjectDataManager();
         this.existingUsers = new ArrayList<>();
     }
 
@@ -46,7 +46,7 @@ public class MembershipService {
     // create
 
     public Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
-        if (!existingProjects.contains(membership.getProjectId())) {
+        if (!consumedProjectDataManager.exists(membership.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + membership.getProjectId());
         }
         if (!existingUsers.contains(membership.getUserId())) {
@@ -180,7 +180,7 @@ public class MembershipService {
     @EventListener
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-        this.existingProjects.add(projectCreatedEvent.getProjectId());
+        this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
         Membership defaultMembership = new Membership(
                 projectCreatedEvent.getProjectId(),
                 projectCreatedEvent.getUserId(),
@@ -200,7 +200,7 @@ public class MembershipService {
     @EventListener
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        this.existingProjects.add(defaultProjectCreatedEvent.getProjectId());
+        this.consumedProjectDataManager.add(defaultProjectCreatedEvent.getProjectId());
         Membership defaultMembership = new Membership(
                 defaultProjectCreatedEvent.getProjectId(),
                 defaultProjectCreatedEvent.getUserId(),
@@ -221,7 +221,7 @@ public class MembershipService {
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         membershipRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
-        this.existingProjects.remove(projectDeletedEvent.getProjectId());
+        this.consumedProjectDataManager.remove(projectDeletedEvent.getProjectId());
     }
 
     @EventListener
