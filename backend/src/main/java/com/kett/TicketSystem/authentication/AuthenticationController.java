@@ -2,12 +2,15 @@ package com.kett.TicketSystem.authentication;
 
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 
 @RestController
@@ -25,8 +28,9 @@ public class AuthenticationController {
 
     @PostMapping
     public ResponseEntity<?> authenticateUser(@RequestBody AuthenticationPostDto authenticationPostDto) {
-        String jwtValue = ticketSystemService.authenticateUser(authenticationPostDto);
+        MDC.put("transactionId", UUID.randomUUID().toString());
 
+        String jwtValue = ticketSystemService.authenticateUser(authenticationPostDto);
         ResponseCookie responseCookie =
                 ResponseCookie
                         .from("jwt", jwtValue)
@@ -37,6 +41,7 @@ public class AuthenticationController {
                         .secure(true)
                         .build();
 
+        MDC.remove("transactionId");
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())

@@ -7,6 +7,7 @@ import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,7 +35,9 @@ public class TicketController {
 
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponseDto> getTicketById(@PathVariable UUID id) {
+        MDC.put("transactionId", UUID.randomUUID().toString());
         TicketResponseDto ticketResponseDto = ticketSystemService.getTicketById(id);
+        MDC.remove("transactionId");
         return new ResponseEntity<>(ticketResponseDto, HttpStatus.OK);
     }
 
@@ -44,6 +47,8 @@ public class TicketController {
             @RequestParam(name = "assignee-id", required = false) UUID assigneeId,
             @RequestParam(name = "project-id", required = false) UUID projectId
     ) {
+        MDC.put("transactionId", UUID.randomUUID().toString());
+
         // TODO: use proper check for too many parameters with map
         if (phaseId != null && assigneeId != null) {
             throw new TooManyParametersException("cannot query by more than one parameter yet");
@@ -59,11 +64,15 @@ public class TicketController {
         } else {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
+
+        MDC.remove("transactionId");
         return new ResponseEntity<>(ticketResponseDtos, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<TicketResponseDto> postTicket(@RequestBody TicketPostDto ticketPostDto) {
+        MDC.put("transactionId", UUID.randomUUID().toString());
+
         EmailAddress userEmail = EmailAddress.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
         TicketResponseDto ticketResponseDto = ticketSystemService.addTicket(ticketPostDto, userEmail);
         URI returnURI = ServletUriComponentsBuilder
@@ -72,6 +81,7 @@ public class TicketController {
                 .buildAndExpand(ticketResponseDto.getId())
                 .toUri();
 
+        MDC.remove("transactionId");
         return ResponseEntity
                 .created(returnURI)
                 .body(ticketResponseDto);
@@ -79,13 +89,17 @@ public class TicketController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> patchTicket(@PathVariable UUID id, @RequestBody TicketPatchDto ticketPatchDto) {
+        MDC.put("transactionId", UUID.randomUUID().toString());
         ticketSystemService.patchTicketById(id, ticketPatchDto);
+        MDC.remove("transactionId");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTicketById(@PathVariable UUID id) {
+        MDC.put("transactionId", UUID.randomUUID().toString());
         ticketSystemService.deleteTicketById(id);
+        MDC.remove("transactionId");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
