@@ -2,6 +2,8 @@ package com.kett.TicketSystem.authentication;
 
 import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +21,7 @@ import java.util.UUID;
 @RequestMapping("/authentication")
 public class AuthenticationController {
     private final TicketSystemService ticketSystemService;
+    private final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
 
     @Autowired
     public AuthenticationController(TicketSystemService ticketSystemService) {
@@ -29,6 +32,7 @@ public class AuthenticationController {
     @PostMapping
     public ResponseEntity<?> authenticateUser(@RequestBody AuthenticationPostDto authenticationPostDto) {
         MDC.put("transactionId", UUID.randomUUID().toString());
+        logger.trace("POST /authentication: BEGIN -> Create authentication token for {}.", authenticationPostDto.getEmail());
 
         String jwtValue = ticketSystemService.authenticateUser(authenticationPostDto);
         ResponseCookie responseCookie =
@@ -41,6 +45,7 @@ public class AuthenticationController {
                         .secure(true)
                         .build();
 
+        logger.trace("POST /authentication: SUCCESS -> Create authentication token for {}.", authenticationPostDto.getEmail());
         MDC.remove("transactionId");
         return ResponseEntity
                 .ok()
