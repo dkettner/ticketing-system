@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.common;
+package com.kett.TicketSystem.common.logging;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
