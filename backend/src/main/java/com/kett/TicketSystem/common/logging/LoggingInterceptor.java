@@ -1,6 +1,5 @@
 package com.kett.TicketSystem.common.logging;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -11,7 +10,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -22,9 +20,11 @@ public class LoggingInterceptor implements HandlerInterceptor {
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
         MDC.put("transactionId", UUID.randomUUID().toString());
 
-        Map<String, Object> inputMap = new ObjectMapper().readValue(request.getInputStream(), Map.class);
-        logger.trace(request.getMethod() + " " + request.getRequestURI());
-        logger.info("Full request: " + inputMap);
+        String log = request.getMethod()  + " " + request.getRequestURI();
+        if (request.getQueryString() != null) {
+            log = log + "?" + request.getQueryString();
+        }
+        logger.trace(log);
 
         return true;
     }
