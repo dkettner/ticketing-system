@@ -8,7 +8,6 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPatchRoleDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,9 +34,7 @@ public class MembershipController {
 
     @GetMapping("/{id}")
     public ResponseEntity<MembershipResponseDto> getMembershipById(@PathVariable UUID id) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         MembershipResponseDto membershipResponseDto = ticketSystemService.getMembershipById(id);
-        MDC.remove("transactionId");
         return new ResponseEntity<>(membershipResponseDto, HttpStatus.OK);
     }
 
@@ -47,7 +44,6 @@ public class MembershipController {
             @RequestParam(name = "project-id", required = false) UUID projectId,
             @RequestParam(name = "email", required = false) String email
     ) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         // TODO: What if another parameter gets added? This is too dirty.
         if (userId != null && projectId != null
             || userId != null && email != null
@@ -66,13 +62,11 @@ public class MembershipController {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
 
-        MDC.remove("transactionId");
         return new ResponseEntity<>(membershipResponseDtos, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<MembershipResponseDto> postMembership(@RequestBody MembershipPostDto membershipPostDto) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         MembershipResponseDto membershipResponseDto = ticketSystemService.addMembership(membershipPostDto);
         URI returnURI = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -80,7 +74,6 @@ public class MembershipController {
                 .buildAndExpand(membershipResponseDto.getId())
                 .toUri();
 
-        MDC.remove("transactionId");
         return ResponseEntity
                 .created(returnURI)
                 .body(membershipResponseDto);
@@ -88,25 +81,19 @@ public class MembershipController {
 
     @PutMapping("/{id}/state")
     public ResponseEntity<?> updateMembershipState(@PathVariable UUID id, @RequestBody MembershipPatchStateDto membershipPatchStateDto) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         ticketSystemService.updateMembershipState(id, membershipPatchStateDto);
-        MDC.remove("transactionId");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/{id}/role")
     public ResponseEntity<?> updateMembershipRole(@PathVariable UUID id, @RequestBody MembershipPatchRoleDto membershipPatchRoleDto) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         ticketSystemService.updateMembershipRole(id, membershipPatchRoleDto);
-        MDC.remove("transactionId");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMembership(@PathVariable UUID id) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         ticketSystemService.deleteMembershipById(id);
-        MDC.remove("transactionId");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

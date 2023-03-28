@@ -6,7 +6,6 @@ import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.application.dto.UserPatchDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
-import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,9 +31,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable UUID id) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         UserResponseDto userResponseDto = ticketSystemService.getUserById(id);
-        MDC.remove("transactionId");
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 
@@ -42,18 +39,15 @@ public class UserController {
     public ResponseEntity<UserResponseDto> getUserByQuery(
             @RequestParam(name = "email", required = true) String email
     ) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         if (email == null) {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
         UserResponseDto userResponseDto = ticketSystemService.getByEMailAddress(EmailAddress.fromString(email));
-        MDC.remove("transactionId");
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserPostDto userPostDto) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         UserResponseDto userResponseDto = ticketSystemService.addUser(userPostDto);
         URI returnURI = ServletUriComponentsBuilder
                 .fromCurrentRequest()
@@ -61,7 +55,6 @@ public class UserController {
                 .buildAndExpand(userResponseDto.getId())
                 .toUri();
 
-        MDC.remove("transactionId");
         return ResponseEntity
                 .created(returnURI)
                 .body(userResponseDto);
@@ -69,17 +62,13 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> patchUserById(@PathVariable UUID id, @RequestBody UserPatchDto userPatchDto) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         ticketSystemService.patchUserById(id, userPatchDto);
-        MDC.remove("transactionId");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
-        MDC.put("transactionId", UUID.randomUUID().toString());
         ticketSystemService.deleteUserById(id);
-        MDC.remove("transactionId");
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
