@@ -101,15 +101,15 @@ public class TemporaryRestTests {
         // post user0
         name0 = "Bill Gates";
         email0 = "dollar.bill@microsoft.com";
-        password0 = "==))88hhnsalsdmfsdklfmNOINöoÖ-sd83´230";
+        password0 = "hereComesThe_Money1337";
 
         UserPostDto userPostDto0 = new UserPostDto(name0, email0, password0);
 
         MvcResult postUserResult0 =
                 mockMvc.perform(
                             post("/users")
-                                    .content(objectMapper.writeValueAsString(userPostDto0))
-                                    .contentType(MediaType.APPLICATION_JSON))
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(userPostDto0)))
                         .andExpect(status().isCreated())
                         .andReturn();
 
@@ -121,9 +121,9 @@ public class TemporaryRestTests {
         MvcResult postAuthenticationResult0 =
                 mockMvc.perform(
                             post("/authentication")
-                                    .content(objectMapper.writeValueAsString(authenticationPostDto0))
-                                    .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isCreated())
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(authenticationPostDto0)))
+                        .andExpect(status().isOk())
                         .andReturn();
 
         jwt0 = postAuthenticationResult0.getResponse().getContentAsString();
@@ -132,7 +132,7 @@ public class TemporaryRestTests {
         // post user1
         name1 = "Jeff Bezos";
         email1 = "say_my_name@amazon.com";
-        password1 = "ioiisdfoipsd0ß2ß03kfß0k..dp.pe.,fs=)(//%$§5";
+        password1 = "ioiisdfoipsd0203kf0k";
 
         UserPostDto userPostDto1 = new UserPostDto(name1, email1, password1);
 
@@ -154,7 +154,7 @@ public class TemporaryRestTests {
                             post("/authentication")
                                     .content(objectMapper.writeValueAsString(authenticationPostDto1))
                                     .contentType(MediaType.APPLICATION_JSON))
-                        .andExpect(status().isCreated())
+                        .andExpect(status().isOk())
                         .andReturn();
 
         jwt1 = postAuthenticationResult1.getResponse().getContentAsString();
@@ -174,9 +174,9 @@ public class TemporaryRestTests {
         password1 = null;
         jwt1 = null;
 
+        projectRepository.deleteAll();
         membershipRepository.deleteAll();
         phaseRepository.deleteAll();
-        projectRepository.deleteAll();
         ticketRepository.deleteAll();
         userRepository.deleteAll();
     }
@@ -194,8 +194,8 @@ public class TemporaryRestTests {
         MvcResult result0 =
                 mockMvc.perform(
                             post("/users")
-                                    .content(objectMapper.writeValueAsString(tempUserPostDto0))
-                                    .contentType(MediaType.APPLICATION_JSON))
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .content(objectMapper.writeValueAsString(tempUserPostDto0)))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.id").exists())
                         .andExpect(jsonPath("$.name").value(tempUserPostDto0.getName()))
@@ -212,7 +212,7 @@ public class TemporaryRestTests {
         // tempUser1
         String tempName1 = "WallE";
         String tempEmail1 = "shy_robot@ai.net";
-        String tempPassword1 = "9d9d8f0s0dfmsmdfüpsdopASFASD)0a9s";
+        String tempPassword1 = "9d9d8f0s0dfmsmdfpsdopASFASD)0a9s";
 
         UserPostDto tempUserPostDto1 = new UserPostDto(tempName1, tempEmail1, tempPassword1);
 
