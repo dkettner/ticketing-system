@@ -1,6 +1,5 @@
-package com.kett.TicketSystem.project;
+package com.kett.TicketSystem.project.domain;
 
-import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import org.junit.jupiter.api.AfterEach;
