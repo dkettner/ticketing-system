@@ -34,7 +34,7 @@ public class UserControllerTests {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final UserService userService;
-    private DummyEventListener dummyEventListener;
+    private final DummyEventListener dummyEventListener;
 
     private String name0;
     private String email0;
@@ -59,16 +59,22 @@ public class UserControllerTests {
 
 
     @Autowired
-    public UserControllerTests(MockMvc mockMvc, ObjectMapper objectMapper, UserRepository userRepository, UserService userService) {
+    public UserControllerTests(
+            MockMvc mockMvc,
+            ObjectMapper objectMapper,
+            UserRepository userRepository,
+            UserService userService,
+            DummyEventListener dummyEventListener
+    ) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
         this.userService = userService;
+        this.dummyEventListener = dummyEventListener;
     }
 
     @BeforeEach
     public void buildUp() throws Exception {
-        this.dummyEventListener = new DummyEventListener();
 
         // validUser0
         name0 = "Bill Gates";
@@ -104,12 +110,12 @@ public class UserControllerTests {
                         .andReturn();
         String dummyResponse = dummyResult.getResponse().getContentAsString();
         id4 = JsonPath.parse(dummyResponse).read("$.id");
+
+        dummyEventListener.deleteAllEvents(); // in buildUp to erase events of buildUp
     }
 
     @AfterEach
     public void tearDown() {
-        this.dummyEventListener = null;
-
         name0 = null;
         email0 = null;
         password0 = null;
