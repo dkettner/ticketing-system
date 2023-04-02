@@ -5,7 +5,9 @@ import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.domain.User;
+import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
+import com.kett.TicketSystem.util.DummyEventListener;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,9 +19,10 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -31,6 +34,7 @@ public class UserControllerTests {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final UserService userService;
+    private DummyEventListener dummyEventListener;
 
     private String name0;
     private String email0;
@@ -64,6 +68,7 @@ public class UserControllerTests {
 
     @BeforeEach
     public void buildUp() throws Exception {
+        this.dummyEventListener = new DummyEventListener();
 
         // validUser0
         name0 = "Bill Gates";
@@ -103,6 +108,8 @@ public class UserControllerTests {
 
     @AfterEach
     public void tearDown() {
+        this.dummyEventListener = null;
+
         name0 = null;
         email0 = null;
         password0 = null;
@@ -148,6 +155,18 @@ public class UserControllerTests {
         assertEquals(user0.getName(), validUser0PostDto.getName());
         assertEquals(user0.getEmail(), EmailAddress.fromString(validUser0PostDto.getEmail()));
 
+        // test UserCreatedEvent
+        Optional<UserCreatedEvent> event0 = dummyEventListener.getLatestUserCreatedEvent();
+        assertTrue(event0.isPresent());
+        Optional<UserCreatedEvent> emptyEvent0 = dummyEventListener.getLatestUserCreatedEvent();
+        assertTrue(emptyEvent0.isEmpty()); // check if only one event was thrown
+
+        UserCreatedEvent userCreatedEvent = event0.get();
+        assertEquals(user0.getId(), userCreatedEvent.getUserId());
+        assertEquals(name0, userCreatedEvent.getName());
+        assertEquals(email0, userCreatedEvent.getEmailAddress().toString());
+
+
         // validUser1
         UserPostDto validUser1PostDto = new UserPostDto(name1, email1, password1);
         MvcResult result1 =
@@ -165,6 +184,17 @@ public class UserControllerTests {
         User user1 = userService.getUserById(UUID.fromString(tempId1));
         assertEquals(user1.getName(), validUser1PostDto.getName());
         assertEquals(user1.getEmail(), EmailAddress.fromString(validUser1PostDto.getEmail()));
+
+        // test UserCreatedEvent
+        Optional<UserCreatedEvent> event1 = dummyEventListener.getLatestUserCreatedEvent();
+        assertTrue(event1.isPresent());
+        Optional<UserCreatedEvent> emptyEvent1 = dummyEventListener.getLatestUserCreatedEvent();
+        assertTrue(emptyEvent1.isEmpty()); // check if only one event was thrown
+
+        UserCreatedEvent userCreatedEvent1 = event1.get();
+        assertEquals(user1.getId(), userCreatedEvent1.getUserId());
+        assertEquals(name1, userCreatedEvent1.getName());
+        assertEquals(email1, userCreatedEvent1.getEmailAddress().toString());
     }
 
     @Test
