@@ -3,10 +3,12 @@ package com.kett.TicketSystem.util;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
 
 import java.util.Optional;
 import java.util.Stack;
 
+@Component
 public class DummyEventListener {
     Stack<UserCreatedEvent> userCreatedEvents = new Stack<>();
     Stack<UserDeletedEvent> userDeletedEvents = new Stack<>();
