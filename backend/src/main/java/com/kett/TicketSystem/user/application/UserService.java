@@ -54,7 +54,7 @@ public class UserService implements UserDetailsService {
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         User initializedUser = userRepository.save(user);
-        eventPublisher.publishEvent(new UserCreatedEvent(initializedUser.getId()));
+        eventPublisher.publishEvent(new UserCreatedEvent(initializedUser.getId(), initializedUser.getName(), initializedUser.getEmail()));
         return initializedUser;
     }
 
