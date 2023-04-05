@@ -95,7 +95,7 @@ public class AuthenticationControllerTests {
     }
 
     @Test
-    public void postAuthenticationTest() throws Exception {
+    public void postValidAuthenticationTest() throws Exception {
         AuthenticationPostDto authenticationPostDto0 = new AuthenticationPostDto(email0, password0);
         MvcResult postAuthenticationResult0 =
                 mockMvc.perform(
@@ -121,5 +121,35 @@ public class AuthenticationControllerTests {
         jwt1 = Objects.requireNonNull(postAuthenticationResult1.getResponse().getCookie("jwt")).getValue();
         assertEquals(email1, jwtTokenProvider.getEmailFromToken(jwt1));
         assertTrue(jwtTokenProvider.validateToken(jwt1));
+    }
+
+    @Test
+    public void postInvalidAuthenticationTest() throws Exception {
+        AuthenticationPostDto invalidAuthenticationPostDto0 = new AuthenticationPostDto(email0, password1);
+        MvcResult postAuthenticationResult0 =
+                mockMvc.perform(
+                                post("/authentication")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(invalidAuthenticationPostDto0)))
+                        .andExpect(status().isUnauthorized())
+                        .andReturn();
+
+        AuthenticationPostDto invalidAuthenticationPostDto1 = new AuthenticationPostDto(email1, password0);
+        MvcResult postAuthenticationResult1 =
+                mockMvc.perform(
+                                post("/authentication")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(invalidAuthenticationPostDto1)))
+                        .andExpect(status().isUnauthorized())
+                        .andReturn();
+
+        AuthenticationPostDto invalidAuthenticationPostDto2 = new AuthenticationPostDto("invalid.email@yahoo.com", password0);
+        MvcResult postAuthenticationResult2 =
+                mockMvc.perform(
+                                post("/authentication")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(invalidAuthenticationPostDto2)))
+                        .andExpect(status().isNotFound())
+                        .andReturn();
     }
 }
