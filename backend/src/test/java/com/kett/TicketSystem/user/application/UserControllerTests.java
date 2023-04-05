@@ -246,13 +246,16 @@ public class UserControllerTests {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(invalidUser4PostDto)))
                 .andExpect(status().isBadRequest());
+    }
 
-        // invalidUser5 -> duplicate email, email4 already exists because of buildUp()
-        UserPostDto invalidUser5PostDto = new UserPostDto(name0, email4, password0);
+    @Test
+    public void postDuplicateUserTest() throws Exception {
+        // duplicate email, email4 already exists because of buildUp()
+        UserPostDto duplicatePostDto = new UserPostDto(name0, email4, password0);
         mockMvc.perform(
                         post("/users")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(invalidUser5PostDto)))
+                                .content(objectMapper.writeValueAsString(duplicatePostDto)))
                 .andExpect(status().isConflict());
     }
 }
