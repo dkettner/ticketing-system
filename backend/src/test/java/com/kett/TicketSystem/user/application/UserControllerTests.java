@@ -2,6 +2,7 @@ package com.kett.TicketSystem.user.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.domain.User;
@@ -19,10 +20,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import javax.servlet.http.Cookie;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -56,6 +60,7 @@ public class UserControllerTests {
     private String name4;
     private String email4;
     private String password4;
+    private String jwt4;
 
 
     @Autowired
@@ -110,6 +115,16 @@ public class UserControllerTests {
                         .andReturn();
         String dummyResponse = dummyResult.getResponse().getContentAsString();
         id4 = JsonPath.parse(dummyResponse).read("$.id");
+
+        AuthenticationPostDto authenticationPostDto4 = new AuthenticationPostDto(email4, password4);
+        MvcResult postAuthenticationResult4 =
+                mockMvc.perform(
+                                post("/authentication")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(authenticationPostDto4)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        jwt4 = Objects.requireNonNull(postAuthenticationResult4.getResponse().getCookie("jwt")).getValue();
 
         dummyEventListener.deleteAllEvents(); // in buildUp to erase events of buildUp
     }
@@ -257,5 +272,21 @@ public class UserControllerTests {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(duplicatePostDto)))
                 .andExpect(status().isConflict());
+    }
+
+    @Test
+    public void getUserTest() throws Exception {
+        MvcResult result =
+                mockMvc.perform(
+                                get("/users/" + id4)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String response = result.getResponse().getContentAsString();
+
+        assertEquals(id4, JsonPath.parse(response).read("$.id"));
+        assertEquals(name4, JsonPath.parse(response).read("$.name"));
+        assertEquals(email4, JsonPath.parse(response).read("$.email"));
     }
 }
