@@ -4,9 +4,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.user.application.dto.UserPatchDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
+import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import com.kett.TicketSystem.util.DummyEventListener;
 import org.junit.jupiter.api.AfterEach;
@@ -26,8 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -359,5 +360,161 @@ public class UserControllerTests {
         assertEquals(id0, JsonPath.parse(response).read("$.id"));
         assertEquals(name0, JsonPath.parse(response).read("$.name"));
         assertEquals(email0, JsonPath.parse(response).read("$.email"));
+    }
+
+    @Test
+    public void patchUserNameTest() throws Exception {
+        UserPatchDto userPatchDto = new UserPatchDto("Donald Trump", null);
+        MvcResult result =
+                mockMvc.perform(
+                                patch("/users/" + id4 )
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userPatchDto))
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        User user4 = userService.getUserById(UUID.fromString(id4));
+        assertEquals(user4.getName(), userPatchDto.getName());
+        assertEquals(user4.getEmail().toString(), email4);
+
+        // test UserCreatedEvent
+        Optional<UserPatchedEvent> event = dummyEventListener.getLatestUserPatchedEvent();
+        assertTrue(event.isPresent());
+        Optional<UserPatchedEvent> emptyEvent = dummyEventListener.getLatestUserPatchedEvent();
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
+
+        UserPatchedEvent userPatchedEvent = event.get();
+        assertEquals(user4.getId(), userPatchedEvent.getUserId());
+        assertEquals(userPatchDto.getName(), userPatchedEvent.getName());
+        assertEquals(user4.getEmail().toString(), email4);
+    }
+
+    @Test
+    public void patchUserEmailTest() throws Exception {
+        UserPatchDto userPatchDto = new UserPatchDto(null, "agent.orange@truth.net");
+        MvcResult result =
+                mockMvc.perform(
+                                patch("/users/" + id4 )
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userPatchDto))
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        User user4 = userService.getUserById(UUID.fromString(id4));
+        assertEquals(user4.getName(), name4);
+        assertEquals(user4.getEmail().toString(), userPatchDto.getEmail());
+
+        // test UserCreatedEvent
+        Optional<UserPatchedEvent> event = dummyEventListener.getLatestUserPatchedEvent();
+        assertTrue(event.isPresent());
+        Optional<UserPatchedEvent> emptyEvent = dummyEventListener.getLatestUserPatchedEvent();
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
+
+        UserPatchedEvent userPatchedEvent = event.get();
+        assertEquals(user4.getId(), userPatchedEvent.getUserId());
+        assertEquals(user4.getName(), name4);
+        assertEquals(user4.getEmail().toString(), userPatchDto.getEmail());
+    }
+
+    @Test
+    public void patchUserNameAndEmailTest() throws Exception {
+        UserPatchDto userPatchDto = new UserPatchDto("Donald Trump", "agent.orange@truth.net");
+        MvcResult result =
+                mockMvc.perform(
+                                patch("/users/" + id4 )
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userPatchDto))
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        User user4 = userService.getUserById(UUID.fromString(id4));
+        assertEquals(user4.getName(), userPatchDto.getName());
+        assertEquals(user4.getEmail(), EmailAddress.fromString(userPatchDto.getEmail()));
+
+        // test UserCreatedEvent
+        Optional<UserPatchedEvent> event = dummyEventListener.getLatestUserPatchedEvent();
+        assertTrue(event.isPresent());
+        Optional<UserPatchedEvent> emptyEvent = dummyEventListener.getLatestUserPatchedEvent();
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
+
+        UserPatchedEvent userPatchedEvent = event.get();
+        assertEquals(user4.getId(), userPatchedEvent.getUserId());
+        assertEquals(userPatchDto.getName(), userPatchedEvent.getName());
+        assertEquals(userPatchDto.getEmail(), userPatchedEvent.getEmailAddress().toString());
+    }
+
+    @Test
+    public void patchUserWithNullDtoEmailTest() throws Exception {
+        MvcResult result =
+                mockMvc.perform(
+                                patch("/users/" + id4)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isBadRequest())
+                        .andReturn();
+    }
+
+    @Test
+    public void patchUserWithFaultyEmailTest() throws Exception {
+        UserPatchDto userPatchDto = new UserPatchDto("Donald Trump", "agent.orangetruth.net"); // no @
+        MvcResult result =
+                mockMvc.perform(
+                                patch("/users/" + id4)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userPatchDto))
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isBadRequest())
+                        .andReturn();
+    }
+
+    @Test
+    public void patchWrongUserTest() throws Exception {
+        UserPostDto validUser0PostDto = new UserPostDto(name0, email0, password0);
+        MvcResult result0 =
+                mockMvc.perform(
+                                post("/users")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(validUser0PostDto)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.name").value(validUser0PostDto.getName()))
+                        .andExpect(jsonPath("$.email").value(validUser0PostDto.getEmail()))
+                        .andReturn();
+        String response0 = result0.getResponse().getContentAsString();
+        String id0 = JsonPath.parse(response0).read("$.id");
+
+        UserPatchDto userPatchDto = new UserPatchDto("Donald Trump", "agent.orange@truth.net");
+        MvcResult result1 =
+                mockMvc.perform(
+                                patch("/users/" + id0) // wrong but existing user
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userPatchDto))
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
+
+        MvcResult result2 =
+                mockMvc.perform(
+                                patch("/users/" + UUID.randomUUID()) // non-existing user
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userPatchDto))
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
+    }
+
+    @Test
+    public void patchUserUnauthorizedTest() throws Exception {
+        UserPatchDto userPatchDto = new UserPatchDto("Donald Trump", "agent.orange@truth.net");
+        MvcResult result =
+                mockMvc.perform(
+                                patch("/users/" + id4)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(userPatchDto))) // no jwt
+                        .andExpect(status().isUnauthorized())
+                        .andReturn();
     }
 }
