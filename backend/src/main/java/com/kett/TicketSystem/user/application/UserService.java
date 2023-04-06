@@ -7,6 +7,7 @@ import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.common.exceptions.NoUserFoundException;
+import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
 import com.kett.TicketSystem.user.domain.exceptions.EmailAlreadyInUseException;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
 import com.kett.TicketSystem.user.repository.UserRepository;
@@ -123,8 +124,8 @@ public class UserService implements UserDetailsService {
             }
             user.setEmail(email);
         }
-
         userRepository.save(user);
+        eventPublisher.publishEvent(new UserPatchedEvent(user.getId(), user.getName(), user.getEmail()));
     }
 
 
