@@ -275,7 +275,7 @@ public class UserControllerTests {
     }
 
     @Test
-    public void getUserTest() throws Exception {
+    public void getUserByIdTest() throws Exception {
         MvcResult result =
                 mockMvc.perform(
                                 get("/users/" + id4)
@@ -288,5 +288,76 @@ public class UserControllerTests {
         assertEquals(id4, JsonPath.parse(response).read("$.id"));
         assertEquals(name4, JsonPath.parse(response).read("$.name"));
         assertEquals(email4, JsonPath.parse(response).read("$.email"));
+    }
+
+    @Test
+    public void getUserByWrongIdTest() throws Exception {
+        MvcResult result =
+                mockMvc.perform(
+                                get("/users/" + UUID.randomUUID())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isNotFound())
+                        .andReturn();
+    }
+
+    @Test
+    public void getUserByEmailQueryTest() throws Exception {
+        MvcResult result =
+                mockMvc.perform(
+                                get("/users" )
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt4))
+                                        .queryParam("email", email4))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String response = result.getResponse().getContentAsString();
+
+        assertEquals(id4, JsonPath.parse(response).read("$.id"));
+        assertEquals(name4, JsonPath.parse(response).read("$.name"));
+        assertEquals(email4, JsonPath.parse(response).read("$.email"));
+    }
+
+    @Test
+    public void getUserByWrongEmailQueryTest() throws Exception {
+        MvcResult result =
+                mockMvc.perform(
+                                get("/users" )
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt4))
+                                        .queryParam("email", "hola.quetal@espanol.com"))
+                        .andExpect(status().isNotFound())
+                        .andReturn();
+    }
+
+    @Test
+    public void getOtherUserByEmailQueryTest() throws Exception {
+        UserPostDto validUser0PostDto = new UserPostDto(name0, email0, password0);
+        MvcResult result0 =
+                mockMvc.perform(
+                                post("/users")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(validUser0PostDto)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.name").value(validUser0PostDto.getName()))
+                        .andExpect(jsonPath("$.email").value(validUser0PostDto.getEmail()))
+                        .andReturn();
+        String response0 = result0.getResponse().getContentAsString();
+        String id0 = JsonPath.parse(response0).read("$.id");
+
+        MvcResult result =
+                mockMvc.perform(
+                                get("/users" )
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt4))
+                                        .queryParam("email", email0))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String response = result.getResponse().getContentAsString();
+
+        assertEquals(id0, JsonPath.parse(response).read("$.id"));
+        assertEquals(name0, JsonPath.parse(response).read("$.name"));
+        assertEquals(email0, JsonPath.parse(response).read("$.email"));
     }
 }
