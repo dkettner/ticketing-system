@@ -334,7 +334,7 @@ public class TicketSystemService {
         userService.patchUserById(
                 id,
                 userPatchDto.getName(),
-                EmailAddress.fromString(userPatchDto.getEmail())
+                userPatchDto.getEmail()
         );
     }
 

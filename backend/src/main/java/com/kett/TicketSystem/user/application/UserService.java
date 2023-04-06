@@ -112,17 +112,18 @@ public class UserService implements UserDetailsService {
 
     // update
 
-    public void patchUserById(UUID id, String name, EmailAddress email) throws UserException, NoUserFoundException {
+    public void patchUserById(UUID id, String name, String email) throws UserException, NoUserFoundException {
         User user = this.getUserById(id);
 
         if (name != null) {
             user.setName(name);
         }
         if (email != null) {
-            if (userRepository.existsByEmailEquals(email)) {
-                throw new EmailAlreadyInUseException("New email: " + email.toString() + " is already in use.");
+            EmailAddress emailAddress = EmailAddress.fromString(email);
+            if (userRepository.existsByEmailEquals(emailAddress)) {
+                throw new EmailAlreadyInUseException("New email: " + emailAddress.toString() + " is already in use.");
             }
-            user.setEmail(email);
+            user.setEmail(emailAddress);
         }
         userRepository.save(user);
         eventPublisher.publishEvent(new UserPatchedEvent(user.getId(), user.getName(), user.getEmail()));
