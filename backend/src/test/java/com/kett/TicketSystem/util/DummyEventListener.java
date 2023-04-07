@@ -88,4 +88,17 @@ public class DummyEventListener {
     public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
         userPatchedEvents.push(userPatchedEvent);
     }
+
+    @EventListener
+    public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
+        projectCreatedEvents.push(projectCreatedEvent);
+    }
+    @EventListener
+    public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
+        defaultProjectCreatedEvents.push(defaultProjectCreatedEvent);
+    }
+    @EventListener
+    public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
+        projectDeletedEvents.push(projectDeletedEvent);
+    }
 }
