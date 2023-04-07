@@ -152,6 +152,7 @@ public class UserControllerTests {
         name4 = null;
         email4 = null;
         password4 = null;
+        jwt4 = null;
 
         userRepository.deleteAll();
     }
