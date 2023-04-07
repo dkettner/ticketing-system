@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.application.dto.UserPatchDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
+import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import com.kett.TicketSystem.util.DummyEventListener;
@@ -516,5 +518,97 @@ public class UserControllerTests {
                                         .content(objectMapper.writeValueAsString(userPatchDto))) // no jwt
                         .andExpect(status().isUnauthorized())
                         .andReturn();
+    }
+
+    @Test
+    public void deleteUserTest() throws Exception {
+        // validUser1
+        MvcResult result1 =
+                mockMvc.perform(
+                                delete("/users/" + id4)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        try {
+            userService.getUserById(UUID.fromString(id4));
+            fail("User found but should have been deleted");
+        } catch (NoUserFoundException exception) {
+            // test passed
+        }
+
+        // test UserDeletedEvent
+        Optional<UserDeletedEvent> event = dummyEventListener.getLatestUserDeletedEvent();
+        assertTrue(event.isPresent());
+        Optional<UserDeletedEvent> emptyEvent = dummyEventListener.getLatestUserDeletedEvent();
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
+
+        UserDeletedEvent userDeletedEvent = event.get();
+        assertEquals(userDeletedEvent.getUserId(), UUID.fromString(id4));
+    }
+
+    @Test
+    public void deleteUserUnauthorizedTest() throws Exception {
+        // validUser1
+        MvcResult result1 =
+                mockMvc.perform(
+                                delete("/users/" + id4)
+                                        .contentType(MediaType.APPLICATION_JSON))
+                        .andExpect(status().isUnauthorized())
+                        .andReturn();
+
+        try {
+            userService.getUserById(UUID.fromString(id4));
+        } catch (NoUserFoundException exception) {
+            fail("No User found but it should not have been deleted");
+        }
+
+        // test if UserDeletedEvent was thrown
+        Optional<UserDeletedEvent> emptyEvent = dummyEventListener.getLatestUserDeletedEvent();
+        assertTrue(emptyEvent.isEmpty());
+    }
+
+    @Test
+    public void deleteNonExistingUserTest() throws Exception {
+        // validUser1
+        MvcResult result1 =
+                mockMvc.perform(
+                                delete("/users/" + UUID.randomUUID())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
+
+        // test if UserDeletedEvent was thrown
+        Optional<UserDeletedEvent> emptyEvent = dummyEventListener.getLatestUserDeletedEvent();
+        assertTrue(emptyEvent.isEmpty());
+    }
+
+    @Test
+    public void deleteOtherExistingUserTest() throws Exception {
+        // post other user
+        UserPostDto dummyUserPostDto = new UserPostDto(name0, email0, password0);
+        MvcResult dummyResult =
+                mockMvc.perform(
+                                post("/users")
+                                        .content(objectMapper.writeValueAsString(dummyUserPostDto))
+                                        .contentType(MediaType.APPLICATION_JSON))
+                        .andReturn();
+        String dummyResponse = dummyResult.getResponse().getContentAsString();
+        String id0 = JsonPath.parse(dummyResponse).read("$.id");
+
+        // but use jwt from the wrong user
+        MvcResult result1 =
+                mockMvc.perform(
+                                delete("/users/" + id0)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt4)))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
+
+        // test if UserDeletedEvent was thrown
+        Optional<UserDeletedEvent> emptyEvent = dummyEventListener.getLatestUserDeletedEvent();
+        assertTrue(emptyEvent.isEmpty());
     }
 }
