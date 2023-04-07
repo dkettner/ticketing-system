@@ -380,7 +380,7 @@ public class UserControllerTests {
         assertEquals(user4.getName(), userPatchDto.getName());
         assertEquals(user4.getEmail().toString(), email4);
 
-        // test UserCreatedEvent
+        // test UserPatchedEvent
         Optional<UserPatchedEvent> event = dummyEventListener.getLatestUserPatchedEvent();
         assertTrue(event.isPresent());
         Optional<UserPatchedEvent> emptyEvent = dummyEventListener.getLatestUserPatchedEvent();
@@ -408,7 +408,7 @@ public class UserControllerTests {
         assertEquals(user4.getName(), name4);
         assertEquals(user4.getEmail().toString(), userPatchDto.getEmail());
 
-        // test UserCreatedEvent
+        // test UserPatchedEvent
         Optional<UserPatchedEvent> event = dummyEventListener.getLatestUserPatchedEvent();
         assertTrue(event.isPresent());
         Optional<UserPatchedEvent> emptyEvent = dummyEventListener.getLatestUserPatchedEvent();
@@ -436,7 +436,7 @@ public class UserControllerTests {
         assertEquals(user4.getName(), userPatchDto.getName());
         assertEquals(user4.getEmail(), EmailAddress.fromString(userPatchDto.getEmail()));
 
-        // test UserCreatedEvent
+        // test UserPatchedEvent
         Optional<UserPatchedEvent> event = dummyEventListener.getLatestUserPatchedEvent();
         assertTrue(event.isPresent());
         Optional<UserPatchedEvent> emptyEvent = dummyEventListener.getLatestUserPatchedEvent();
