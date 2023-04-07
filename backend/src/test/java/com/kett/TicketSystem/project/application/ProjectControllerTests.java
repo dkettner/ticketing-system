@@ -98,12 +98,14 @@ public class ProjectControllerTests {
     }
 
     @AfterEach
-    public void tearDown() throws Exception {
+    public void tearDown() {
         userName = null;
         userEmail = null;
         userPassword = null;
         userId = null;
         jwt = null;
+
+        projectRepository.deleteAll();
     }
 
     @Test
