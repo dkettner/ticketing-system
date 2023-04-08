@@ -21,11 +21,13 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
+@Transactional
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final ApplicationEventPublisher eventPublisher;

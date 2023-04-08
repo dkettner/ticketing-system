@@ -24,10 +24,12 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
 @Service
+@Transactional
 public class MembershipService {
     private final MembershipRepository membershipRepository;
     private final ApplicationEventPublisher eventPublisher;
