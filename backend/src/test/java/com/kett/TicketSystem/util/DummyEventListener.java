@@ -60,7 +60,7 @@ public class DummyEventListener {
     }
     public Optional<ProjectDeletedEvent> getLatestProjectDeletedEvent() {
         Optional<ProjectDeletedEvent> event = Optional.empty();
-        if (!projectCreatedEvents.isEmpty()) {
+        if (!projectDeletedEvents.isEmpty()) {
             event = Optional.of(projectDeletedEvents.pop());
         }
         return event;
