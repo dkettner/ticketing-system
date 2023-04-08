@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
@@ -11,7 +12,9 @@ import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
+import com.kett.TicketSystem.user.repository.UserRepository;
 import com.kett.TicketSystem.util.DummyEventListener;
+import com.kett.TicketSystem.util.RestRequestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -45,16 +48,22 @@ public class ProjectControllerTests {
     private final ApplicationEventPublisher eventPublisher;
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
+    private final UserRepository userRepository;
+    private final RestRequestHelper restMinion;
 
-    private String userId;
+    private UUID userId;
     private String userName;
     private String userEmail;
     private String userPassword;
     private String jwt;
 
-    private String projectId;
+    private UUID projectId;
     private String projectName;
     private String projectDescription;
+
+    private UUID buildUpProjectId;
+    private String buildUpProjectName;
+    private String buildUpProjectDescription;
 
 
 
@@ -64,8 +73,10 @@ public class ProjectControllerTests {
             ObjectMapper objectMapper,
             DummyEventListener dummyEventListener,
             ApplicationEventPublisher eventPublisher,
+            RestRequestHelper restMinion,
             ProjectService projectService,
-            ProjectRepository projectRepository
+            ProjectRepository projectRepository,
+            UserRepository userRepository
     ) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
@@ -73,6 +84,8 @@ public class ProjectControllerTests {
         this.eventPublisher = eventPublisher;
         this.projectService = projectService;
         this.projectRepository = projectRepository;
+        this.userRepository = userRepository;
+        this.restMinion = restMinion;
     }
 
     @BeforeEach
@@ -80,35 +93,17 @@ public class ProjectControllerTests {
         userName = "Franz Gerald Stauffingen";
         userEmail = "franz.stauffingen@gmail.com";
         userPassword = "MyLittlePony4Ever!";
+        userId = restMinion.postUser(userName, userEmail, userPassword);
+        jwt = restMinion.authenticateUser(userEmail, userPassword);
+
+        buildUpProjectName = "Mozzarella";
+        buildUpProjectDescription = "What do you do with the white ball after drinking the mozzarella?";
+        buildUpProjectId = restMinion.postProject(jwt, buildUpProjectName, buildUpProjectDescription);
 
         projectName = "My Little Project";
         projectDescription = "My very own project description";
 
-        // post user
-        UserPostDto userPostDto = new UserPostDto(userName, userEmail, userPassword);
-        MvcResult userPostResult =
-                mockMvc.perform(
-                                post("/users")
-                                        .content(objectMapper.writeValueAsString(userPostDto))
-                                        .contentType(MediaType.APPLICATION_JSON))
-                        .andReturn();
-        String dummyResponse = userPostResult.getResponse().getContentAsString();
-        userId = JsonPath.parse(dummyResponse).read("$.id");
-
-        // authenticate user
-        AuthenticationPostDto authenticationPostDto4 = new AuthenticationPostDto(userEmail, userPassword);
-        MvcResult postAuthenticationResult4 =
-                mockMvc.perform(
-                                post("/authentication")
-                                        .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(authenticationPostDto4)))
-                        .andExpect(status().isOk())
-                        .andReturn();
-        jwt = Objects.requireNonNull(postAuthenticationResult4.getResponse().getCookie("jwt")).getValue();
-
-        dummyEventListener.deleteAllEvents(); // in buildUp to erase events of buildUp
-
-        // post Project
+        dummyEventListener.deleteAllEvents(); // erase events of buildUp
     }
 
     @AfterEach
@@ -123,7 +118,12 @@ public class ProjectControllerTests {
         projectName = null;
         projectDescription = null;
 
+        buildUpProjectId = null;
+        buildUpProjectName = null;
+        buildUpProjectDescription = null;
+
         projectRepository.deleteAll();
+        userRepository.deleteAll();
     }
 
     @Test
@@ -143,9 +143,9 @@ public class ProjectControllerTests {
                         .andExpect(jsonPath("$.description").value(projectPostDto.getDescription()))
                         .andReturn();
         String postResponse = postResult.getResponse().getContentAsString();
-        projectId = JsonPath.parse(postResponse).read("$.id");
-        Project project = projectService.getProjectById(UUID.fromString(projectId));
-        assertEquals(UUID.fromString(projectId), project.getId());
+        projectId = UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
+        Project project = projectService.getProjectById(projectId);
+        assertEquals(projectId, project.getId());
         assertEquals(projectPostDto.getName(), project.getName());
         assertEquals(projectPostDto.getDescription(), project.getDescription());
 
@@ -156,15 +156,15 @@ public class ProjectControllerTests {
         assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
 
         ProjectCreatedEvent projectCreatedEvent = event.get();
-        assertEquals(UUID.fromString(projectId), projectCreatedEvent.getProjectId());
-        assertEquals(UUID.fromString(userId), projectCreatedEvent.getUserId());
+        assertEquals(projectId, projectCreatedEvent.getProjectId());
+        assertEquals(userId, projectCreatedEvent.getUserId());
     }
 
     @Test
     public void consumeUserCreatedEventTest() throws Exception {
         eventPublisher.publishEvent(
                 new UserCreatedEvent(
-                        UUID.fromString(userId),
+                        userId,
                         userName,
                         EmailAddress.fromString(userEmail)
                 )
@@ -181,19 +181,18 @@ public class ProjectControllerTests {
         assertTrue(emptyEvent0.isEmpty()); // check if only one event was thrown
 
         DefaultProjectCreatedEvent defaultProjectCreatedEvent = event0.get();
-        assertEquals(UUID.fromString(userId), defaultProjectCreatedEvent.getUserId());
+        assertEquals(userId, defaultProjectCreatedEvent.getUserId());
 
         // test if project was actually created
         Project defaultProject = projectService.getProjectById(defaultProjectCreatedEvent.getProjectId());
     }
 
-    /*
     @Test
     public void consumeLastMembershipDeletedEventTest() throws Exception {
         eventPublisher.publishEvent(
                 new LastProjectMemberDeletedEvent(
-                        UUID.randomUUID(),
-                        projectId;
+                        userId,
+                        buildUpProjectId
                 )
         );
 
@@ -213,6 +212,4 @@ public class ProjectControllerTests {
         // test if project was actually created
         Project defaultProject = projectService.getProjectById(defaultProjectCreatedEvent.getProjectId());
     }
-    */
-
 }
