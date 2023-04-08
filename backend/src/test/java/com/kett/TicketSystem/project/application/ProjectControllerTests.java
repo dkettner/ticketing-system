@@ -4,11 +4,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
+import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
@@ -26,14 +28,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.Cookie;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,6 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
 public class ProjectControllerTests {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
@@ -73,7 +76,6 @@ public class ProjectControllerTests {
             ObjectMapper objectMapper,
             DummyEventListener dummyEventListener,
             ApplicationEventPublisher eventPublisher,
-            RestRequestHelper restMinion,
             ProjectService projectService,
             ProjectRepository projectRepository,
             UserRepository userRepository
@@ -85,7 +87,7 @@ public class ProjectControllerTests {
         this.projectService = projectService;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
-        this.restMinion = restMinion;
+        this.restMinion = new RestRequestHelper(this.mockMvc, this.objectMapper);
     }
 
     @BeforeEach
@@ -201,15 +203,19 @@ public class ProjectControllerTests {
         Thread.sleep(100);
 
         // test DefaultProjectCreatedEvent
-        Optional<DefaultProjectCreatedEvent> event0 = dummyEventListener.getLatestDefaultProjectCreatedEvent();
-        assertTrue(event0.isPresent());
-        Optional<DefaultProjectCreatedEvent> emptyEvent0 = dummyEventListener.getLatestDefaultProjectCreatedEvent();
-        assertTrue(emptyEvent0.isEmpty()); // check if only one event was thrown
+        Optional<ProjectDeletedEvent> event = dummyEventListener.getLatestProjectDeletedEvent();
+        assertTrue(event.isPresent());
+        Optional<ProjectDeletedEvent> emptyEvent = dummyEventListener.getLatestProjectDeletedEvent();
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
 
-        DefaultProjectCreatedEvent defaultProjectCreatedEvent = event0.get();
-        assertEquals(UUID.fromString(userId), defaultProjectCreatedEvent.getUserId());
+        ProjectDeletedEvent projectDeletedEvent = event.get();
+        assertEquals(buildUpProjectId, projectDeletedEvent.getProjectId());
 
-        // test if project was actually created
-        Project defaultProject = projectService.getProjectById(defaultProjectCreatedEvent.getProjectId());
+        try {
+            projectService.getProjectById(buildUpProjectId);
+            fail("Project was found but should have been deleted");
+        } catch (NoProjectFoundException exception) {
+            // test passed
+        }
     }
 }
