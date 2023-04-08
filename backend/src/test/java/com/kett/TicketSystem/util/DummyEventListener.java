@@ -71,7 +71,7 @@ public class DummyEventListener {
         userPatchedEvents.clear();
         userDeletedEvents.clear();
 
-        projectDeletedEvents.clear();
+        projectCreatedEvents.clear();
         defaultProjectCreatedEvents.clear();
         projectDeletedEvents.clear();
     }
