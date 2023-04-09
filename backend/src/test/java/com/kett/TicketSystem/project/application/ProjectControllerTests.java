@@ -5,6 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
+import com.kett.TicketSystem.project.application.dto.ProjectPatchDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
@@ -33,8 +34,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -185,6 +185,26 @@ public class ProjectControllerTests {
         } catch (NoProjectFoundException exception) {
             // test passed
         }
+    }
+
+    @Test
+    public void patchProjectTest() throws Exception {
+        String newName = "Hallo";
+        String newDescription = "Ciao";
+        ProjectPatchDto projectPatchDto = new ProjectPatchDto(newName, newDescription);
+        MvcResult patchResult =
+                mockMvc.perform(
+                                patch("/projects/" + buildUpProjectId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(projectPatchDto))
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        Project project = projectService.getProjectById(buildUpProjectId);
+        assertEquals(buildUpProjectId, project.getId());
+        assertEquals(projectPatchDto.getName(), project.getName());
+        assertEquals(projectPatchDto.getDescription(), project.getDescription());
     }
 
     @Test

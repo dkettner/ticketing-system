@@ -3,6 +3,7 @@ package com.kett.TicketSystem.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
+import com.kett.TicketSystem.project.application.dto.ProjectPatchDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import org.springframework.http.MediaType;
@@ -13,8 +14,7 @@ import javax.servlet.http.Cookie;
 import java.util.Objects;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -66,6 +66,18 @@ public class RestRequestHelper {
                         .andReturn();
         String postResponse = postResult.getResponse().getContentAsString();
         return UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
+    }
+
+    public void patchProject(String jwt, UUID projectId, String name, String description) throws Exception {
+        ProjectPatchDto projectPatchDto = new ProjectPatchDto(name, description);
+        MvcResult patchResult =
+                mockMvc.perform(
+                                patch("/projects/" + projectId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(projectPatchDto))
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
     }
 
     public void deleteProject(String jwt, UUID projectId) throws Exception {
