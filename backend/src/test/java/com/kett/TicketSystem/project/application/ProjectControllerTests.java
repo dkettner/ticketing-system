@@ -33,6 +33,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -157,6 +158,33 @@ public class ProjectControllerTests {
         ProjectCreatedEvent projectCreatedEvent = event.get();
         assertEquals(projectId, projectCreatedEvent.getProjectId());
         assertEquals(userId, projectCreatedEvent.getUserId());
+    }
+
+    @Test
+    public void deleteProjectTest() throws Exception {
+        MvcResult deleteResult =
+                mockMvc.perform(
+                        delete("/projects/" + buildUpProjectId)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .cookie(new Cookie("jwt", jwt)))
+                .andExpect(status().isNoContent())
+                .andReturn();
+
+        // test ProjectDeletedEvent
+        Optional<ProjectDeletedEvent> event = dummyEventListener.getLatestProjectDeletedEvent();
+        assertTrue(event.isPresent());
+        Optional<ProjectDeletedEvent> emptyEvent = dummyEventListener.getLatestProjectDeletedEvent();
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
+
+        ProjectDeletedEvent projectDeletedEvent = event.get();
+        assertEquals(buildUpProjectId, projectDeletedEvent.getProjectId());
+
+        try {
+            projectService.getProjectById(buildUpProjectId);
+            fail("Project was found but should have been deleted");
+        } catch (NoProjectFoundException exception) {
+            // test passed
+        }
     }
 
     @Test
