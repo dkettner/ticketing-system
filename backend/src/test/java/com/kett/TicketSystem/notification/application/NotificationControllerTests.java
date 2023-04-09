@@ -9,6 +9,7 @@ import com.kett.TicketSystem.ticket.domain.events.TicketUnassignedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import com.kett.TicketSystem.util.DummyEventListener;
 import com.kett.TicketSystem.util.RestRequestHelper;
+import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,15 +17,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.Cookie;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -118,6 +125,47 @@ public class NotificationControllerTests {
 
         notificationRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    public void getNotificationsByQueryTest() throws Exception {
+        eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(userId0, projectId));
+        eventPublisher.publishEvent(new TicketAssignedEvent(ticketId, projectId, userId0));
+        eventPublisher.publishEvent(new TicketUnassignedEvent(ticketId, projectId, userId0));
+
+        Thread.sleep(100);
+
+        MvcResult getByRecipientIdResult =
+                mockMvc.perform(
+                                get("/notifications")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("recipientId", userId0.toString())
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].id").exists())
+                        .andExpect(jsonPath("$[0].recipientId").value(userId0.toString()))
+                        .andExpect(jsonPath("$[1].id").exists())
+                        .andExpect(jsonPath("$[1].recipientId").value(userId0.toString()))
+                        .andExpect(jsonPath("$[2].id").exists())
+                        .andExpect(jsonPath("$[2].recipientId").value(userId0.toString()))
+                        .andReturn();
+
+        MvcResult getByEmailResult =
+                mockMvc.perform(
+                                get("/notifications")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("email", userEmail0)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].id").exists())
+                        .andExpect(jsonPath("$[0].recipientId").value(userId0.toString()))
+                        .andExpect(jsonPath("$[1].id").exists())
+                        .andExpect(jsonPath("$[1].recipientId").value(userId0.toString()))
+                        .andExpect(jsonPath("$[2].id").exists())
+                        .andExpect(jsonPath("$[2].recipientId").value(userId0.toString()))
+                        .andReturn();
+
+        assertEquals(getByRecipientIdResult.getResponse().getContentAsString(), getByEmailResult.getResponse().getContentAsString());
     }
 
     @Test
