@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.notification.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
@@ -9,7 +10,6 @@ import com.kett.TicketSystem.ticket.domain.events.TicketUnassignedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import com.kett.TicketSystem.util.DummyEventListener;
 import com.kett.TicketSystem.util.RestRequestHelper;
-import org.hamcrest.Matcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -166,6 +166,72 @@ public class NotificationControllerTests {
                         .andReturn();
 
         assertEquals(getByRecipientIdResult.getResponse().getContentAsString(), getByEmailResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void getNotificationByIdTest() throws Exception {
+        eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(userId0, projectId));
+        Thread.sleep(100);
+
+        // find out notificationId
+        MvcResult getByRecipientIdResult =
+                mockMvc.perform(
+                                get("/notifications")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("recipientId", userId0.toString())
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String getByRecipientIdResponse = getByRecipientIdResult.getResponse().getContentAsString();
+        UUID notificationId = UUID.fromString(JsonPath.parse(getByRecipientIdResponse).read("$[0].id"));
+
+        MvcResult getByIdResult =
+                mockMvc.perform(
+                                get("/notifications/" + notificationId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(notificationId.toString()))
+                        .andExpect(jsonPath("$.recipientId").value(userId0.toString()))
+                        .andExpect(jsonPath("$.isRead").value(false))
+                        .andReturn();
+    }
+
+    @Test
+    public void getNotificationByWrongIdTest() throws Exception {
+        MvcResult getByIdResult =
+                mockMvc.perform(
+                                get("/notifications/" + UUID.randomUUID())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNotFound())
+                        .andReturn();
+    }
+
+    @Test
+    public void getNotificationOfOtherUserByIdTest() throws Exception {
+        eventPublisher.publishEvent(new TicketAssignedEvent(ticketId, projectId, userId1));
+        Thread.sleep(100);
+
+        // find out notificationId
+        MvcResult getByRecipientIdResult =
+                mockMvc.perform(
+                                get("/notifications")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("recipientId", userId1.toString())
+                                        .cookie(new Cookie("jwt", jwt1)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String getByRecipientIdResponse = getByRecipientIdResult.getResponse().getContentAsString();
+        UUID notificationId = UUID.fromString(JsonPath.parse(getByRecipientIdResponse).read("$[0].id"));
+
+        MvcResult getByIdResult =
+                mockMvc.perform(
+                                get("/notifications/" + notificationId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
     }
 
     @Test
