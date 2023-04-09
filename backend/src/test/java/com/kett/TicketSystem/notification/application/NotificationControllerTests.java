@@ -1,9 +1,11 @@
 package com.kett.TicketSystem.notification.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
 import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketUnassignedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import com.kett.TicketSystem.util.DummyEventListener;
 import com.kett.TicketSystem.util.RestRequestHelper;
@@ -52,6 +54,7 @@ public class NotificationControllerTests {
 
     private UUID ticketId;
     private UUID projectId;
+    private UUID membershipId;
 
     @Autowired
     public NotificationControllerTests(
@@ -89,6 +92,7 @@ public class NotificationControllerTests {
 
         ticketId = UUID.randomUUID();
         projectId = UUID.randomUUID();
+        membershipId = UUID.randomUUID();
 
         dummyEventListener.deleteAllEvents();
         notificationRepository.deleteAll();
@@ -110,6 +114,7 @@ public class NotificationControllerTests {
 
         ticketId = null;
         projectId = null;
+        membershipId = null;
 
         notificationRepository.deleteAll();
         userRepository.deleteAll();
@@ -120,6 +125,51 @@ public class NotificationControllerTests {
         eventPublisher
                 .publishEvent(
                         new TicketAssignedEvent(
+                                ticketId,
+                                projectId,
+                                userId0
+                        )
+                );
+
+        // TODO: find more stable alternative for testing
+        // shame: give services time to handle event
+        Thread.sleep(100);
+
+        List<Notification> notifications = notificationService.getNotificationsByRecipientId(userId0);
+        assertEquals(1, notifications.size());
+        Notification notification = notifications.get(0);
+        assertEquals(userId0, notification.getRecipientId());
+        assertEquals(false, notification.getIsRead());
+        assertTrue(notification.getContent().contains(ticketId.toString()));
+    }
+
+    @Test
+    public void consumeUnacceptedProjectMembershipCreatedEvent() throws Exception {
+        eventPublisher
+                .publishEvent(
+                        new UnacceptedProjectMembershipCreatedEvent(
+                                userId0,
+                                projectId
+                        )
+                );
+
+        // TODO: find more stable alternative for testing
+        // shame: give services time to handle event
+        Thread.sleep(100);
+
+        List<Notification> notifications = notificationService.getNotificationsByRecipientId(userId0);
+        assertEquals(1, notifications.size());
+        Notification notification = notifications.get(0);
+        assertEquals(userId0, notification.getRecipientId());
+        assertEquals(false, notification.getIsRead());
+        assertTrue(notification.getContent().contains(projectId.toString()));
+    }
+
+    @Test
+    public void consumeTicketUnassignedEvent() throws Exception {
+        eventPublisher
+                .publishEvent(
+                        new TicketUnassignedEvent(
                                 ticketId,
                                 projectId,
                                 userId0
