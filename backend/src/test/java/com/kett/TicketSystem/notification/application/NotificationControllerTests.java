@@ -3,6 +3,7 @@ package com.kett.TicketSystem.notification.application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
+import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
 import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
@@ -30,6 +31,7 @@ import java.util.UUID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -89,7 +91,6 @@ public class NotificationControllerTests {
         userPassword0 = "MyGuitarIsMyLife1337";
         userId0 = restMinion.postUser(userName0, userEmail0, userPassword0);
         jwt0 = restMinion.authenticateUser(userEmail0, userPassword0);
-
 
         userName1 = "Julia McGonagall";
         userEmail1 = "julia.MG@hogwarts.uk";
@@ -232,6 +233,52 @@ public class NotificationControllerTests {
                                         .cookie(new Cookie("jwt", jwt0)))
                         .andExpect(status().isForbidden())
                         .andReturn();
+    }
+
+    @Test
+    public void patchNotificationTest() throws Exception {
+        eventPublisher.publishEvent(new TicketAssignedEvent(ticketId, projectId, userId0));
+        Thread.sleep(100);
+
+        // find out notificationId
+        MvcResult getByRecipientIdResult =
+                mockMvc.perform(
+                                get("/notifications")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("recipientId", userId0.toString())
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String getByRecipientIdResponse = getByRecipientIdResult.getResponse().getContentAsString();
+        UUID notificationId = UUID.fromString(JsonPath.parse(getByRecipientIdResponse).read("$[0].id"));
+
+        // test isRead: false -> true (allowed)
+        NotificationPatchIsReadDto notificationPatchIsReadDto = new NotificationPatchIsReadDto(true);
+        MvcResult patchResult =
+                mockMvc.perform(
+                        patch("/notifications/" + notificationId + "/is-read")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(notificationPatchIsReadDto))
+                                .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+        Notification patchedNotification = notificationService.getNotificationById(notificationId);
+        assertEquals(notificationId, patchedNotification.getId());
+        assertEquals(userId0, patchedNotification.getRecipientId());
+        assertTrue(patchedNotification.getIsRead());
+
+        // test isRead: true -> false (not allowed)
+        NotificationPatchIsReadDto conflictingNotificationPatchIsReadDto = new NotificationPatchIsReadDto(false);
+        MvcResult conflictingPatchResult =
+                mockMvc.perform(
+                                patch("/notifications/" + notificationId + "/is-read")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(conflictingNotificationPatchIsReadDto))
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isConflict())
+                        .andReturn();
+        Notification unpatchedNotification = notificationService.getNotificationById(notificationId);
+        assertEquals(patchedNotification, unpatchedNotification);
     }
 
     @Test
