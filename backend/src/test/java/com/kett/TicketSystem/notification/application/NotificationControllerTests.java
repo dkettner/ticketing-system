@@ -5,6 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
 import com.kett.TicketSystem.notification.domain.Notification;
+import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
 import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketUnassignedEvent;
@@ -28,10 +29,8 @@ import javax.servlet.http.Cookie;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -279,6 +278,45 @@ public class NotificationControllerTests {
                         .andReturn();
         Notification unpatchedNotification = notificationService.getNotificationById(notificationId);
         assertEquals(patchedNotification, unpatchedNotification);
+    }
+
+    @Test
+    public void deleteNotificationTest() throws Exception {
+        eventPublisher.publishEvent(new TicketAssignedEvent(ticketId, projectId, userId0));
+        Thread.sleep(100);
+
+        // find out notificationId
+        MvcResult getByRecipientIdResult =
+                mockMvc.perform(
+                                get("/notifications")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("recipientId", userId0.toString())
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        String getByRecipientIdResponse = getByRecipientIdResult.getResponse().getContentAsString();
+        UUID notificationId = UUID.fromString(JsonPath.parse(getByRecipientIdResponse).read("$[0].id"));
+
+        // test delete
+        MvcResult deleteResult =
+                mockMvc.perform(
+                                delete("/notifications/" + notificationId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+        assertThrows(NoNotificationFoundException.class, () -> notificationService.getNotificationById(notificationId));
+    }
+
+    @Test
+    public void deleteNonExistingNotification() throws Exception {
+        MvcResult deleteResult =
+                mockMvc.perform(
+                                delete("/notifications/" + UUID.randomUUID())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNotFound())
+                        .andReturn();
     }
 
     @Test
