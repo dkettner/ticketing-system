@@ -13,6 +13,7 @@ import javax.servlet.http.Cookie;
 import java.util.Objects;
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -65,5 +66,15 @@ public class RestRequestHelper {
                         .andReturn();
         String postResponse = postResult.getResponse().getContentAsString();
         return UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
+    }
+
+    public void deleteProject(String jwt, UUID projectId) throws Exception {
+        MvcResult deleteResult =
+                mockMvc.perform(
+                                delete("/projects/" + projectId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
     }
 }
