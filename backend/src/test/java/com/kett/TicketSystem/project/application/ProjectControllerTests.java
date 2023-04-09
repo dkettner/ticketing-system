@@ -128,8 +128,6 @@ public class ProjectControllerTests {
 
     @Test
     public void postProjectTest() throws Exception {
-
-        // post project
         ProjectPostDto projectPostDto = new ProjectPostDto(projectName, projectDescription);
         MvcResult postResult =
                 mockMvc.perform(
@@ -158,6 +156,31 @@ public class ProjectControllerTests {
         ProjectCreatedEvent projectCreatedEvent = event.get();
         assertEquals(projectId, projectCreatedEvent.getProjectId());
         assertEquals(userId, projectCreatedEvent.getUserId());
+    }
+
+    @Test
+    public void getProjectTest() throws Exception {
+        MvcResult postResult =
+                mockMvc.perform(
+                                get("/projects/" + buildUpProjectId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(buildUpProjectId.toString()))
+                        .andExpect(jsonPath("$.name").value(buildUpProjectName))
+                        .andExpect(jsonPath("$.description").value(buildUpProjectDescription))
+                        .andReturn();
+    }
+
+    @Test
+    public void getNonExistingProjectTest() throws Exception {
+        MvcResult postResult =
+                mockMvc.perform(
+                                get("/projects/" + UUID.randomUUID())
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
     }
 
     @Test
