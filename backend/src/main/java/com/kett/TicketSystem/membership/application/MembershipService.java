@@ -233,7 +233,6 @@ public class MembershipService {
     }
 
     @EventListener
-    @Async
     public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
         List<Membership> memberships = getMembershipsByUserId(userDeletedEvent.getUserId());
         memberships.forEach(membership -> this.deleteMembershipById(membership.getId()));
