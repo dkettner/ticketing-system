@@ -18,18 +18,18 @@ import java.util.Stack;
 
 @Service
 public class DummyEventListener {
-    Stack<UserCreatedEvent> userCreatedEvents = new Stack<>();
-    Stack<UserPatchedEvent> userPatchedEvents = new Stack<>();
-    Stack<UserDeletedEvent> userDeletedEvents = new Stack<>();
+    Stack<UnacceptedProjectMembershipCreatedEvent> unacceptedProjectMembershipCreatedEvents = new Stack<>();
+    Stack<MembershipAcceptedEvent> membershipAcceptedEvents = new Stack<>();
+    Stack<MembershipDeletedEvent> membershipDeletedEvents = new Stack<>();
+    Stack<LastProjectMemberDeletedEvent> lastProjectMemberDeletedEvents = new Stack<>();
 
     Stack<ProjectCreatedEvent> projectCreatedEvents = new Stack<>();
     Stack<DefaultProjectCreatedEvent> defaultProjectCreatedEvents = new Stack<>();
     Stack<ProjectDeletedEvent> projectDeletedEvents = new Stack<>();
 
-    Stack<UnacceptedProjectMembershipCreatedEvent> unacceptedProjectMembershipCreatedEvents = new Stack<>();
-    Stack<MembershipAcceptedEvent> membershipAcceptedEvents = new Stack<>();
-    Stack<MembershipDeletedEvent> membershipDeletedEvents = new Stack<>();
-    Stack<LastProjectMemberDeletedEvent> lastProjectMemberDeletedEvents = new Stack<>();
+    Stack<UserCreatedEvent> userCreatedEvents = new Stack<>();
+    Stack<UserPatchedEvent> userPatchedEvents = new Stack<>();
+    Stack<UserDeletedEvent> userDeletedEvents = new Stack<>();
 
     public Optional<UnacceptedProjectMembershipCreatedEvent> getLatestUnacceptedProjectMembershipCreatedEvent() {
         Optional<UnacceptedProjectMembershipCreatedEvent> event = Optional.empty();
@@ -60,28 +60,6 @@ public class DummyEventListener {
         return event;
     }
 
-    public Optional<UserCreatedEvent> getLatestUserCreatedEvent() {
-        Optional<UserCreatedEvent> event = Optional.empty();
-        if (!userCreatedEvents.isEmpty()) {
-            event = Optional.of(userCreatedEvents.pop());
-        }
-        return event;
-    }
-    public Optional<UserPatchedEvent> getLatestUserPatchedEvent() {
-        Optional<UserPatchedEvent> event = Optional.empty();
-        if (!userPatchedEvents.isEmpty()) {
-            event = Optional.of(userPatchedEvents.pop());
-        }
-        return event;
-    }
-    public Optional<UserDeletedEvent> getLatestUserDeletedEvent() {
-        Optional<UserDeletedEvent> event = Optional.empty();
-        if (!userDeletedEvents.isEmpty()) {
-            event = Optional.of(userDeletedEvents.pop());
-        }
-        return event;
-    }
-
     public Optional<ProjectCreatedEvent> getLatestProjectCreatedEvent() {
         Optional<ProjectCreatedEvent> event = Optional.empty();
         if (!projectCreatedEvents.isEmpty()) {
@@ -104,14 +82,41 @@ public class DummyEventListener {
         return event;
     }
 
+    public Optional<UserCreatedEvent> getLatestUserCreatedEvent() {
+        Optional<UserCreatedEvent> event = Optional.empty();
+        if (!userCreatedEvents.isEmpty()) {
+            event = Optional.of(userCreatedEvents.pop());
+        }
+        return event;
+    }
+    public Optional<UserPatchedEvent> getLatestUserPatchedEvent() {
+        Optional<UserPatchedEvent> event = Optional.empty();
+        if (!userPatchedEvents.isEmpty()) {
+            event = Optional.of(userPatchedEvents.pop());
+        }
+        return event;
+    }
+    public Optional<UserDeletedEvent> getLatestUserDeletedEvent() {
+        Optional<UserDeletedEvent> event = Optional.empty();
+        if (!userDeletedEvents.isEmpty()) {
+            event = Optional.of(userDeletedEvents.pop());
+        }
+        return event;
+    }
+
     public void deleteAllEvents() {
-        userCreatedEvents.clear();
-        userPatchedEvents.clear();
-        userDeletedEvents.clear();
+        unacceptedProjectMembershipCreatedEvents.clear();
+        membershipAcceptedEvents.clear();
+        membershipDeletedEvents.clear();
+        lastProjectMemberDeletedEvents.clear();
 
         projectCreatedEvents.clear();
         defaultProjectCreatedEvents.clear();
         projectDeletedEvents.clear();
+
+        userCreatedEvents.clear();
+        userPatchedEvents.clear();
+        userDeletedEvents.clear();
     }
 
     @EventListener
@@ -134,6 +139,20 @@ public class DummyEventListener {
     }
 
     @EventListener
+    public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
+        projectCreatedEvents.push(projectCreatedEvent);
+    }
+
+    @EventListener
+    public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
+        defaultProjectCreatedEvents.push(defaultProjectCreatedEvent);
+    }
+    @EventListener
+    public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
+        projectDeletedEvents.push(projectDeletedEvent);
+    }
+
+    @EventListener
     public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
         userCreatedEvents.push(userCreatedEvent);
     }
@@ -144,18 +163,5 @@ public class DummyEventListener {
     @EventListener
     public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
         userPatchedEvents.push(userPatchedEvent);
-    }
-
-    @EventListener
-    public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-        projectCreatedEvents.push(projectCreatedEvent);
-    }
-    @EventListener
-    public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        defaultProjectCreatedEvents.push(defaultProjectCreatedEvent);
-    }
-    @EventListener
-    public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
-        projectDeletedEvents.push(projectDeletedEvent);
     }
 }
