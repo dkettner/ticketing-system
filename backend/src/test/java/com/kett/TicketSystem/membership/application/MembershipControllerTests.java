@@ -1,7 +1,6 @@
 package com.kett.TicketSystem.membership.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
@@ -9,12 +8,9 @@ import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
-import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
-import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
-import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import com.kett.TicketSystem.util.DummyEventListener;
 import com.kett.TicketSystem.util.RestRequestHelper;
@@ -189,25 +185,22 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(1000);
-        System.out.println(projectId0);
+        Thread.sleep(100);
 
         String projectName1 = "Project 1";
         String projectDescription1 = "Description 1";
-        //UUID projectId1 = restMinion.postProject(jwt0, projectName1, projectDescription1);
-        //Thread.sleep(100);
+        UUID projectId1 = restMinion.postProject(jwt0, projectName1, projectDescription1);
+        Thread.sleep(100);
 
         String projectName2 = "Project 2";
         String projectDescription2 = "Description 2";
-        //UUID projectId2 = restMinion.postProject(jwt0, projectName2, projectDescription2);
-        //Thread.sleep(100);
+        UUID projectId2 = restMinion.postProject(jwt0, projectName2, projectDescription2);
+        Thread.sleep(100);
 
-        eventPublisher.publishEvent(new UserDeletedEvent(userId0));
-        //Thread.sleep(100);
+        restMinion.deleteUser(jwt0, userId0);
+        Thread.sleep(100);
 
-        //assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipsByUserId(userId0));
+        assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipsByUserId(userId0));
     }
-
-
 }
 
