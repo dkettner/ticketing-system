@@ -229,9 +229,11 @@ public class TicketService {
     @EventListener
     @Async
     public void handleMembershipAcceptedEvent(MembershipAcceptedEvent membershipAcceptedEvent) {
+        this.consumedProjectDataManager.add(membershipAcceptedEvent.getProjectId());
         Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(membershipAcceptedEvent.getProjectId());
         if (projectMembersVO.isEmpty()) {
-            throw new ImpossibleException("There is no projectMembersVO with projectId: " + membershipAcceptedEvent.getProjectId());
+            this.consumedMembershipDataManager.add(new ProjectMembersVO(membershipAcceptedEvent.getProjectId(), new ArrayList<>()));
+            projectMembersVO = this.consumedMembershipDataManager.get(membershipAcceptedEvent.getProjectId());
         }
 
         List<UUID> projectMembers = projectMembersVO.get().memberIds();
@@ -251,14 +253,22 @@ public class TicketService {
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
         this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
-        this.consumedMembershipDataManager.add(new ProjectMembersVO(projectCreatedEvent.getProjectId(), new ArrayList<>()));
+
+        Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(projectCreatedEvent.getProjectId());
+        if (projectMembersVO.isEmpty()) {
+            this.consumedMembershipDataManager.add(new ProjectMembersVO(projectCreatedEvent.getProjectId(), new ArrayList<>()));
+        }
     }
 
     @EventListener
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
         this.consumedProjectDataManager.add(defaultProjectCreatedEvent.getProjectId());
-        this.consumedMembershipDataManager.add(new ProjectMembersVO(defaultProjectCreatedEvent.getProjectId(), new ArrayList<>()));
+
+        Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(defaultProjectCreatedEvent.getProjectId());
+        if (projectMembersVO.isEmpty()) {
+            this.consumedMembershipDataManager.add(new ProjectMembersVO(defaultProjectCreatedEvent.getProjectId(), new ArrayList<>()));
+        }
     }
 
 
