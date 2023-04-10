@@ -129,7 +129,7 @@ public class NotificationControllerTests {
 
     @Test
     public void getNotificationsByQueryTest() throws Exception {
-        eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(userId0, projectId));
+        eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(membershipId, userId0, projectId));
         eventPublisher.publishEvent(new TicketAssignedEvent(ticketId, projectId, userId0));
         eventPublisher.publishEvent(new TicketUnassignedEvent(ticketId, projectId, userId0));
 
@@ -170,7 +170,7 @@ public class NotificationControllerTests {
 
     @Test
     public void getNotificationByIdTest() throws Exception {
-        eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(userId0, projectId));
+        eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(membershipId, userId0, projectId));
         Thread.sleep(100);
 
         // find out notificationId
@@ -347,6 +347,7 @@ public class NotificationControllerTests {
         eventPublisher
                 .publishEvent(
                         new UnacceptedProjectMembershipCreatedEvent(
+                                membershipId,
                                 userId0,
                                 projectId
                         )
