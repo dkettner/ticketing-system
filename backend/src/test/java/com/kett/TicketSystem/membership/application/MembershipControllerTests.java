@@ -1,11 +1,14 @@
 package com.kett.TicketSystem.membership.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
+import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
+import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
@@ -21,14 +24,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.servlet.http.Cookie;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -86,8 +95,8 @@ public class MembershipControllerTests {
         userId0 = restMinion.postUser(userName0, userEmail0, userPassword0);
         jwt0 = restMinion.authenticateUser(userEmail0, userPassword0);
 
-        userName1 = "Ronald Weasly";
-        userEmail1 = "RonRonRonWeasly@hw.uk";
+        userName1 = "Ronald Weasley";
+        userEmail1 = "RonRonRonWeasley@hw.uk";
         userPassword1 = "lkasjdfoijwaefo8238298";
         userId1 = restMinion.postUser(userName1, userEmail1, userPassword1);
         jwt1 = restMinion.authenticateUser(userEmail1, userPassword1);
@@ -111,8 +120,57 @@ public class MembershipControllerTests {
         userId1 = null;
         jwt1 = null;
 
+        projectId = null;
+
         membershipRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    public void postMembershipTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        MembershipPostDto membershipPostDto = new MembershipPostDto(projectId0, userId1, Role.MEMBER);
+        MvcResult postResult =
+                mockMvc.perform(
+                                post("/memberships")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPostDto))
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.projectId").value(membershipPostDto.getProjectId().toString()))
+                        .andExpect(jsonPath("$.userId").value(membershipPostDto.getUserId().toString()))
+                        .andExpect(jsonPath("$.role").value(membershipPostDto.getRole().toString()))
+                        .andExpect(jsonPath("$.state").value(State.OPEN.toString()))
+                        .andReturn();
+        Thread.sleep(100);
+
+        String postResponse = postResult.getResponse().getContentAsString();
+        UUID membershipId = UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
+
+        // test UnacceptedProjectMembershipEvent
+        Optional<UnacceptedProjectMembershipCreatedEvent> event = dummyEventListener.getLatestUnacceptedProjectMembershipCreatedEvent();
+        assertTrue(event.isPresent());
+        Optional<UnacceptedProjectMembershipCreatedEvent> emptyEvent = dummyEventListener.getLatestUnacceptedProjectMembershipCreatedEvent();
+        System.out.println("InviteeId von emptyEvent: " + emptyEvent.get().getInviteeId());
+        System.out.println("projectId von emptyEvent: " + emptyEvent.get().getProjectId());
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
+        UnacceptedProjectMembershipCreatedEvent unacceptedProjectMembershipCreatedEvent = event.get();
+        assertEquals(membershipId, unacceptedProjectMembershipCreatedEvent.getMembershipId());
+        assertEquals(membershipPostDto.getProjectId(), unacceptedProjectMembershipCreatedEvent.getProjectId());
+        assertEquals(membershipPostDto.getUserId(), unacceptedProjectMembershipCreatedEvent.getInviteeId());
+
+        // test instance
+        Membership membership = membershipService.getMembershipById(membershipId);
+        assertEquals(membershipId, membership.getId());
+        assertEquals(membershipPostDto.getUserId(), membership.getUserId());
+        assertEquals(membershipPostDto.getProjectId(), membership.getProjectId());
+        assertEquals(membershipPostDto.getRole(), membership.getRole());
+        assertEquals(State.OPEN, membership.getState());
     }
 
     @Test
