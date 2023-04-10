@@ -160,7 +160,7 @@ public class ProjectControllerTests {
 
     @Test
     public void getProjectTest() throws Exception {
-        MvcResult postResult =
+        MvcResult getResult =
                 mockMvc.perform(
                                 get("/projects/" + buildUpProjectId)
                                         .contentType(MediaType.APPLICATION_JSON)
@@ -174,7 +174,7 @@ public class ProjectControllerTests {
 
     @Test
     public void getNonExistingProjectTest() throws Exception {
-        MvcResult postResult =
+        MvcResult getResult =
                 mockMvc.perform(
                                 get("/projects/" + UUID.randomUUID())
                                         .contentType(MediaType.APPLICATION_JSON)
