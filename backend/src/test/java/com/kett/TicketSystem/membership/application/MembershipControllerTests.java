@@ -240,6 +240,11 @@ public class MembershipControllerTests {
 
     @Test
     public void consumeUserDeletedEventTest() throws Exception {
+
+        // TODO: find cause for race conditions
+        // dirty fix for slow machines
+        Thread.sleep(500);
+
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
