@@ -1,5 +1,9 @@
 package com.kett.TicketSystem.util;
 
+import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
+import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
+import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
+import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -21,6 +25,40 @@ public class DummyEventListener {
     Stack<ProjectCreatedEvent> projectCreatedEvents = new Stack<>();
     Stack<DefaultProjectCreatedEvent> defaultProjectCreatedEvents = new Stack<>();
     Stack<ProjectDeletedEvent> projectDeletedEvents = new Stack<>();
+
+    Stack<UnacceptedProjectMembershipCreatedEvent> unacceptedProjectMembershipCreatedEvents = new Stack<>();
+    Stack<MembershipAcceptedEvent> membershipAcceptedEvents = new Stack<>();
+    Stack<MembershipDeletedEvent> membershipDeletedEvents = new Stack<>();
+    Stack<LastProjectMemberDeletedEvent> lastProjectMemberDeletedEvents = new Stack<>();
+
+    public Optional<UnacceptedProjectMembershipCreatedEvent> getLatestUnacceptedProjectMembershipCreatedEvent() {
+        Optional<UnacceptedProjectMembershipCreatedEvent> event = Optional.empty();
+        if (!unacceptedProjectMembershipCreatedEvents.isEmpty()) {
+            event = Optional.of(unacceptedProjectMembershipCreatedEvents.pop());
+        }
+        return event;
+    }
+    public Optional<MembershipAcceptedEvent> getLatestMembershipAcceptedEvent() {
+        Optional<MembershipAcceptedEvent> event = Optional.empty();
+        if (!membershipAcceptedEvents.isEmpty()) {
+            event = Optional.of(membershipAcceptedEvents.pop());
+        }
+        return event;
+    }
+    public Optional<MembershipDeletedEvent> getLatestMembershipDeletedEvent() {
+        Optional<MembershipDeletedEvent> event = Optional.empty();
+        if (!membershipDeletedEvents.isEmpty()) {
+            event = Optional.of(membershipDeletedEvents.pop());
+        }
+        return event;
+    }
+    public Optional<LastProjectMemberDeletedEvent> getLatestLastProjectMembershipDeletedEvent() {
+        Optional<LastProjectMemberDeletedEvent> event = Optional.empty();
+        if (!lastProjectMemberDeletedEvents.isEmpty()) {
+            event = Optional.of(lastProjectMemberDeletedEvents.pop());
+        }
+        return event;
+    }
 
     public Optional<UserCreatedEvent> getLatestUserCreatedEvent() {
         Optional<UserCreatedEvent> event = Optional.empty();
@@ -74,6 +112,25 @@ public class DummyEventListener {
         projectCreatedEvents.clear();
         defaultProjectCreatedEvents.clear();
         projectDeletedEvents.clear();
+    }
+
+    @EventListener
+    public void handleUnacceptedProjectMembershipCreatedEvent(
+            UnacceptedProjectMembershipCreatedEvent unacceptedProjectMembershipCreatedEvent
+    ) {
+        unacceptedProjectMembershipCreatedEvents.push(unacceptedProjectMembershipCreatedEvent);
+    }
+    @EventListener
+    public void handleMembershipAcceptedEvent(MembershipAcceptedEvent membershipAcceptedEvent) {
+        membershipAcceptedEvents.push(membershipAcceptedEvent);
+    }
+    @EventListener
+    public void handleMembershipDeletedEvent(MembershipDeletedEvent membershipDeletedEvent) {
+        membershipDeletedEvents.push(membershipDeletedEvent);
+    }
+    @EventListener
+    public void handleLastProjectMemberDeletedEvents(LastProjectMemberDeletedEvent lastProjectMemberDeletedEvent) {
+        lastProjectMemberDeletedEvents.push(lastProjectMemberDeletedEvent);
     }
 
     @EventListener
