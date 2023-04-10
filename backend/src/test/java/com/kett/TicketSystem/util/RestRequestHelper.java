@@ -38,6 +38,15 @@ public class RestRequestHelper {
         String userPostResponse = userPostResult.getResponse().getContentAsString();
         return UUID.fromString(JsonPath.parse(userPostResponse).read("$.id"));
     }
+    public void deleteUser(String jwt, UUID userId) throws Exception {
+        MvcResult result1 =
+                mockMvc.perform(
+                                delete("/users/" + userId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+    }
 
     public String authenticateUser(String userEmail, String userPassword) throws Exception {
         AuthenticationPostDto authenticationPostDto4 = new AuthenticationPostDto(userEmail, userPassword);
