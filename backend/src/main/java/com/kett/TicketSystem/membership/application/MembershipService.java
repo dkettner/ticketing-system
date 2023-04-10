@@ -63,7 +63,13 @@ public class MembershipService {
             );
         }
 
-        eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(membership.getUserId(), membership.getProjectId()));
+        eventPublisher.publishEvent(
+                new UnacceptedProjectMembershipCreatedEvent(
+                        membership.getId(),
+                        membership.getUserId(),
+                        membership.getProjectId()
+                )
+        );
         return membershipRepository.save(membership);
     }
 
