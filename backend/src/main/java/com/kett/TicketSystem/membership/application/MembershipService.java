@@ -54,7 +54,6 @@ public class MembershipService {
         if (!consumedUserDataManager.exists(membership.getUserId())) {
             throw new NoUserFoundException("could not find user with id: " + membership.getUserId());
         }
-
         if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
             throw new MembershipAlreadyExistsException(
                     "Membership for userId: " + membership.getUserId() +
@@ -63,14 +62,25 @@ public class MembershipService {
             );
         }
 
-        eventPublisher.publishEvent(
-                new UnacceptedProjectMembershipCreatedEvent(
-                        membership.getId(),
-                        membership.getUserId(),
-                        membership.getProjectId()
-                )
-        );
-        return membershipRepository.save(membership);
+        Membership initializedMembership = membershipRepository.save(membership);
+        if (initializedMembership.getState().equals(State.OPEN)) {
+            eventPublisher.publishEvent(
+                    new UnacceptedProjectMembershipCreatedEvent(
+                            initializedMembership.getId(),
+                            initializedMembership.getUserId(),
+                            initializedMembership.getProjectId()
+                    )
+            );
+        } else {
+            eventPublisher.publishEvent(
+                    new MembershipAcceptedEvent(
+                            initializedMembership.getId(),
+                            initializedMembership.getProjectId(),
+                            initializedMembership.getUserId()
+                    )
+            );
+        }
+        return initializedMembership;
     }
 
 
@@ -196,13 +206,6 @@ public class MembershipService {
         );
         defaultMembership.setState(State.ACCEPTED);
         Membership initializedMembership = this.addMembership(defaultMembership);
-        eventPublisher.publishEvent(
-                new MembershipAcceptedEvent(
-                        initializedMembership.getId(),
-                        initializedMembership.getProjectId(),
-                        initializedMembership.getUserId()
-                )
-        );
     }
 
     @EventListener
@@ -216,13 +219,6 @@ public class MembershipService {
         );
         defaultMembership.setState(State.ACCEPTED);
         Membership initializedMembership = this.addMembership(defaultMembership);
-        eventPublisher.publishEvent(
-                new MembershipAcceptedEvent(
-                        initializedMembership.getId(),
-                        initializedMembership.getProjectId(),
-                        initializedMembership.getUserId()
-                )
-        );
     }
 
     @EventListener
