@@ -156,8 +156,6 @@ public class MembershipControllerTests {
         Optional<UnacceptedProjectMembershipCreatedEvent> event = dummyEventListener.getLatestUnacceptedProjectMembershipCreatedEvent();
         assertTrue(event.isPresent());
         Optional<UnacceptedProjectMembershipCreatedEvent> emptyEvent = dummyEventListener.getLatestUnacceptedProjectMembershipCreatedEvent();
-        System.out.println("InviteeId von emptyEvent: " + emptyEvent.get().getInviteeId());
-        System.out.println("projectId von emptyEvent: " + emptyEvent.get().getProjectId());
         assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
         UnacceptedProjectMembershipCreatedEvent unacceptedProjectMembershipCreatedEvent = event.get();
         assertEquals(membershipId, unacceptedProjectMembershipCreatedEvent.getMembershipId());
@@ -240,11 +238,6 @@ public class MembershipControllerTests {
 
     @Test
     public void consumeUserDeletedEventTest() throws Exception {
-
-        // TODO: find cause for race conditions
-        // dirty fix for slow machines
-        Thread.sleep(500);
-
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
