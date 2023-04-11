@@ -249,10 +249,18 @@ public class PhaseService {
     @EventListener
     @Async
     public void handleTicketPhaseUpdatedEvent(TicketPhaseUpdatedEvent ticketPhaseUpdatedEvent) {
-        // TODO: check if new phase exists and is related to old phase
-
         Phase oldPhase = this.getPhaseById(ticketPhaseUpdatedEvent.getOldPhaseId());
         Phase newPhase = this.getPhaseById(ticketPhaseUpdatedEvent.getNewPhaseId());
+
+        // TODO: publish event to initiate rollback ?
+        if (!oldPhase.getProjectId().equals(newPhase.getProjectId())) {
+            throw new UnrelatedPhaseException(
+                    "The update of ticket: " + ticketPhaseUpdatedEvent.getTicketId() + " caused a conflict: " +
+                    "the old phase (id: " + oldPhase.getId() + ", projectId: " + oldPhase.getProjectId() + ") " +
+                    "and new phase (id: " + newPhase.getId() + ", projectId: " + newPhase.getProjectId() + ") " +
+                    "are not related."
+            );
+        }
 
         oldPhase.decreaseTicketCount();
         newPhase.increaseTicketCount();
