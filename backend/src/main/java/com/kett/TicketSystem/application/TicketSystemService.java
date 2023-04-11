@@ -115,7 +115,7 @@ public class TicketSystemService {
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_USER'.concat(@membershipService.getUserIdByMembershipId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
     public void updateMembershipState(UUID id, MembershipPatchStateDto membershipPatchStateDto) {
         membershipService.updateMemberShipState(id, membershipPatchStateDto.getState());
     }
@@ -127,7 +127,7 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAnyAuthority(" +
             "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
-            "'ROLE_USER'.concat(@membershipService.getUserIdByMembershipId(#id)))")
+            "'ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
     public void deleteMembershipById(UUID id) {
         membershipService.deleteMembershipById(id);
     }
