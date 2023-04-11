@@ -4,6 +4,9 @@ import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEv
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
+import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
+import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
+import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -22,6 +25,10 @@ public class DummyEventListener {
     Stack<MembershipAcceptedEvent> membershipAcceptedEvents = new Stack<>();
     Stack<MembershipDeletedEvent> membershipDeletedEvents = new Stack<>();
     Stack<LastProjectMemberDeletedEvent> lastProjectMemberDeletedEvents = new Stack<>();
+
+    Stack<NewTicketAssignedToPhaseEvent> newTicketAssignedToPhaseEvents = new Stack<>();
+    Stack<PhaseCreatedEvent> phaseCreatedEvents = new Stack<>();
+    Stack<PhaseDeletedEvent> phaseDeletedEvents = new Stack<>();
 
     Stack<ProjectCreatedEvent> projectCreatedEvents = new Stack<>();
     Stack<DefaultProjectCreatedEvent> defaultProjectCreatedEvents = new Stack<>();
@@ -56,6 +63,28 @@ public class DummyEventListener {
         Optional<LastProjectMemberDeletedEvent> event = Optional.empty();
         if (!lastProjectMemberDeletedEvents.isEmpty()) {
             event = Optional.of(lastProjectMemberDeletedEvents.pop());
+        }
+        return event;
+    }
+
+    public Optional<NewTicketAssignedToPhaseEvent> getLatestNewTicketAssignedToPhaseEvent() {
+        Optional<NewTicketAssignedToPhaseEvent> event = Optional.empty();
+        if (!newTicketAssignedToPhaseEvents.isEmpty()) {
+            event = Optional.of(newTicketAssignedToPhaseEvents.pop());
+        }
+        return event;
+    }
+    public Optional<PhaseCreatedEvent> getLatestPhaseCreatedEvent() {
+        Optional<PhaseCreatedEvent> event = Optional.empty();
+        if (!phaseCreatedEvents.isEmpty()) {
+            event = Optional.of(phaseCreatedEvents.pop());
+        }
+        return event;
+    }
+    public Optional<PhaseDeletedEvent> getLatestPhaseDeletedEvent() {
+        Optional<PhaseDeletedEvent> event = Optional.empty();
+        if (!phaseDeletedEvents.isEmpty()) {
+            event = Optional.of(phaseDeletedEvents.pop());
         }
         return event;
     }
@@ -110,6 +139,10 @@ public class DummyEventListener {
         membershipDeletedEvents.clear();
         lastProjectMemberDeletedEvents.clear();
 
+        newTicketAssignedToPhaseEvents.clear();
+        phaseCreatedEvents.clear();
+        phaseDeletedEvents.clear();
+
         projectCreatedEvents.clear();
         defaultProjectCreatedEvents.clear();
         projectDeletedEvents.clear();
@@ -139,10 +172,22 @@ public class DummyEventListener {
     }
 
     @EventListener
+    public void handleNewTicketAssignedToPhaseEvent(NewTicketAssignedToPhaseEvent newTicketAssignedToPhaseEvent) {
+        newTicketAssignedToPhaseEvents.push(newTicketAssignedToPhaseEvent);
+    }
+    @EventListener
+    public void handlePhaseCreatedEvent(PhaseCreatedEvent phaseCreatedEvent) {
+        phaseCreatedEvents.push(phaseCreatedEvent);
+    }
+    @EventListener
+    public void handlePhaseDeletedEvent(PhaseDeletedEvent phaseDeletedEvent) {
+        phaseDeletedEvents.push(phaseDeletedEvent);
+    }
+
+    @EventListener
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
         projectCreatedEvents.push(projectCreatedEvent);
     }
-
     @EventListener
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
         defaultProjectCreatedEvents.push(defaultProjectCreatedEvent);
