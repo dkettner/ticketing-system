@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -134,6 +135,24 @@ public class PhaseControllerTests {
         projectRepository.deleteAll();
         userRepository.deleteAll();
     }
+    @Test
+    public void getPhaseByIdTest() throws Exception {
+        UUID phaseId = restMinion.postPhase(jwt, buildUpProjectId, phaseName0, null);
+        Phase phase = phaseService.getPhaseById(phaseId);
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/phases/" + phaseId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(phaseId.toString()))
+                        .andExpect(jsonPath("$.projectId").value(buildUpProjectId.toString()))
+                        .andExpect(jsonPath("$.name").value(phaseName0))
+                        .andExpect(jsonPath("$.previousPhaseId").isEmpty())
+                        .andExpect(jsonPath("$.nextPhaseId").exists())
+                        .andExpect(jsonPath("$.ticketCount").value(0))
+                        .andReturn();
+    }
 
     @Test
     public void postPhaseToNewProjectTest() throws Exception {
@@ -211,4 +230,6 @@ public class PhaseControllerTests {
         assertEquals(phasePostDto1.getPreviousPhaseId(), phase1.getPreviousPhase().getId());
         assertEquals(nextPhaseId, phase1.getNextPhase().getId());
     }
+
+
 }
