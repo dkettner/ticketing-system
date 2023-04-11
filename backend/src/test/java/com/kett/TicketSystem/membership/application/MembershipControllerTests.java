@@ -61,14 +61,16 @@ public class MembershipControllerTests {
     private String userEmail0;
     private String userPassword0;
     private String jwt0;
+    private UUID defaultProjectId0;
 
     private UUID userId1;
     private String userName1;
     private String userEmail1;
     private String userPassword1;
     private String jwt1;
+    private UUID defaultProjectId1;
 
-    private UUID projectId;
+    private UUID randomProjectId;
 
     @Autowired
     public MembershipControllerTests(
@@ -97,14 +99,22 @@ public class MembershipControllerTests {
         userPassword0 = "snapeShape88";
         userId0 = restMinion.postUser(userName0, userEmail0, userPassword0);
         jwt0 = restMinion.authenticateUser(userEmail0, userPassword0);
+        defaultProjectId0 = dummyEventListener
+                .getLatestDefaultProjectCreatedEvent()
+                .orElseThrow(() -> new RuntimeException("could not get defaultProjectId0"))
+                .getProjectId();
 
         userName1 = "Ronald Weasley";
         userEmail1 = "RonRonRonWeasley@hw.uk";
         userPassword1 = "lkasjdfoijwaefo8238298";
         userId1 = restMinion.postUser(userName1, userEmail1, userPassword1);
         jwt1 = restMinion.authenticateUser(userEmail1, userPassword1);
+        defaultProjectId1 = dummyEventListener
+                .getLatestDefaultProjectCreatedEvent()
+                .orElseThrow(() -> new RuntimeException("could not get defaultProjectId1"))
+                .getProjectId();
 
-        projectId = UUID.randomUUID();
+        randomProjectId = UUID.randomUUID();
 
         dummyEventListener.deleteAllEvents();
     }
@@ -116,17 +126,133 @@ public class MembershipControllerTests {
         userPassword0 = null;
         userId0 = null;
         jwt0 = null;
+        defaultProjectId0 = null;
 
         userName1 = null;
         userEmail1 = null;
         userPassword1 = null;
         userId1 = null;
         jwt1 = null;
+        defaultProjectId1 = null;
 
-        projectId = null;
+        randomProjectId = null;
 
         membershipRepository.deleteAll();
         userRepository.deleteAll();
+    }
+
+    @Test
+    public void getMembershipByIdTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/memberships/" + membershipId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt1)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(membershipId.toString()))
+                        .andExpect(jsonPath("$.projectId").value(projectId0.toString()))
+                        .andExpect(jsonPath("$.userId").value(userId1.toString()))
+                        .andExpect(jsonPath("$.role").value(Role.MEMBER.toString()))
+                        .andExpect(jsonPath("$.state").value(State.OPEN.toString()))
+                        .andReturn();
+    }
+
+    @Test
+    public void getMembershipByIdAsAdminTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/memberships/" + membershipId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(membershipId.toString()))
+                        .andExpect(jsonPath("$.projectId").value(projectId0.toString()))
+                        .andExpect(jsonPath("$.userId").value(userId1.toString()))
+                        .andExpect(jsonPath("$.role").value(Role.MEMBER.toString()))
+                        .andExpect(jsonPath("$.state").value(State.OPEN.toString()))
+                        .andReturn();
+    }
+
+    @Test
+    public void getMembershipsByUserIdAndEmailQueryTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        MvcResult getByUserIdResult =
+                mockMvc.perform(
+                                get("/memberships")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("user-id", userId0.toString())
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].id").exists())
+                        .andExpect(jsonPath("$[0].userId").value(userId0.toString()))
+                        .andExpect(jsonPath("$[0].projectId").value(defaultProjectId0.toString()))
+                        .andExpect(jsonPath("$[0].role").value(Role.ADMIN.toString()))
+                        .andExpect(jsonPath("$[0].state").value(State.ACCEPTED.toString()))
+                        .andExpect(jsonPath("$[1].id").exists())
+                        .andExpect(jsonPath("$[1].projectId").value(projectId0.toString()))
+                        .andExpect(jsonPath("$[1].userId").value(userId0.toString()))
+                        .andExpect(jsonPath("$[1].role").value(Role.ADMIN.toString()))
+                        .andExpect(jsonPath("$[1].state").value(State.ACCEPTED.toString()))
+                        .andReturn();
+        MvcResult getByEmailResult =
+                mockMvc.perform(
+                                get("/memberships")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("email", userEmail0)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        assertEquals(getByUserIdResult.getResponse().getContentAsString(), getByEmailResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void getMembershipsByProjectIdQueryTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/memberships")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("project-id", projectId0.toString())
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$[0].id").exists())
+                        .andExpect(jsonPath("$[0].userId").value(userId0.toString()))
+                        .andExpect(jsonPath("$[0].projectId").value(projectId0.toString()))
+                        .andExpect(jsonPath("$[0].role").value(Role.ADMIN.toString()))
+                        .andExpect(jsonPath("$[0].state").value(State.ACCEPTED.toString()))
+                        .andExpect(jsonPath("$[1].id").value(membershipId.toString()))
+                        .andExpect(jsonPath("$[1].projectId").value(projectId0.toString()))
+                        .andExpect(jsonPath("$[1].userId").value(userId1.toString()))
+                        .andExpect(jsonPath("$[1].role").value(Role.MEMBER.toString()))
+                        .andExpect(jsonPath("$[1].state").value(State.OPEN.toString()))
+                        .andReturn();
     }
 
     @Test
@@ -438,7 +564,7 @@ public class MembershipControllerTests {
 
     @Test
     public void consumeProjectCreatedEventTest() throws Exception {
-        eventPublisher.publishEvent(new ProjectCreatedEvent(projectId, userId0));
+        eventPublisher.publishEvent(new ProjectCreatedEvent(randomProjectId, userId0));
         Thread.sleep(100);
 
         // test MembershipAcceptedEvent
@@ -448,21 +574,21 @@ public class MembershipControllerTests {
         assertTrue(emptyEvent0.isEmpty()); // check if only one event was thrown
         MembershipAcceptedEvent membershipAcceptedEvent = event0.get();
         assertEquals(userId0, membershipAcceptedEvent.getUserId());
-        assertEquals(projectId, membershipAcceptedEvent.getProjectId());
+        assertEquals(randomProjectId, membershipAcceptedEvent.getProjectId());
 
         // test membership instance
         UUID membershipId = membershipAcceptedEvent.getMembershipId();
         Membership membership = membershipService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId0, membership.getUserId());
-        assertEquals(projectId, membership.getProjectId());
+        assertEquals(randomProjectId, membership.getProjectId());
         assertEquals(Role.ADMIN, membership.getRole());
         assertEquals(State.ACCEPTED, membership.getState());
     }
 
     @Test
     public void consumeDefaultProjectCreatedEventTest() throws Exception{
-        eventPublisher.publishEvent(new DefaultProjectCreatedEvent(projectId, userId0));
+        eventPublisher.publishEvent(new DefaultProjectCreatedEvent(randomProjectId, userId0));
         Thread.sleep(100);
 
         // test MembershipAcceptedEvent
@@ -472,21 +598,21 @@ public class MembershipControllerTests {
         assertTrue(emptyEvent0.isEmpty()); // check if only one event was thrown
         MembershipAcceptedEvent membershipAcceptedEvent = event0.get();
         assertEquals(userId0, membershipAcceptedEvent.getUserId());
-        assertEquals(projectId, membershipAcceptedEvent.getProjectId());
+        assertEquals(randomProjectId, membershipAcceptedEvent.getProjectId());
 
         // test membership instance
         UUID membershipId = membershipAcceptedEvent.getMembershipId();
         Membership membership = membershipService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId0, membership.getUserId());
-        assertEquals(projectId, membership.getProjectId());
+        assertEquals(randomProjectId, membership.getProjectId());
         assertEquals(Role.ADMIN, membership.getRole());
         assertEquals(State.ACCEPTED, membership.getState());
     }
 
     @Test
     public void consumeProjectDeletedEventTest() throws Exception {
-        eventPublisher.publishEvent(new ProjectCreatedEvent(projectId, userId0));
+        eventPublisher.publishEvent(new ProjectCreatedEvent(randomProjectId, userId0));
         Thread.sleep(100);
 
         UUID membershipId =
@@ -495,7 +621,7 @@ public class MembershipControllerTests {
                         .orElseThrow(() -> new ImpossibleException("could not find MembershipAcceptedEvent"))
                         .getMembershipId();
 
-        eventPublisher.publishEvent(new ProjectDeletedEvent(projectId));
+        eventPublisher.publishEvent(new ProjectDeletedEvent(randomProjectId));
         Thread.sleep(100);
 
         assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipById(membershipId));
