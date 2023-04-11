@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
+import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
+import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
@@ -36,8 +38,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -174,6 +175,204 @@ public class MembershipControllerTests {
     }
 
     @Test
+    public void putMembershipStateTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        MembershipPutStateDto membershipPutStateDto = new MembershipPutStateDto(State.ACCEPTED);
+        MvcResult putResult =
+                mockMvc.perform(
+                                put("/memberships/" + membershipId + "/state")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPutStateDto))
+                                        .cookie(new Cookie("jwt", jwt1)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test instance
+        Membership membership = membershipService.getMembershipById(membershipId);
+        assertEquals(membershipId, membership.getId());
+        assertEquals(userId1, membership.getUserId());
+        assertEquals(projectId0, membership.getProjectId());
+        assertEquals(Role.MEMBER, membership.getRole());
+        assertEquals(State.ACCEPTED, membership.getState());
+    }
+
+    @Test
+    public void putMembershipStateBackToOpenTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        // accept
+        MembershipPutStateDto membershipPutStateDto0 = new MembershipPutStateDto(State.ACCEPTED);
+        MvcResult putResult0 =
+                mockMvc.perform(
+                                put("/memberships/" + membershipId + "/state")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPutStateDto0))
+                                        .cookie(new Cookie("jwt", jwt1)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // try to go back to open
+        MembershipPutStateDto membershipPutStateDto1 = new MembershipPutStateDto(State.OPEN);
+        MvcResult putResult1 =
+                mockMvc.perform(
+                                put("/memberships/" + membershipId + "/state")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPutStateDto1))
+                                        .cookie(new Cookie("jwt", jwt1)))
+                        .andExpect(status().isConflict())
+                        .andReturn();
+
+        // test instance
+        Membership membership = membershipService.getMembershipById(membershipId);
+        assertEquals(membershipId, membership.getId());
+        assertEquals(userId1, membership.getUserId());
+        assertEquals(projectId0, membership.getProjectId());
+        assertEquals(Role.MEMBER, membership.getRole());
+        assertEquals(State.ACCEPTED, membership.getState());
+    }
+
+    @Test
+    public void putMembershipStateBackToOpenAsAdminTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        // accept
+        MembershipPutStateDto membershipPutStateDto0 = new MembershipPutStateDto(State.ACCEPTED);
+        MvcResult putResult0 =
+                mockMvc.perform(
+                                put("/memberships/" + membershipId + "/state")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPutStateDto0))
+                                        .cookie(new Cookie("jwt", jwt1)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // try to go back to open
+        MembershipPutStateDto membershipPutStateDto1 = new MembershipPutStateDto(State.OPEN);
+        MvcResult putResult1 =
+                mockMvc.perform(
+                                put("/memberships/" + membershipId + "/state")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPutStateDto1))
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
+
+        // test instance
+        Membership membership = membershipService.getMembershipById(membershipId);
+        assertEquals(membershipId, membership.getId());
+        assertEquals(userId1, membership.getUserId());
+        assertEquals(projectId0, membership.getProjectId());
+        assertEquals(Role.MEMBER, membership.getRole());
+        assertEquals(State.ACCEPTED, membership.getState());
+    }
+
+    @Test
+    public void putMembershipStateAsAdminTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        MembershipPutStateDto membershipPutStateDto = new MembershipPutStateDto(State.ACCEPTED);
+        MvcResult putResult =
+                mockMvc.perform(
+                                put("/memberships/" + membershipId + "/state")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPutStateDto))
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
+
+        // test instance
+        Membership membership = membershipService.getMembershipById(membershipId);
+        assertEquals(membershipId, membership.getId());
+        assertEquals(userId1, membership.getUserId());
+        assertEquals(projectId0, membership.getProjectId());
+        assertEquals(Role.MEMBER, membership.getRole());
+        assertEquals(State.OPEN, membership.getState());
+    }
+
+    @Test
+    public void putMembershipRoleAsAdminTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        MembershipPutRoleDto membershipPutStateDto = new MembershipPutRoleDto(Role.ADMIN);
+        MvcResult putResult =
+                mockMvc.perform(
+                                put("/memberships/" + membershipId + "/role")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPutStateDto))
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test instance
+        Membership membership = membershipService.getMembershipById(membershipId);
+        assertEquals(membershipId, membership.getId());
+        assertEquals(userId1, membership.getUserId());
+        assertEquals(projectId0, membership.getProjectId());
+        assertEquals(Role.ADMIN, membership.getRole());
+        assertEquals(State.OPEN, membership.getState());
+    }
+
+    @Test
+    public void putMembershipRoleTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        MembershipPutRoleDto membershipPutStateDto = new MembershipPutRoleDto(Role.ADMIN);
+        MvcResult putResult =
+                mockMvc.perform(
+                                put("/memberships/" + membershipId + "/role")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPutStateDto))
+                                        .cookie(new Cookie("jwt", jwt1)))
+                        .andExpect(status().isForbidden())
+                        .andReturn();
+
+        // test instance
+        Membership membership = membershipService.getMembershipById(membershipId);
+        assertEquals(membershipId, membership.getId());
+        assertEquals(userId1, membership.getUserId());
+        assertEquals(projectId0, membership.getProjectId());
+        assertEquals(Role.MEMBER, membership.getRole());
+        assertEquals(State.OPEN, membership.getState());
+    }
+
+    @Test
     public void deleteOtherMembershipAsAdminTest() throws Exception {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
@@ -213,7 +412,7 @@ public class MembershipControllerTests {
         Thread.sleep(100);
 
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(2000);
+        Thread.sleep(100);
 
         MvcResult deleteResult =
                 mockMvc.perform(
