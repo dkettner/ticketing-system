@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.Cookie;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -151,6 +152,35 @@ public class PhaseControllerTests {
                         .andExpect(jsonPath("$.previousPhaseId").isEmpty())
                         .andExpect(jsonPath("$.nextPhaseId").exists())
                         .andExpect(jsonPath("$.ticketCount").value(0))
+                        .andReturn();
+    }
+
+    @Test
+    public void getPhasesByQueryTest() throws Exception {
+        UUID phaseId = restMinion.postPhase(jwt, buildUpProjectId, phaseName0, null);
+        List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
+
+        // defaultPhase + new phase = 2
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/phases")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("project-id", buildUpProjectId.toString())
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$").isArray())
+                        .andExpect(jsonPath("$[0].id").value(phases.get(0).getId().toString()))
+                        .andExpect(jsonPath("$[0].projectId").value(phases.get(0).getProjectId().toString()))
+                        .andExpect(jsonPath("$[0].name").value(phases.get(0).getName()))
+                        .andExpect(jsonPath("$[0].previousPhaseId").value(phases.get(0).getPreviousPhase().getId().toString()))
+                        .andExpect(jsonPath("$[0].nextPhaseId").isEmpty())
+                        .andExpect(jsonPath("$[0].ticketCount").value(phases.get(0).getTicketCount()))
+                        .andExpect(jsonPath("$[1].id").value(phases.get(1).getId().toString()))
+                        .andExpect(jsonPath("$[1].projectId").value(phases.get(1).getProjectId().toString()))
+                        .andExpect(jsonPath("$[1].name").value(phases.get(1).getName()))
+                        .andExpect(jsonPath("$[1].previousPhaseId").isEmpty())
+                        .andExpect(jsonPath("$[1].nextPhaseId").value(phases.get(1).getNextPhase().getId().toString()))
+                        .andExpect(jsonPath("$[1].ticketCount").value(phases.get(1).getTicketCount()))
                         .andReturn();
     }
 
