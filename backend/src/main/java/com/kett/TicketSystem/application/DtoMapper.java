@@ -52,6 +52,7 @@ public class DtoMapper {
                 Phase nextPhase = phase.getNextPhase();
                 return (nextPhase == null) ? null : nextPhase.getId();
             }, PhaseResponseDto::setNextPhaseId);
+            mapper.map(Phase::getTicketCount, PhaseResponseDto::setTicketCount);
         });
         modelMapper.typeMap(Project.class, ProjectResponseDto.class).addMappings(mapper -> {
             mapper.map(Project::getId, ProjectResponseDto::setId);

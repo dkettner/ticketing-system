@@ -17,4 +17,5 @@ public class PhaseResponseDto {
     private String name;
     private UUID previousPhaseId;
     private UUID nextPhaseId;
+    private Integer ticketCount;
 }
