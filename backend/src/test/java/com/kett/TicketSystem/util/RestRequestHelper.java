@@ -6,6 +6,7 @@ import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
+import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPatchDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
@@ -28,6 +29,20 @@ public class RestRequestHelper {
     public RestRequestHelper(MockMvc mockMvc, ObjectMapper objectMapper) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
+    }
+
+    public UUID postPhase(String jwt, UUID projectId, String phaseName, UUID previousPhaseId) throws Exception {
+        PhasePostDto phasePostDto0 = new PhasePostDto(projectId, phaseName, previousPhaseId);
+        MvcResult postResult0 =
+                mockMvc.perform(
+                                post("/phases")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(phasePostDto0))
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isCreated())
+                        .andReturn();
+        String postResponse0 = postResult0.getResponse().getContentAsString();
+        return UUID.fromString(JsonPath.parse(postResponse0).read("$.id"));
     }
 
     public UUID postMembership(String jwt, UUID projectId, UUID userId, Role role) throws Exception{
