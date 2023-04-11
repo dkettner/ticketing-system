@@ -3,6 +3,9 @@ package com.kett.TicketSystem.util;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
+import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
+import com.kett.TicketSystem.membership.domain.Role;
+import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.project.application.dto.ProjectPatchDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
@@ -25,6 +28,25 @@ public class RestRequestHelper {
     public RestRequestHelper(MockMvc mockMvc, ObjectMapper objectMapper) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
+    }
+
+    public UUID postMembership(String jwt, UUID projectId, UUID userId, Role role) throws Exception{
+        MembershipPostDto membershipPostDto = new MembershipPostDto(projectId, userId, role);
+        MvcResult postResult =
+                mockMvc.perform(
+                                post("/memberships")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(membershipPostDto))
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isCreated())
+                        .andExpect(jsonPath("$.id").exists())
+                        .andExpect(jsonPath("$.projectId").value(membershipPostDto.getProjectId().toString()))
+                        .andExpect(jsonPath("$.userId").value(membershipPostDto.getUserId().toString()))
+                        .andExpect(jsonPath("$.role").value(membershipPostDto.getRole().toString()))
+                        .andExpect(jsonPath("$.state").value(State.OPEN.toString()))
+                        .andReturn();
+        String postResponse = postResult.getResponse().getContentAsString();
+        return UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
     }
 
     public UUID postUser(String userName, String userEmail, String userPassword) throws Exception {
