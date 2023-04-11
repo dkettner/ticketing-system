@@ -8,6 +8,7 @@ import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
+import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
@@ -35,6 +36,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -172,7 +174,71 @@ public class MembershipControllerTests {
     }
 
     @Test
-    public void consumeProjectCreatedEventTest() throws Exception{
+    public void deleteOtherMembershipAsAdminTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(100);
+
+        MvcResult deleteResult =
+                mockMvc.perform(
+                                delete("/memberships/" + membershipId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test event
+        Optional<MembershipDeletedEvent> event = dummyEventListener.getLatestMembershipDeletedEvent();
+        assertTrue(event.isPresent());
+        Optional<MembershipDeletedEvent> emptyEvent = dummyEventListener.getLatestMembershipDeletedEvent();
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
+        MembershipDeletedEvent membershipDeletedEvent = event.get();
+        assertEquals(membershipId, membershipDeletedEvent.getMembershipId());
+        assertEquals(projectId0, membershipDeletedEvent.getProjectId());
+        assertEquals(userId1, membershipDeletedEvent.getUserId());
+
+        // test instance
+        assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipById(membershipId));
+    }
+
+    @Test
+    public void deleteOwnMembershipAsMemberTest() throws Exception {
+        String projectName0 = "Project 0";
+        String projectDescription0 = "Description 0";
+        UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
+        Thread.sleep(100);
+
+        UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
+        Thread.sleep(2000);
+
+        MvcResult deleteResult =
+                mockMvc.perform(
+                                delete("/memberships/" + membershipId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt1)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test event
+        Optional<MembershipDeletedEvent> event = dummyEventListener.getLatestMembershipDeletedEvent();
+        assertTrue(event.isPresent());
+        Optional<MembershipDeletedEvent> emptyEvent = dummyEventListener.getLatestMembershipDeletedEvent();
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
+        MembershipDeletedEvent membershipDeletedEvent = event.get();
+        assertEquals(membershipId, membershipDeletedEvent.getMembershipId());
+        assertEquals(projectId0, membershipDeletedEvent.getProjectId());
+        assertEquals(userId1, membershipDeletedEvent.getUserId());
+
+        // test instance
+        assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipById(membershipId));
+    }
+
+    @Test
+    public void consumeProjectCreatedEventTest() throws Exception {
         eventPublisher.publishEvent(new ProjectCreatedEvent(projectId, userId0));
         Thread.sleep(100);
 
