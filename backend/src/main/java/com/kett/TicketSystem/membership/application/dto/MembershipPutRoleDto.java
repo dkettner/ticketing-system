@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.membership.application.dto;
 
-import com.kett.TicketSystem.membership.domain.State;
+import com.kett.TicketSystem.membership.domain.Role;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,6 +10,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class MembershipPatchStateDto {
-    private State state;
+public class MembershipPutRoleDto {
+    private Role role;
 }

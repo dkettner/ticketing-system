@@ -4,8 +4,8 @@ import com.kett.TicketSystem.authentication.AuthenticationService;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.MembershipService;
-import com.kett.TicketSystem.membership.application.dto.MembershipPatchRoleDto;
-import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
+import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
+import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
@@ -116,13 +116,13 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
-    public void updateMembershipState(UUID id, MembershipPatchStateDto membershipPatchStateDto) {
-        membershipService.updateMemberShipState(id, membershipPatchStateDto.getState());
+    public void updateMembershipState(UUID id, MembershipPutStateDto membershipPutStateDto) {
+        membershipService.updateMemberShipState(id, membershipPutStateDto.getState());
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id)))")
-    public void updateMembershipRole(UUID id, MembershipPatchRoleDto membershipPatchRoleDto) {
-        membershipService.updateMembershipRole(id, membershipPatchRoleDto.getRole());
+    public void updateMembershipRole(UUID id, MembershipPutRoleDto membershipPutRoleDto) {
+        membershipService.updateMembershipRole(id, membershipPutRoleDto.getRole());
     }
 
     @PreAuthorize("hasAnyAuthority(" +

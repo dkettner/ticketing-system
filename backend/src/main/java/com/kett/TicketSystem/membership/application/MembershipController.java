@@ -4,8 +4,8 @@ import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.common.exceptions.NoParametersException;
 import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.membership.application.dto.MembershipPatchRoleDto;
-import com.kett.TicketSystem.membership.application.dto.MembershipPatchStateDto;
+import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
+import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,14 +80,14 @@ public class MembershipController {
     }
 
     @PutMapping("/{id}/state")
-    public ResponseEntity<?> updateMembershipState(@PathVariable UUID id, @RequestBody MembershipPatchStateDto membershipPatchStateDto) {
-        ticketSystemService.updateMembershipState(id, membershipPatchStateDto);
+    public ResponseEntity<?> updateMembershipState(@PathVariable UUID id, @RequestBody MembershipPutStateDto membershipPutStateDto) {
+        ticketSystemService.updateMembershipState(id, membershipPutStateDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/{id}/role")
-    public ResponseEntity<?> updateMembershipRole(@PathVariable UUID id, @RequestBody MembershipPatchRoleDto membershipPatchRoleDto) {
-        ticketSystemService.updateMembershipRole(id, membershipPatchRoleDto);
+    public ResponseEntity<?> updateMembershipRole(@PathVariable UUID id, @RequestBody MembershipPutRoleDto membershipPutRoleDto) {
+        ticketSystemService.updateMembershipRole(id, membershipPutRoleDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
