@@ -44,6 +44,17 @@ public class RestRequestHelper {
         String postResponse0 = postResult0.getResponse().getContentAsString();
         return UUID.fromString(JsonPath.parse(postResponse0).read("$.id"));
     }
+    public String getPhasesByProjectIdAsJson(String jwt, UUID projectId) throws Exception {
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/phases")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("project-id", projectId.toString())
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isOk())
+                        .andReturn();
+        return getResult.getResponse().getContentAsString();
+    }
 
     public UUID postMembership(String jwt, UUID projectId, UUID userId, Role role) throws Exception{
         MembershipPostDto membershipPostDto = new MembershipPostDto(projectId, userId, role);
