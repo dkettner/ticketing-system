@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.util;
 
 import com.kett.TicketSystem.common.domainprimitives.DomainEvent;
+import lombok.Getter;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Service;
 public class EventCatcher {
     private DomainEvent event = null;
     private Class<? extends DomainEvent> typeOfClass = null;
+
+    @Getter
     private Boolean isListening = false;
 
     public void catchEventOfType(Class<? extends DomainEvent> eventClass) {
@@ -16,7 +19,7 @@ public class EventCatcher {
     }
 
     public Boolean isOfSpecifiedType(Object newEvent) {
-        return isListening && typeOfClass.isInstance(newEvent);
+        return typeOfClass.isInstance(newEvent);
     }
 
     public Boolean hasCaughtEvent() {
@@ -29,7 +32,7 @@ public class EventCatcher {
         return tempEvent;
     }
 
-    @EventListener(condition = "@eventCatcher.isOfSpecifiedType(#newEvent)")
+    @EventListener(condition = "@eventCatcher.isListening && @eventCatcher.isOfSpecifiedType(#newEvent)")
     public void onApplicationEvent(Object newEvent) {
         isListening = false;
         event = (DomainEvent) newEvent;
