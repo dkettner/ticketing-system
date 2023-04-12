@@ -5,6 +5,8 @@ import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
+import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
+import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.user.repository.UserRepository;
@@ -29,8 +31,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -136,6 +137,7 @@ public class PhaseControllerTests {
         projectRepository.deleteAll();
         userRepository.deleteAll();
     }
+
     @Test
     public void getPhaseByIdTest() throws Exception {
         UUID phaseId = restMinion.postPhase(jwt, buildUpProjectId, phaseName0, null);
@@ -261,5 +263,69 @@ public class PhaseControllerTests {
         assertEquals(nextPhaseId, phase1.getNextPhase().getId());
     }
 
+    @Test
+    public void deletePhaseTest() throws Exception {
+        restMinion.postPhase(jwt, buildUpProjectId, phaseName1, null);
+        restMinion.postPhase(jwt, buildUpProjectId, phaseName0, null);
 
+        // test initial state
+        List<Phase> initialPhases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        assertEquals(3, initialPhases.size());
+
+        assertEquals("BACKLOG", initialPhases.get(0).getName());
+        UUID backlogId = initialPhases.get(0).getId();
+        assertFalse(initialPhases.get(0).isFirst());
+        assertTrue(initialPhases.get(0).isLast());
+        assertEquals(initialPhases.get(1).getId(), initialPhases.get(0).getPreviousPhase().getId());
+        assertNull(initialPhases.get(0).getNextPhase());
+
+        assertEquals(phaseName1, initialPhases.get(1).getName());
+        UUID phaseId1 = initialPhases.get(1).getId();
+        assertFalse(initialPhases.get(1).isFirst());
+        assertFalse(initialPhases.get(1).isLast());
+        assertEquals(initialPhases.get(2).getId(), initialPhases.get(1).getPreviousPhase().getId());
+        assertEquals(initialPhases.get(0).getId(), initialPhases.get(1).getNextPhase().getId());
+
+        assertEquals(phaseName0, initialPhases.get(2).getName());
+        UUID phaseId0 = initialPhases.get(2).getId();
+        assertTrue(initialPhases.get(2).isFirst());
+        assertFalse(initialPhases.get(2).isLast());
+        assertNull(initialPhases.get(2).getPreviousPhase());
+        assertEquals(initialPhases.get(1).getId(), initialPhases.get(2).getNextPhase().getId());
+
+        // delete middle -> phaseId1
+        MvcResult postResult0 =
+                mockMvc.perform(
+                                delete("/phases/" + phaseId1)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test event
+        Optional<PhaseDeletedEvent> event = dummyEventListener.getLatestPhaseDeletedEvent();
+        assertTrue(event.isPresent());
+        Optional<PhaseDeletedEvent> emptyEvent = dummyEventListener.getLatestPhaseDeletedEvent();
+        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
+        PhaseDeletedEvent phaseDeletedEvent = event.get();
+        assertEquals(phaseId1, phaseDeletedEvent.getPhaseId());
+        assertEquals(buildUpProjectId, phaseDeletedEvent.getProjectId());
+
+        // test if phase was actually deleted
+        assertThrows(NoPhaseFoundException.class, () -> phaseService.getPhaseById(phaseId1));
+
+        // test other phases after delete
+        List<Phase> phasesAfterFirstDelete = phaseService.getPhasesByProjectId(buildUpProjectId);
+        assertEquals(2, phasesAfterFirstDelete.size());
+        assertEquals(backlogId, phasesAfterFirstDelete.get(0).getId());
+        assertTrue(phasesAfterFirstDelete.get(0).isLast());
+        assertEquals(phasesAfterFirstDelete.get(0).getPreviousPhase().getId(), phasesAfterFirstDelete.get(1).getId());
+        assertNull(phasesAfterFirstDelete.get(0).getNextPhase());
+        assertEquals(phaseId0, phasesAfterFirstDelete.get(1).getId());
+        assertTrue(phasesAfterFirstDelete.get(1).isFirst());
+        assertEquals(phasesAfterFirstDelete.get(1).getNextPhase().getId(), phasesAfterFirstDelete.get(0).getId());
+        assertNull(phasesAfterFirstDelete.get(1).getPreviousPhase());
+
+        // TODO: test next two deletes
+    }
 }
