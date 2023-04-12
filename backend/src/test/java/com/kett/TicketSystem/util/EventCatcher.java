@@ -10,6 +10,15 @@ public class EventCatcher {
     private Class<? extends DomainEvent> typeOfClass = null;
     private Boolean isListening = false;
 
+    public void catchEventOfType(Class<? extends DomainEvent> eventClass) {
+        typeOfClass = eventClass;
+        isListening = true;
+    }
+
+    public Boolean isOfSpecifiedType(Object newEvent) {
+        return isListening && typeOfClass.isInstance(newEvent);
+    }
+
     public Boolean hasCaughtEvent() {
         return event != null;
     }
@@ -18,15 +27,6 @@ public class EventCatcher {
         DomainEvent tempEvent = event;
         event = null;
         return tempEvent;
-    }
-
-    public Boolean isOfSpecifiedType(Object newEvent) {
-        return isListening && typeOfClass.isInstance(newEvent);
-    }
-
-    public void catchEventOfType(Class<? extends DomainEvent> eventClass) {
-        typeOfClass = eventClass;
-        isListening = true;
     }
 
     @EventListener(condition = "@eventCatcher.isOfSpecifiedType(#newEvent)")
