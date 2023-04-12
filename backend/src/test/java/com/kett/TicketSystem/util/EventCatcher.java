@@ -33,8 +33,8 @@ public class EventCatcher {
     }
 
     @EventListener(condition = "@eventCatcher.isListening && @eventCatcher.isOfSpecifiedType(#newEvent)")
-    public void onApplicationEvent(Object newEvent) {
+    public void onApplicationEvent(DomainEvent newEvent) {
         isListening = false;
-        event = (DomainEvent) newEvent;
+        event = newEvent;
     }
 }
