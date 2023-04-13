@@ -12,7 +12,7 @@ import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
-import com.kett.TicketSystem.util.DummyEventListener;
+import com.kett.TicketSystem.util.EventCatcher;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -26,9 +26,9 @@ import org.springframework.test.web.servlet.MvcResult;
 
 import javax.servlet.http.Cookie;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,7 +41,7 @@ public class UserControllerTests {
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
     private final UserService userService;
-    private final DummyEventListener dummyEventListener;
+    private final EventCatcher eventCatcher;
 
     private String name0;
     private String email0;
@@ -72,13 +72,13 @@ public class UserControllerTests {
             ObjectMapper objectMapper,
             UserRepository userRepository,
             UserService userService,
-            DummyEventListener dummyEventListener
+            EventCatcher eventCatcher
     ) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
         this.userService = userService;
-        this.dummyEventListener = dummyEventListener;
+        this.eventCatcher = eventCatcher;
     }
 
     @BeforeEach
@@ -128,8 +128,6 @@ public class UserControllerTests {
                         .andExpect(status().isOk())
                         .andReturn();
         jwt4 = Objects.requireNonNull(postAuthenticationResult4.getResponse().getCookie("jwt")).getValue();
-
-        dummyEventListener.deleteAllEvents(); // in buildUp to erase events of buildUp
     }
 
     @AfterEach
@@ -163,6 +161,7 @@ public class UserControllerTests {
     public void postValidUserTests() throws Exception {
 
         // validUser0
+        eventCatcher.catchEventOfType(UserCreatedEvent.class);
         UserPostDto validUser0PostDto = new UserPostDto(name0, email0, password0);
         MvcResult result0 =
                 mockMvc.perform(
@@ -174,6 +173,8 @@ public class UserControllerTests {
                         .andExpect(jsonPath("$.name").value(validUser0PostDto.getName()))
                         .andExpect(jsonPath("$.email").value(validUser0PostDto.getEmail()))
                         .andReturn();
+
+        // test instance
         String response0 = result0.getResponse().getContentAsString();
         String tempId0 = JsonPath.parse(response0).read("$.id");
         User user0 = userService.getUserById(UUID.fromString(tempId0));
@@ -181,18 +182,14 @@ public class UserControllerTests {
         assertEquals(user0.getEmail(), EmailAddress.fromString(validUser0PostDto.getEmail()));
 
         // test UserCreatedEvent
-        Optional<UserCreatedEvent> event0 = dummyEventListener.getLatestUserCreatedEvent();
-        assertTrue(event0.isPresent());
-        Optional<UserCreatedEvent> emptyEvent0 = dummyEventListener.getLatestUserCreatedEvent();
-        assertTrue(emptyEvent0.isEmpty()); // check if only one event was thrown
-
-        UserCreatedEvent userCreatedEvent = event0.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        UserCreatedEvent userCreatedEvent = (UserCreatedEvent) eventCatcher.getEvent();
         assertEquals(user0.getId(), userCreatedEvent.getUserId());
         assertEquals(name0, userCreatedEvent.getName());
         assertEquals(email0, userCreatedEvent.getEmailAddress().toString());
 
-
         // validUser1
+        eventCatcher.catchEventOfType(UserCreatedEvent.class);
         UserPostDto validUser1PostDto = new UserPostDto(name1, email1, password1);
         MvcResult result1 =
                 mockMvc.perform(
@@ -204,6 +201,8 @@ public class UserControllerTests {
                         .andExpect(jsonPath("$.name").value(validUser1PostDto.getName()))
                         .andExpect(jsonPath("$.email").value(validUser1PostDto.getEmail()))
                         .andReturn();
+
+        // test instance
         String response1 = result1.getResponse().getContentAsString();
         String tempId1 = JsonPath.parse(response1).read("$.id");
         User user1 = userService.getUserById(UUID.fromString(tempId1));
@@ -211,12 +210,8 @@ public class UserControllerTests {
         assertEquals(user1.getEmail(), EmailAddress.fromString(validUser1PostDto.getEmail()));
 
         // test UserCreatedEvent
-        Optional<UserCreatedEvent> event1 = dummyEventListener.getLatestUserCreatedEvent();
-        assertTrue(event1.isPresent());
-        Optional<UserCreatedEvent> emptyEvent1 = dummyEventListener.getLatestUserCreatedEvent();
-        assertTrue(emptyEvent1.isEmpty()); // check if only one event was thrown
-
-        UserCreatedEvent userCreatedEvent1 = event1.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        UserCreatedEvent userCreatedEvent1 = (UserCreatedEvent) eventCatcher.getEvent();
         assertEquals(user1.getId(), userCreatedEvent1.getUserId());
         assertEquals(name1, userCreatedEvent1.getName());
         assertEquals(email1, userCreatedEvent1.getEmailAddress().toString());
@@ -367,6 +362,7 @@ public class UserControllerTests {
 
     @Test
     public void patchUserNameTest() throws Exception {
+        eventCatcher.catchEventOfType(UserPatchedEvent.class);
         UserPatchDto userPatchDto = new UserPatchDto("Donald Trump", null);
         MvcResult result =
                 mockMvc.perform(
@@ -377,17 +373,14 @@ public class UserControllerTests {
                         .andExpect(status().isNoContent())
                         .andReturn();
 
+        // test instance
         User user4 = userService.getUserById(UUID.fromString(id4));
         assertEquals(user4.getName(), userPatchDto.getName());
         assertEquals(user4.getEmail().toString(), email4);
 
         // test UserPatchedEvent
-        Optional<UserPatchedEvent> event = dummyEventListener.getLatestUserPatchedEvent();
-        assertTrue(event.isPresent());
-        Optional<UserPatchedEvent> emptyEvent = dummyEventListener.getLatestUserPatchedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-
-        UserPatchedEvent userPatchedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        UserPatchedEvent userPatchedEvent =(UserPatchedEvent) eventCatcher.getEvent();
         assertEquals(user4.getId(), userPatchedEvent.getUserId());
         assertEquals(userPatchDto.getName(), userPatchedEvent.getName());
         assertEquals(user4.getEmail().toString(), email4);
@@ -395,6 +388,7 @@ public class UserControllerTests {
 
     @Test
     public void patchUserEmailTest() throws Exception {
+        eventCatcher.catchEventOfType(UserPatchedEvent.class);
         UserPatchDto userPatchDto = new UserPatchDto(null, "agent.orange@truth.net");
         MvcResult result =
                 mockMvc.perform(
@@ -405,17 +399,14 @@ public class UserControllerTests {
                         .andExpect(status().isNoContent())
                         .andReturn();
 
+        // test instance
         User user4 = userService.getUserById(UUID.fromString(id4));
         assertEquals(user4.getName(), name4);
         assertEquals(user4.getEmail().toString(), userPatchDto.getEmail());
 
         // test UserPatchedEvent
-        Optional<UserPatchedEvent> event = dummyEventListener.getLatestUserPatchedEvent();
-        assertTrue(event.isPresent());
-        Optional<UserPatchedEvent> emptyEvent = dummyEventListener.getLatestUserPatchedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-
-        UserPatchedEvent userPatchedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        UserPatchedEvent userPatchedEvent = (UserPatchedEvent) eventCatcher.getEvent();
         assertEquals(user4.getId(), userPatchedEvent.getUserId());
         assertEquals(user4.getName(), name4);
         assertEquals(user4.getEmail().toString(), userPatchDto.getEmail());
@@ -423,6 +414,7 @@ public class UserControllerTests {
 
     @Test
     public void patchUserNameAndEmailTest() throws Exception {
+        eventCatcher.catchEventOfType(UserPatchedEvent.class);
         UserPatchDto userPatchDto = new UserPatchDto("Donald Trump", "agent.orange@truth.net");
         MvcResult result =
                 mockMvc.perform(
@@ -433,17 +425,14 @@ public class UserControllerTests {
                         .andExpect(status().isNoContent())
                         .andReturn();
 
+        // test instance
         User user4 = userService.getUserById(UUID.fromString(id4));
         assertEquals(user4.getName(), userPatchDto.getName());
         assertEquals(user4.getEmail(), EmailAddress.fromString(userPatchDto.getEmail()));
 
         // test UserPatchedEvent
-        Optional<UserPatchedEvent> event = dummyEventListener.getLatestUserPatchedEvent();
-        assertTrue(event.isPresent());
-        Optional<UserPatchedEvent> emptyEvent = dummyEventListener.getLatestUserPatchedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-
-        UserPatchedEvent userPatchedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        UserPatchedEvent userPatchedEvent = (UserPatchedEvent) eventCatcher.getEvent();
         assertEquals(user4.getId(), userPatchedEvent.getUserId());
         assertEquals(userPatchDto.getName(), userPatchedEvent.getName());
         assertEquals(userPatchDto.getEmail(), userPatchedEvent.getEmailAddress().toString());
@@ -524,6 +513,7 @@ public class UserControllerTests {
     @Test
     public void deleteUserTest() throws Exception {
         // validUser1
+        eventCatcher.catchEventOfType(UserDeletedEvent.class);
         MvcResult result1 =
                 mockMvc.perform(
                                 delete("/users/" + id4)
@@ -532,26 +522,19 @@ public class UserControllerTests {
                         .andExpect(status().isNoContent())
                         .andReturn();
 
-        try {
-            userService.getUserById(UUID.fromString(id4));
-            fail("User found but should have been deleted");
-        } catch (NoUserFoundException exception) {
-            // test passed
-        }
+        // test instance
+        assertThrows(NoUserFoundException.class, () -> userService.getUserById(UUID.fromString(id4)));
 
         // test UserDeletedEvent
-        Optional<UserDeletedEvent> event = dummyEventListener.getLatestUserDeletedEvent();
-        assertTrue(event.isPresent());
-        Optional<UserDeletedEvent> emptyEvent = dummyEventListener.getLatestUserDeletedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-
-        UserDeletedEvent userDeletedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        UserDeletedEvent userDeletedEvent = (UserDeletedEvent) eventCatcher.getEvent();
         assertEquals(userDeletedEvent.getUserId(), UUID.fromString(id4));
     }
 
     @Test
     public void deleteUserUnauthorizedTest() throws Exception {
         // validUser1
+        eventCatcher.catchEventOfType(UserDeletedEvent.class);
         MvcResult result1 =
                 mockMvc.perform(
                                 delete("/users/" + id4)
@@ -559,20 +542,22 @@ public class UserControllerTests {
                         .andExpect(status().isUnauthorized())
                         .andReturn();
 
-        try {
-            userService.getUserById(UUID.fromString(id4));
-        } catch (NoUserFoundException exception) {
-            fail("No User found but it should not have been deleted");
-        }
+        // test instance
+        User user = userService.getUserById(UUID.fromString(id4));
 
         // test if UserDeletedEvent was thrown
-        Optional<UserDeletedEvent> emptyEvent = dummyEventListener.getLatestUserDeletedEvent();
-        assertTrue(emptyEvent.isEmpty());
+        try {
+            await().until(eventCatcher::hasCaughtEvent);
+            fail();
+        } catch (Exception e) {
+            // test passed
+        }
     }
 
     @Test
     public void deleteNonExistingUserTest() throws Exception {
         // validUser1
+        eventCatcher.catchEventOfType(UserDeletedEvent.class);
         MvcResult result1 =
                 mockMvc.perform(
                                 delete("/users/" + UUID.randomUUID())
@@ -582,8 +567,12 @@ public class UserControllerTests {
                         .andReturn();
 
         // test if UserDeletedEvent was thrown
-        Optional<UserDeletedEvent> emptyEvent = dummyEventListener.getLatestUserDeletedEvent();
-        assertTrue(emptyEvent.isEmpty());
+        try {
+            await().until(eventCatcher::hasCaughtEvent);
+            fail();
+        } catch (Exception e) {
+            // test passed
+        }
     }
 
     @Test
@@ -600,6 +589,7 @@ public class UserControllerTests {
         String id0 = JsonPath.parse(dummyResponse).read("$.id");
 
         // but use jwt from the wrong user
+        eventCatcher.catchEventOfType(UserDeletedEvent.class);
         MvcResult result1 =
                 mockMvc.perform(
                                 delete("/users/" + id0)
@@ -609,7 +599,11 @@ public class UserControllerTests {
                         .andReturn();
 
         // test if UserDeletedEvent was thrown
-        Optional<UserDeletedEvent> emptyEvent = dummyEventListener.getLatestUserDeletedEvent();
-        assertTrue(emptyEvent.isEmpty());
+        try {
+            await().until(eventCatcher::hasCaughtEvent);
+            fail();
+        } catch (Exception e) {
+            // test passed
+        }
     }
 }
