@@ -2,7 +2,6 @@ package com.kett.TicketSystem.membership.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
@@ -18,7 +17,7 @@ import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
-import com.kett.TicketSystem.util.DummyEventListener;
+import com.kett.TicketSystem.util.EventCatcher;
 import com.kett.TicketSystem.util.RestRequestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,9 +33,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.Cookie;
-import java.util.Optional;
 import java.util.UUID;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -49,7 +48,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class MembershipControllerTests {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
-    private final DummyEventListener dummyEventListener;
+    private final EventCatcher eventCatcher;
     private final ApplicationEventPublisher eventPublisher;
     private final RestRequestHelper restMinion;
     private final UserRepository userRepository;
@@ -76,7 +75,7 @@ public class MembershipControllerTests {
     public MembershipControllerTests(
             MockMvc mockMvc,
             ObjectMapper objectMapper,
-            DummyEventListener dummyEventListener,
+            EventCatcher eventCatcher,
             ApplicationEventPublisher eventPublisher,
             UserRepository userRepository,
             MembershipService membershipService,
@@ -84,7 +83,7 @@ public class MembershipControllerTests {
     ) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
-        this.dummyEventListener = dummyEventListener;
+        this.eventCatcher = eventCatcher;
         this.eventPublisher = eventPublisher;
         this.restMinion = new RestRequestHelper(mockMvc, objectMapper);
         this.userRepository = userRepository;
@@ -97,26 +96,28 @@ public class MembershipControllerTests {
         userName0 = "Harry Potter";
         userEmail0 = "harry.potter@hw.uk";
         userPassword0 = "snapeShape88";
+
+        eventCatcher.catchEventOfType(DefaultProjectCreatedEvent.class);
         userId0 = restMinion.postUser(userName0, userEmail0, userPassword0);
+        await().until(eventCatcher::hasCaughtEvent);
+        defaultProjectId0 = ((DefaultProjectCreatedEvent) eventCatcher.getEvent()).getProjectId();
+
         jwt0 = restMinion.authenticateUser(userEmail0, userPassword0);
-        defaultProjectId0 = dummyEventListener
-                .getLatestDefaultProjectCreatedEvent()
-                .orElseThrow(() -> new RuntimeException("could not get defaultProjectId0"))
-                .getProjectId();
 
         userName1 = "Ronald Weasley";
         userEmail1 = "RonRonRonWeasley@hw.uk";
         userPassword1 = "lkasjdfoijwaefo8238298";
+
+        eventCatcher.catchEventOfType(DefaultProjectCreatedEvent.class);
         userId1 = restMinion.postUser(userName1, userEmail1, userPassword1);
+        await().until(eventCatcher::hasCaughtEvent);
+        defaultProjectId1 = ((DefaultProjectCreatedEvent) eventCatcher.getEvent()).getProjectId();
+
         jwt1 = restMinion.authenticateUser(userEmail1, userPassword1);
-        defaultProjectId1 = dummyEventListener
-                .getLatestDefaultProjectCreatedEvent()
-                .orElseThrow(() -> new RuntimeException("could not get defaultProjectId1"))
-                .getProjectId();
 
         randomProjectId = UUID.randomUUID();
 
-        dummyEventListener.deleteAllEvents();
+        //dummyEventListener.deleteAllEvents();
     }
 
     @AfterEach
@@ -146,10 +147,8 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
 
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
         MvcResult getResult =
                 mockMvc.perform(
@@ -170,10 +169,8 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
 
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
         MvcResult getResult =
                 mockMvc.perform(
@@ -194,7 +191,6 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
 
         MvcResult getByUserIdResult =
                 mockMvc.perform(
@@ -230,10 +226,8 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
 
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
         MvcResult getResult =
                 mockMvc.perform(
@@ -260,8 +254,8 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
 
+        eventCatcher.catchEventOfType(UnacceptedProjectMembershipCreatedEvent.class);
         MembershipPostDto membershipPostDto = new MembershipPostDto(projectId0, userId1, Role.MEMBER);
         MvcResult postResult =
                 mockMvc.perform(
@@ -276,17 +270,14 @@ public class MembershipControllerTests {
                         .andExpect(jsonPath("$.role").value(membershipPostDto.getRole().toString()))
                         .andExpect(jsonPath("$.state").value(State.OPEN.toString()))
                         .andReturn();
-        Thread.sleep(100);
+        await().until(eventCatcher::hasCaughtEvent);
+        UnacceptedProjectMembershipCreatedEvent unacceptedProjectMembershipCreatedEvent =
+                (UnacceptedProjectMembershipCreatedEvent) eventCatcher.getEvent();
 
         String postResponse = postResult.getResponse().getContentAsString();
         UUID membershipId = UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
 
-        // test UnacceptedProjectMembershipEvent
-        Optional<UnacceptedProjectMembershipCreatedEvent> event = dummyEventListener.getLatestUnacceptedProjectMembershipCreatedEvent();
-        assertTrue(event.isPresent());
-        Optional<UnacceptedProjectMembershipCreatedEvent> emptyEvent = dummyEventListener.getLatestUnacceptedProjectMembershipCreatedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-        UnacceptedProjectMembershipCreatedEvent unacceptedProjectMembershipCreatedEvent = event.get();
+        // test event
         assertEquals(membershipId, unacceptedProjectMembershipCreatedEvent.getMembershipId());
         assertEquals(membershipPostDto.getProjectId(), unacceptedProjectMembershipCreatedEvent.getProjectId());
         assertEquals(membershipPostDto.getUserId(), unacceptedProjectMembershipCreatedEvent.getInviteeId());
@@ -305,11 +296,10 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
 
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
+        eventCatcher.catchEventOfType(MembershipAcceptedEvent.class);
         MembershipPutStateDto membershipPutStateDto = new MembershipPutStateDto(State.ACCEPTED);
         MvcResult putResult =
                 mockMvc.perform(
@@ -319,6 +309,13 @@ public class MembershipControllerTests {
                                         .cookie(new Cookie("jwt", jwt1)))
                         .andExpect(status().isNoContent())
                         .andReturn();
+
+        // test event
+        await().until(eventCatcher::hasCaughtEvent);
+        MembershipAcceptedEvent membershipAcceptedEvent = (MembershipAcceptedEvent) eventCatcher.getEvent();
+        assertEquals(membershipId, membershipAcceptedEvent.getMembershipId());
+        assertEquals(userId1, membershipAcceptedEvent.getUserId());
+        assertEquals(projectId0, membershipAcceptedEvent.getProjectId());
 
         // test instance
         Membership membership = membershipService.getMembershipById(membershipId);
@@ -334,10 +331,8 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
 
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
         // accept
         MembershipPutStateDto membershipPutStateDto0 = new MembershipPutStateDto(State.ACCEPTED);
@@ -375,10 +370,7 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
-
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
         // accept
         MembershipPutStateDto membershipPutStateDto0 = new MembershipPutStateDto(State.ACCEPTED);
@@ -416,10 +408,7 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
-
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
         MembershipPutStateDto membershipPutStateDto = new MembershipPutStateDto(State.ACCEPTED);
         MvcResult putResult =
@@ -445,10 +434,7 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
-
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
         MembershipPutRoleDto membershipPutStateDto = new MembershipPutRoleDto(Role.ADMIN);
         MvcResult putResult =
@@ -474,10 +460,7 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
-
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
         MembershipPutRoleDto membershipPutStateDto = new MembershipPutRoleDto(Role.ADMIN);
         MvcResult putResult =
@@ -503,11 +486,9 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
-
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
+        eventCatcher.catchEventOfType(MembershipDeletedEvent.class);
         MvcResult deleteResult =
                 mockMvc.perform(
                                 delete("/memberships/" + membershipId)
@@ -517,11 +498,8 @@ public class MembershipControllerTests {
                         .andReturn();
 
         // test event
-        Optional<MembershipDeletedEvent> event = dummyEventListener.getLatestMembershipDeletedEvent();
-        assertTrue(event.isPresent());
-        Optional<MembershipDeletedEvent> emptyEvent = dummyEventListener.getLatestMembershipDeletedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-        MembershipDeletedEvent membershipDeletedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        MembershipDeletedEvent membershipDeletedEvent = (MembershipDeletedEvent) eventCatcher.getEvent();
         assertEquals(membershipId, membershipDeletedEvent.getMembershipId());
         assertEquals(projectId0, membershipDeletedEvent.getProjectId());
         assertEquals(userId1, membershipDeletedEvent.getUserId());
@@ -535,11 +513,9 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
-
         UUID membershipId = restMinion.postMembership(jwt0, projectId0, userId1, Role.MEMBER);
-        Thread.sleep(100);
 
+        eventCatcher.catchEventOfType(MembershipDeletedEvent.class);
         MvcResult deleteResult =
                 mockMvc.perform(
                                 delete("/memberships/" + membershipId)
@@ -549,11 +525,8 @@ public class MembershipControllerTests {
                         .andReturn();
 
         // test event
-        Optional<MembershipDeletedEvent> event = dummyEventListener.getLatestMembershipDeletedEvent();
-        assertTrue(event.isPresent());
-        Optional<MembershipDeletedEvent> emptyEvent = dummyEventListener.getLatestMembershipDeletedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-        MembershipDeletedEvent membershipDeletedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        MembershipDeletedEvent membershipDeletedEvent = (MembershipDeletedEvent) eventCatcher.getEvent();
         assertEquals(membershipId, membershipDeletedEvent.getMembershipId());
         assertEquals(projectId0, membershipDeletedEvent.getProjectId());
         assertEquals(userId1, membershipDeletedEvent.getUserId());
@@ -563,16 +536,13 @@ public class MembershipControllerTests {
     }
 
     @Test
-    public void consumeProjectCreatedEventTest() throws Exception {
+    public void consumeProjectCreatedEventTest() {
+        eventCatcher.catchEventOfType(MembershipAcceptedEvent.class);
         eventPublisher.publishEvent(new ProjectCreatedEvent(randomProjectId, userId0));
-        Thread.sleep(100);
 
         // test MembershipAcceptedEvent
-        Optional<MembershipAcceptedEvent> event0 = dummyEventListener.getLatestMembershipAcceptedEvent();
-        assertTrue(event0.isPresent());
-        Optional<MembershipAcceptedEvent> emptyEvent0 = dummyEventListener.getLatestMembershipAcceptedEvent();
-        assertTrue(emptyEvent0.isEmpty()); // check if only one event was thrown
-        MembershipAcceptedEvent membershipAcceptedEvent = event0.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        MembershipAcceptedEvent membershipAcceptedEvent = (MembershipAcceptedEvent) eventCatcher.getEvent();
         assertEquals(userId0, membershipAcceptedEvent.getUserId());
         assertEquals(randomProjectId, membershipAcceptedEvent.getProjectId());
 
@@ -587,16 +557,13 @@ public class MembershipControllerTests {
     }
 
     @Test
-    public void consumeDefaultProjectCreatedEventTest() throws Exception{
+    public void consumeDefaultProjectCreatedEventTest() {
+        eventCatcher.catchEventOfType(MembershipAcceptedEvent.class);
         eventPublisher.publishEvent(new DefaultProjectCreatedEvent(randomProjectId, userId0));
-        Thread.sleep(100);
 
         // test MembershipAcceptedEvent
-        Optional<MembershipAcceptedEvent> event0 = dummyEventListener.getLatestMembershipAcceptedEvent();
-        assertTrue(event0.isPresent());
-        Optional<MembershipAcceptedEvent> emptyEvent0 = dummyEventListener.getLatestMembershipAcceptedEvent();
-        assertTrue(emptyEvent0.isEmpty()); // check if only one event was thrown
-        MembershipAcceptedEvent membershipAcceptedEvent = event0.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        MembershipAcceptedEvent membershipAcceptedEvent = (MembershipAcceptedEvent) eventCatcher.getEvent();
         assertEquals(userId0, membershipAcceptedEvent.getUserId());
         assertEquals(randomProjectId, membershipAcceptedEvent.getProjectId());
 
@@ -611,19 +578,24 @@ public class MembershipControllerTests {
     }
 
     @Test
-    public void consumeProjectDeletedEventTest() throws Exception {
+    public void consumeProjectDeletedEventTest() {
+        eventCatcher.catchEventOfType(MembershipAcceptedEvent.class);
         eventPublisher.publishEvent(new ProjectCreatedEvent(randomProjectId, userId0));
-        Thread.sleep(100);
 
-        UUID membershipId =
-                dummyEventListener
-                        .getLatestMembershipAcceptedEvent()
-                        .orElseThrow(() -> new ImpossibleException("could not find MembershipAcceptedEvent"))
-                        .getMembershipId();
+        await().until(eventCatcher::hasCaughtEvent);
+        UUID membershipId = ((MembershipAcceptedEvent) eventCatcher.getEvent()).getMembershipId();
 
+        eventCatcher.catchEventOfType(MembershipDeletedEvent.class);
         eventPublisher.publishEvent(new ProjectDeletedEvent(randomProjectId));
-        Thread.sleep(100);
 
+        // test event
+        await().until(eventCatcher::hasCaughtEvent);
+        MembershipDeletedEvent membershipDeletedEvent = (MembershipDeletedEvent) eventCatcher.getEvent();
+        assertEquals(membershipId, membershipDeletedEvent.getMembershipId());
+        assertEquals(randomProjectId, membershipDeletedEvent.getProjectId());
+        assertEquals(userId0, membershipDeletedEvent.getUserId());
+
+        // test instance
         assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipById(membershipId));
     }
 
@@ -632,20 +604,16 @@ public class MembershipControllerTests {
         String projectName0 = "Project 0";
         String projectDescription0 = "Description 0";
         UUID projectId0 = restMinion.postProject(jwt0, projectName0, projectDescription0);
-        Thread.sleep(100);
 
         String projectName1 = "Project 1";
         String projectDescription1 = "Description 1";
         UUID projectId1 = restMinion.postProject(jwt0, projectName1, projectDescription1);
-        Thread.sleep(100);
 
         String projectName2 = "Project 2";
         String projectDescription2 = "Description 2";
         UUID projectId2 = restMinion.postProject(jwt0, projectName2, projectDescription2);
-        Thread.sleep(100);
 
         restMinion.deleteUser(jwt0, userId0);
-        Thread.sleep(100);
 
         assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipsByUserId(userId0));
     }
