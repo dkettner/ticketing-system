@@ -1,6 +1,5 @@
 package com.kett.TicketSystem.ticket.application;
 
-import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
@@ -217,13 +216,11 @@ public class TicketService {
 
         // Update projectMembersVO
         Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(membershipDeletedEvent.getProjectId());
-        if (projectMembersVO.isEmpty()) {
-            throw new ImpossibleException("There is no projectMembersVO with projectId: " + membershipDeletedEvent.getProjectId());
+        if (projectMembersVO.isPresent()) {
+            List<UUID> projectMembers = projectMembersVO.get().memberIds();
+            projectMembers.remove(membershipDeletedEvent.getUserId());
+            this.consumedMembershipDataManager.overwrite(new ProjectMembersVO(membershipDeletedEvent.getProjectId(), projectMembers));
         }
-
-        List<UUID> projectMembers = projectMembersVO.get().memberIds();
-        projectMembers.remove(membershipDeletedEvent.getUserId());
-        this.consumedMembershipDataManager.overwrite(new ProjectMembersVO(membershipDeletedEvent.getProjectId(), projectMembers));
     }
 
     @EventListener
