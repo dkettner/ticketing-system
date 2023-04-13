@@ -10,7 +10,7 @@ import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.user.repository.UserRepository;
-import com.kett.TicketSystem.util.DummyEventListener;
+import com.kett.TicketSystem.util.EventCatcher;
 import com.kett.TicketSystem.util.RestRequestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,9 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.Cookie;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,7 +44,7 @@ public class PhaseControllerTests {
     private final ObjectMapper objectMapper;
     private final RestRequestHelper restMinion;
     private final ApplicationEventPublisher eventPublisher;
-    private final DummyEventListener dummyEventListener;
+    private final EventCatcher eventCatcher;
     private final PhaseService phaseService;
     private final PhaseRepository phaseRepository;
     private final ProjectRepository projectRepository;
@@ -73,7 +73,7 @@ public class PhaseControllerTests {
             MockMvc mockMvc,
             ObjectMapper objectMapper,
             ApplicationEventPublisher eventPublisher,
-            DummyEventListener dummyEventListener,
+            EventCatcher eventCatcher,
             PhaseService phaseService,
             PhaseRepository phaseRepository,
             ProjectRepository projectRepository,
@@ -81,9 +81,9 @@ public class PhaseControllerTests {
     ) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
+        this.eventCatcher = eventCatcher;
         this.restMinion = new RestRequestHelper(mockMvc, objectMapper);
         this.eventPublisher = eventPublisher;
-        this.dummyEventListener = dummyEventListener;
         this.phaseService = phaseService;
         this.phaseRepository = phaseRepository;
         this.projectRepository = projectRepository;
@@ -109,8 +109,6 @@ public class PhaseControllerTests {
         phaseName1 = "phaseName1";
         phaseName2 = "phaseName2";
         phaseName3 = "phaseName3";
-
-        dummyEventListener.deleteAllEvents();
     }
 
     @AfterEach
@@ -189,6 +187,7 @@ public class PhaseControllerTests {
     @Test
     public void postPhaseToNewProjectTest() throws Exception {
         // post to first place
+        eventCatcher.catchEventOfType(PhaseCreatedEvent.class);
         PhasePostDto phasePostDto0 = new PhasePostDto(buildUpProjectId, phaseName0, null);
         MvcResult postResult0 =
                 mockMvc.perform(
@@ -209,11 +208,8 @@ public class PhaseControllerTests {
         UUID nextPhaseId = UUID.fromString(JsonPath.parse(postResponse0).read("$.nextPhaseId"));
 
         // test event
-        Optional<PhaseCreatedEvent> event = dummyEventListener.getLatestPhaseCreatedEvent();
-        assertTrue(event.isPresent());
-        Optional<PhaseCreatedEvent> emptyEvent = dummyEventListener.getLatestPhaseCreatedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-        PhaseCreatedEvent phaseCreatedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        PhaseCreatedEvent phaseCreatedEvent = (PhaseCreatedEvent) eventCatcher.getEvent();
         assertEquals(phaseId0, phaseCreatedEvent.getPhaseId());
         assertEquals(phasePostDto0.getProjectId(), phaseCreatedEvent.getProjectId());
 
@@ -226,6 +222,7 @@ public class PhaseControllerTests {
         assertEquals(nextPhaseId, phase0.getNextPhase().getId());
 
         // post to second place
+        eventCatcher.catchEventOfType(PhaseCreatedEvent.class);
         PhasePostDto phasePostDto1 = new PhasePostDto(buildUpProjectId, phaseName1, phaseId0);
         MvcResult postResult1 =
                 mockMvc.perform(
@@ -241,16 +238,12 @@ public class PhaseControllerTests {
                         .andExpect(jsonPath("$.nextPhaseId").value(nextPhaseId.toString()))
                         .andExpect(jsonPath("$.ticketCount").value(0))
                         .andReturn();
-
         String postResponse1 = postResult1.getResponse().getContentAsString();
         UUID phaseId1 = UUID.fromString(JsonPath.parse(postResponse1).read("$.id"));
 
         // test event
-        Optional<PhaseCreatedEvent> event1 = dummyEventListener.getLatestPhaseCreatedEvent();
-        assertTrue(event1.isPresent());
-        Optional<PhaseCreatedEvent> emptyEvent1 = dummyEventListener.getLatestPhaseCreatedEvent();
-        assertTrue(emptyEvent1.isEmpty()); // check if only one event was thrown
-        PhaseCreatedEvent phaseCreatedEvent1 = event1.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        PhaseCreatedEvent phaseCreatedEvent1 = (PhaseCreatedEvent) eventCatcher.getEvent();
         assertEquals(phaseId1, phaseCreatedEvent1.getPhaseId());
         assertEquals(phasePostDto1.getProjectId(), phaseCreatedEvent1.getProjectId());
 
@@ -294,6 +287,7 @@ public class PhaseControllerTests {
         assertEquals(initialPhases.get(1).getId(), initialPhases.get(2).getNextPhase().getId());
 
         // delete middle -> phaseId1
+        eventCatcher.catchEventOfType(PhaseDeletedEvent.class);
         MvcResult postResult0 =
                 mockMvc.perform(
                                 delete("/phases/" + phaseId1)
@@ -303,11 +297,8 @@ public class PhaseControllerTests {
                         .andReturn();
 
         // test event
-        Optional<PhaseDeletedEvent> event = dummyEventListener.getLatestPhaseDeletedEvent();
-        assertTrue(event.isPresent());
-        Optional<PhaseDeletedEvent> emptyEvent = dummyEventListener.getLatestPhaseDeletedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-        PhaseDeletedEvent phaseDeletedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        PhaseDeletedEvent phaseDeletedEvent = (PhaseDeletedEvent) eventCatcher.getEvent();
         assertEquals(phaseId1, phaseDeletedEvent.getPhaseId());
         assertEquals(buildUpProjectId, phaseDeletedEvent.getProjectId());
 
