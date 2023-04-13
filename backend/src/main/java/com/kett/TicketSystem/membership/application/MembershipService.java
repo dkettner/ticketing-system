@@ -224,7 +224,12 @@ public class MembershipService {
     @EventListener
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
-        membershipRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
+        List<Membership> deletedMemberships = membershipRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
+        deletedMemberships.forEach(membership ->
+                eventPublisher.publishEvent(
+                        new MembershipDeletedEvent(membership.getId(), membership.getProjectId(), membership.getUserId())
+                )
+        );
         this.consumedProjectDataManager.remove(projectDeletedEvent.getProjectId());
     }
 
@@ -237,7 +242,12 @@ public class MembershipService {
     @EventListener
     public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
         List<Membership> memberships = getMembershipsByUserId(userDeletedEvent.getUserId());
-        memberships.forEach(membership -> this.deleteMembershipById(membership.getId()));
+        memberships.forEach(membership -> {
+            this.deleteMembershipById(membership.getId());
+            eventPublisher.publishEvent(
+                    new MembershipDeletedEvent(membership.getId(), membership.getProjectId(), membership.getUserId())
+            );
+        });
         this.consumedUserDataManager.remove(userDeletedEvent.getUserId());
     }
 }
