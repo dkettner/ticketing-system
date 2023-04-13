@@ -14,7 +14,7 @@ import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
-import com.kett.TicketSystem.util.DummyEventListener;
+import com.kett.TicketSystem.util.EventCatcher;
 import com.kett.TicketSystem.util.RestRequestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,9 +30,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.Cookie;
-import java.util.Optional;
 import java.util.UUID;
 
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -45,7 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ProjectControllerTests {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
-    private final DummyEventListener dummyEventListener;
+    private final EventCatcher eventCatcher;
     private final ApplicationEventPublisher eventPublisher;
     private final ProjectService projectService;
     private final ProjectRepository projectRepository;
@@ -66,13 +66,11 @@ public class ProjectControllerTests {
     private String buildUpProjectName;
     private String buildUpProjectDescription;
 
-
-
     @Autowired
     public ProjectControllerTests(
             MockMvc mockMvc,
             ObjectMapper objectMapper,
-            DummyEventListener dummyEventListener,
+            EventCatcher eventCatcher,
             ApplicationEventPublisher eventPublisher,
             ProjectService projectService,
             ProjectRepository projectRepository,
@@ -80,7 +78,7 @@ public class ProjectControllerTests {
     ) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
-        this.dummyEventListener = dummyEventListener;
+        this.eventCatcher = eventCatcher;
         this.eventPublisher = eventPublisher;
         this.projectService = projectService;
         this.projectRepository = projectRepository;
@@ -102,8 +100,6 @@ public class ProjectControllerTests {
 
         projectName = "My Little Project";
         projectDescription = "My very own project description";
-
-        dummyEventListener.deleteAllEvents(); // erase events of buildUp
     }
 
     @AfterEach
@@ -128,6 +124,7 @@ public class ProjectControllerTests {
 
     @Test
     public void postProjectTest() throws Exception {
+        eventCatcher.catchEventOfType(ProjectCreatedEvent.class);
         ProjectPostDto projectPostDto = new ProjectPostDto(projectName, projectDescription);
         MvcResult postResult =
                 mockMvc.perform(
@@ -140,6 +137,8 @@ public class ProjectControllerTests {
                         .andExpect(jsonPath("$.name").value(projectPostDto.getName()))
                         .andExpect(jsonPath("$.description").value(projectPostDto.getDescription()))
                         .andReturn();
+
+        // test instance
         String postResponse = postResult.getResponse().getContentAsString();
         projectId = UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
         Project project = projectService.getProjectById(projectId);
@@ -148,12 +147,8 @@ public class ProjectControllerTests {
         assertEquals(projectPostDto.getDescription(), project.getDescription());
 
         // test ProjectCreatedEvent
-        Optional<ProjectCreatedEvent> event = dummyEventListener.getLatestProjectCreatedEvent();
-        assertTrue(event.isPresent());
-        Optional<ProjectCreatedEvent> emptyEvent = dummyEventListener.getLatestProjectCreatedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-
-        ProjectCreatedEvent projectCreatedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        ProjectCreatedEvent projectCreatedEvent = (ProjectCreatedEvent) eventCatcher.getEvent();
         assertEquals(projectId, projectCreatedEvent.getProjectId());
         assertEquals(userId, projectCreatedEvent.getUserId());
     }
@@ -185,6 +180,7 @@ public class ProjectControllerTests {
 
     @Test
     public void deleteProjectTest() throws Exception {
+        eventCatcher.catchEventOfType(ProjectDeletedEvent.class);
         MvcResult deleteResult =
                 mockMvc.perform(
                         delete("/projects/" + buildUpProjectId)
@@ -194,20 +190,12 @@ public class ProjectControllerTests {
                 .andReturn();
 
         // test ProjectDeletedEvent
-        Optional<ProjectDeletedEvent> event = dummyEventListener.getLatestProjectDeletedEvent();
-        assertTrue(event.isPresent());
-        Optional<ProjectDeletedEvent> emptyEvent = dummyEventListener.getLatestProjectDeletedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-
-        ProjectDeletedEvent projectDeletedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        ProjectDeletedEvent projectDeletedEvent = (ProjectDeletedEvent) eventCatcher.getEvent();
         assertEquals(buildUpProjectId, projectDeletedEvent.getProjectId());
 
-        try {
-            projectService.getProjectById(buildUpProjectId);
-            fail("Project was found but should have been deleted");
-        } catch (NoProjectFoundException exception) {
-            // test passed
-        }
+        // test instance
+        assertThrows(NoProjectFoundException.class, () -> projectService.getProjectById(buildUpProjectId));
     }
 
     @Test
@@ -232,6 +220,7 @@ public class ProjectControllerTests {
 
     @Test
     public void consumeUserCreatedEventTest() throws Exception {
+        eventCatcher.catchEventOfType(DefaultProjectCreatedEvent.class);
         eventPublisher.publishEvent(
                 new UserCreatedEvent(
                         userId,
@@ -240,17 +229,9 @@ public class ProjectControllerTests {
                 )
         );
 
-        // TODO: find more stable alternative for testing
-        // shame: give services time to handle UserCreatedEvents
-        Thread.sleep(100);
-
         // test DefaultProjectCreatedEvent
-        Optional<DefaultProjectCreatedEvent> event0 = dummyEventListener.getLatestDefaultProjectCreatedEvent();
-        assertTrue(event0.isPresent());
-        Optional<DefaultProjectCreatedEvent> emptyEvent0 = dummyEventListener.getLatestDefaultProjectCreatedEvent();
-        assertTrue(emptyEvent0.isEmpty()); // check if only one event was thrown
-
-        DefaultProjectCreatedEvent defaultProjectCreatedEvent = event0.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        DefaultProjectCreatedEvent defaultProjectCreatedEvent = (DefaultProjectCreatedEvent) eventCatcher.getEvent();
         assertEquals(userId, defaultProjectCreatedEvent.getUserId());
 
         // test if project was actually created
@@ -259,6 +240,7 @@ public class ProjectControllerTests {
 
     @Test
     public void consumeLastMembershipDeletedEventTest() throws Exception {
+        eventCatcher.catchEventOfType(ProjectDeletedEvent.class);
         eventPublisher.publishEvent(
                 new LastProjectMemberDeletedEvent(
                         userId,
@@ -266,24 +248,12 @@ public class ProjectControllerTests {
                 )
         );
 
-        // TODO: find more stable alternative for testing
-        // shame: give services time to handle UserCreatedEvents
-        Thread.sleep(100);
-
         // test DefaultProjectCreatedEvent
-        Optional<ProjectDeletedEvent> event = dummyEventListener.getLatestProjectDeletedEvent();
-        assertTrue(event.isPresent());
-        Optional<ProjectDeletedEvent> emptyEvent = dummyEventListener.getLatestProjectDeletedEvent();
-        assertTrue(emptyEvent.isEmpty()); // check if only one event was thrown
-
-        ProjectDeletedEvent projectDeletedEvent = event.get();
+        await().until(eventCatcher::hasCaughtEvent);
+        ProjectDeletedEvent projectDeletedEvent = (ProjectDeletedEvent) eventCatcher.getEvent();
         assertEquals(buildUpProjectId, projectDeletedEvent.getProjectId());
 
-        try {
-            projectService.getProjectById(buildUpProjectId);
-            fail("Project was found but should have been deleted");
-        } catch (NoProjectFoundException exception) {
-            // test passed
-        }
+        // test instance
+        assertThrows(NoProjectFoundException.class, () -> projectService.getProjectById(buildUpProjectId));
     }
 }
