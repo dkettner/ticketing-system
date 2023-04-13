@@ -10,7 +10,6 @@ import com.kett.TicketSystem.notification.repository.NotificationRepository;
 import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketUnassignedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
-import com.kett.TicketSystem.util.DummyEventListener;
 import com.kett.TicketSystem.util.RestRequestHelper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,7 +40,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class NotificationControllerTests {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
-    private final DummyEventListener dummyEventListener;
     private final ApplicationEventPublisher eventPublisher;
     private final NotificationService notificationService;
     private final NotificationRepository notificationRepository;
@@ -68,14 +66,12 @@ public class NotificationControllerTests {
     public NotificationControllerTests(
             MockMvc mockMvc,
             ObjectMapper objectMapper,
-            DummyEventListener dummyEventListener,
             ApplicationEventPublisher eventPublisher,
             NotificationService notificationService,
             NotificationRepository notificationRepository,
             UserRepository userRepository) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
-        this.dummyEventListener = dummyEventListener;
         this.eventPublisher = eventPublisher;
         this.notificationService = notificationService;
         this.notificationRepository = notificationRepository;
@@ -101,7 +97,6 @@ public class NotificationControllerTests {
         projectId = UUID.randomUUID();
         membershipId = UUID.randomUUID();
 
-        dummyEventListener.deleteAllEvents();
         notificationRepository.deleteAll();
     }
 
@@ -132,8 +127,6 @@ public class NotificationControllerTests {
         eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(membershipId, userId0, projectId));
         eventPublisher.publishEvent(new TicketAssignedEvent(ticketId, projectId, userId0));
         eventPublisher.publishEvent(new TicketUnassignedEvent(ticketId, projectId, userId0));
-
-        Thread.sleep(100);
 
         MvcResult getByRecipientIdResult =
                 mockMvc.perform(
@@ -171,7 +164,6 @@ public class NotificationControllerTests {
     @Test
     public void getNotificationByIdTest() throws Exception {
         eventPublisher.publishEvent(new UnacceptedProjectMembershipCreatedEvent(membershipId, userId0, projectId));
-        Thread.sleep(100);
 
         // find out notificationId
         MvcResult getByRecipientIdResult =
@@ -211,7 +203,6 @@ public class NotificationControllerTests {
     @Test
     public void getNotificationOfOtherUserByIdTest() throws Exception {
         eventPublisher.publishEvent(new TicketAssignedEvent(ticketId, projectId, userId1));
-        Thread.sleep(100);
 
         // find out notificationId
         MvcResult getByRecipientIdResult =
@@ -237,7 +228,6 @@ public class NotificationControllerTests {
     @Test
     public void patchNotificationTest() throws Exception {
         eventPublisher.publishEvent(new TicketAssignedEvent(ticketId, projectId, userId0));
-        Thread.sleep(100);
 
         // find out notificationId
         MvcResult getByRecipientIdResult =
@@ -283,7 +273,6 @@ public class NotificationControllerTests {
     @Test
     public void deleteNotificationTest() throws Exception {
         eventPublisher.publishEvent(new TicketAssignedEvent(ticketId, projectId, userId0));
-        Thread.sleep(100);
 
         // find out notificationId
         MvcResult getByRecipientIdResult =
