@@ -10,12 +10,15 @@ import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPatchDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import javax.servlet.http.Cookie;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -158,5 +161,26 @@ public class RestRequestHelper {
                                         .cookie(new Cookie("jwt", jwt)))
                         .andExpect(status().isNoContent())
                         .andReturn();
+    }
+
+    public UUID postTicket(
+            String jwt,
+            UUID projectId,
+            String title,
+            String description,
+            LocalDateTime dueTime,
+            List<UUID> assigneeIds
+    ) throws Exception {
+        TicketPostDto ticketPostDto = new TicketPostDto(projectId, title, description, dueTime, assigneeIds);
+        MvcResult postResult =
+                mockMvc.perform(
+                                post("/tickets")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(ticketPostDto))
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isCreated())
+                        .andReturn();
+        String postResponse = postResult.getResponse().getContentAsString();
+        return UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
     }
 }
