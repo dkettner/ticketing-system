@@ -3,6 +3,7 @@ package com.kett.TicketSystem.phase.application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
+import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
@@ -391,5 +392,73 @@ public class PhaseControllerTests {
         assertEquals(backlogId, phase.getId());
         assertEquals(newName, phase.getName());
         assertNotEquals("BACKLOG", phase.getName());
+    }
+
+    @Test
+    public void patchPhasePositionFirstToLastTest() throws Exception {
+        restMinion.postPhase(jwt, buildUpProjectId, phaseName1, null);
+        restMinion.postPhase(jwt, buildUpProjectId, phaseName0, null);
+
+        // test initial state
+        List<Phase> initialPhases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        assertEquals(3, initialPhases.size());
+
+        assertEquals("BACKLOG", initialPhases.get(0).getName());
+        UUID backlogId = initialPhases.get(0).getId();
+        assertFalse(initialPhases.get(0).isFirst());
+        assertTrue(initialPhases.get(0).isLast());
+        assertEquals(initialPhases.get(1).getId(), initialPhases.get(0).getPreviousPhase().getId());
+        assertNull(initialPhases.get(0).getNextPhase());
+
+        assertEquals(phaseName1, initialPhases.get(1).getName());
+        UUID phaseId1 = initialPhases.get(1).getId();
+        assertFalse(initialPhases.get(1).isFirst());
+        assertFalse(initialPhases.get(1).isLast());
+        assertEquals(initialPhases.get(2).getId(), initialPhases.get(1).getPreviousPhase().getId());
+        assertEquals(initialPhases.get(0).getId(), initialPhases.get(1).getNextPhase().getId());
+
+        assertEquals(phaseName0, initialPhases.get(2).getName());
+        UUID phaseId0 = initialPhases.get(2).getId();
+        assertTrue(initialPhases.get(2).isFirst());
+        assertFalse(initialPhases.get(2).isLast());
+        assertNull(initialPhases.get(2).getPreviousPhase());
+        assertEquals(initialPhases.get(1).getId(), initialPhases.get(2).getNextPhase().getId());
+
+        // move first to last
+        PhasePatchPositionDto phasePatchPositionDto = new PhasePatchPositionDto(backlogId);
+        MvcResult patchResult =
+                mockMvc.perform(
+                                patch("/phases/" + phaseId0 + "/position")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(phasePatchPositionDto))
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test initial state
+        List<Phase> phasesAfterPatch = phaseService.getPhasesByProjectId(buildUpProjectId);
+        assertEquals(3, phasesAfterPatch.size());
+
+        assertEquals("BACKLOG", phasesAfterPatch.get(0).getName());
+        assertFalse(phasesAfterPatch.get(0).isFirst());
+        assertFalse(phasesAfterPatch.get(0).isLast());
+        assertEquals(phasesAfterPatch.get(1).getId(), phasesAfterPatch.get(0).getPreviousPhase().getId());
+        assertEquals(phaseId1, phasesAfterPatch.get(0).getPreviousPhase().getId());
+        assertEquals(phasesAfterPatch.get(2).getId(), phasesAfterPatch.get(0).getNextPhase().getId());
+        assertEquals(phaseId0, phasesAfterPatch.get(0).getNextPhase().getId());
+
+        assertEquals(phaseName1, phasesAfterPatch.get(1).getName());
+        assertTrue(phasesAfterPatch.get(1).isFirst());
+        assertFalse(phasesAfterPatch.get(1).isLast());
+        assertNull(phasesAfterPatch.get(1).getPreviousPhase());
+        assertEquals(phasesAfterPatch.get(0).getId(), phasesAfterPatch.get(1).getNextPhase().getId());
+        assertEquals(backlogId, phasesAfterPatch.get(1).getNextPhase().getId());
+
+        assertEquals(phaseName0, phasesAfterPatch.get(2).getName());
+        assertFalse(phasesAfterPatch.get(2).isFirst());
+        assertTrue(phasesAfterPatch.get(2).isLast());
+        assertEquals(phasesAfterPatch.get(0).getId(), phasesAfterPatch.get(2).getPreviousPhase().getId());
+        assertEquals(backlogId, phasesAfterPatch.get(2).getPreviousPhase().getId());
+        assertNull(phasesAfterPatch.get(2).getNextPhase());
     }
 }
