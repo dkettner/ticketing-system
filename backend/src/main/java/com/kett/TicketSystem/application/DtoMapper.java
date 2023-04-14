@@ -166,8 +166,8 @@ public class DtoMapper {
                 ticketPostDto.getTitle(),
                 ticketPostDto.getDescription(),
                 ticketPostDto.getDueTime(),
-                phaseId,
                 ticketPostDto.getProjectId(),
+                phaseId,
                 ticketPostDto.getAssigneeIds()
         );
     }
