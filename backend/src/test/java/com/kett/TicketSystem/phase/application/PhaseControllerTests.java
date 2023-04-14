@@ -288,7 +288,7 @@ public class PhaseControllerTests {
 
         // delete middle -> phaseId1
         eventCatcher.catchEventOfType(PhaseDeletedEvent.class);
-        MvcResult postResult0 =
+        MvcResult deleteResult0 =
                 mockMvc.perform(
                                 delete("/phases/" + phaseId1)
                                         .contentType(MediaType.APPLICATION_JSON)
@@ -317,6 +317,53 @@ public class PhaseControllerTests {
         assertEquals(phasesAfterFirstDelete.get(1).getNextPhase().getId(), phasesAfterFirstDelete.get(0).getId());
         assertNull(phasesAfterFirstDelete.get(1).getPreviousPhase());
 
-        // TODO: test next two deletes
+        // delete last -> backlogId
+        eventCatcher.catchEventOfType(PhaseDeletedEvent.class);
+        MvcResult deleteResult1 =
+                mockMvc.perform(
+                                delete("/phases/" + backlogId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test event
+        await().until(eventCatcher::hasCaughtEvent);
+        PhaseDeletedEvent phaseDeletedEvent1 = (PhaseDeletedEvent) eventCatcher.getEvent();
+        assertEquals(backlogId, phaseDeletedEvent1.getPhaseId());
+        assertEquals(buildUpProjectId, phaseDeletedEvent1.getProjectId());
+
+        // test if phase was actually deleted
+        assertThrows(NoPhaseFoundException.class, () -> phaseService.getPhaseById(backlogId));
+
+        // test other phases after delete
+        List<Phase> phasesAfterSecondDelete = phaseService.getPhasesByProjectId(buildUpProjectId);
+        assertEquals(1, phasesAfterSecondDelete.size());
+        assertEquals(phaseId0, phasesAfterSecondDelete.get(0).getId());
+        assertTrue(phasesAfterSecondDelete.get(0).isFirst());
+        assertTrue(phasesAfterSecondDelete.get(0).isLast());
+        assertNull(phasesAfterSecondDelete.get(0).getPreviousPhase());
+        assertNull(phasesAfterSecondDelete.get(0).getNextPhase());
+
+        // delete remaining phase -> phaseId0
+        eventCatcher.catchEventOfType(PhaseDeletedEvent.class);
+        MvcResult deleteResult2 =
+                mockMvc.perform(
+                                delete("/phases/" + phaseId0)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isConflict())
+                        .andReturn();
+
+        // test event
+        try {
+            await().until(eventCatcher::hasCaughtEvent);
+            fail();
+        } catch (Exception e) {
+            // test passed
+        }
+
+        // test if phase was actually deleted
+        Phase phase = phaseService.getPhaseById(phaseId0);
     }
 }
