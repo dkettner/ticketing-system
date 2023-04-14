@@ -15,6 +15,7 @@ public class EventCatcher {
 
     public void catchEventOfType(Class<? extends DomainEvent> eventClass) {
         typeOfClass = eventClass;
+        event = null;
         isListening = true;
     }
 
