@@ -222,8 +222,6 @@ public class TicketControllerTests {
                 jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>()
         );
 
-        Thread.sleep(5000);
-
         eventCatcher.catchEventOfType(TicketDeletedEvent.class);
         MvcResult deleteResult =
                 mockMvc.perform(
