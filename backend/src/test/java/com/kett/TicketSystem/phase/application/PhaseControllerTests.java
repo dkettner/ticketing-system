@@ -2,6 +2,7 @@ package com.kett.TicketSystem.phase.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
+import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
@@ -365,5 +366,30 @@ public class PhaseControllerTests {
 
         // test if phase was actually deleted
         Phase phase = phaseService.getPhaseById(phaseId0);
+    }
+
+    @Test
+    public void patchPhaseNameTest() throws Exception {
+        List<Phase> initialPhases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        assertEquals(1, initialPhases.size());
+        assertEquals("BACKLOG", initialPhases.get(0).getName());
+        UUID backlogId = initialPhases.get(0).getId();
+
+        String newName = "Hola que tal";
+        PhasePatchNameDto phasePatchNameDto = new PhasePatchNameDto(newName);
+        MvcResult patchResult =
+                mockMvc.perform(
+                                patch("/phases/" + backlogId + "/name")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(phasePatchNameDto))
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test if name changed
+        Phase phase = phaseService.getPhaseById(backlogId);
+        assertEquals(backlogId, phase.getId());
+        assertEquals(newName, phase.getName());
+        assertNotEquals("BACKLOG", phase.getName());
     }
 }
