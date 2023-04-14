@@ -230,7 +230,6 @@ public class PhaseService {
     }
 
     @EventListener
-    @Async
     public void handleTicketCreatedEvent(TicketCreatedEvent ticketCreatedEvent) {
         Phase firstPhaseOfProject =
                 getFirstPhaseByProjectId(ticketCreatedEvent.getProjectId())
@@ -250,7 +249,6 @@ public class PhaseService {
     }
 
     @EventListener
-    @Async
     public void handleTicketPhaseUpdatedEvent(TicketPhaseUpdatedEvent ticketPhaseUpdatedEvent) {
         Phase oldPhase = this.getPhaseById(ticketPhaseUpdatedEvent.getOldPhaseId());
         Phase newPhase = this.getPhaseById(ticketPhaseUpdatedEvent.getNewPhaseId());
