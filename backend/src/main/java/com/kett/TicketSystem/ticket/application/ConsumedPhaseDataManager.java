@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.ticket.application;
 
 import com.kett.TicketSystem.common.IConsumedDataManager;
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,6 +40,18 @@ public class ConsumedPhaseDataManager implements IConsumedDataManager<PhaseVO> {
 
     public Boolean removeByPredicate(Predicate<PhaseVO> predicate) {
         return phases.removeIf(predicate);
+    }
+
+    public PhaseVO getFirstPhaseByProjectId(UUID projectId) {
+        return phases
+                .stream()
+                .filter(phaseVO ->
+                        phaseVO.projectId().equals(projectId)
+                        && phaseVO.previousPhaseId() == null)
+                .findFirst()
+                .orElseThrow(() -> new ImpossibleException(
+                        "could not find phaseVO that matches criteria to be first phase of project: " + projectId
+                ));
     }
 
     @Override

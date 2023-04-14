@@ -1,9 +1,9 @@
 package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
-import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
+import com.kett.TicketSystem.phase.domain.events.PhasePositionUpdatedEvent;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
@@ -70,7 +70,13 @@ public class PhaseService {
         } else {
             initializedPhase = addAfterPrevious(phase, previousPhase);
         }
-        eventPublisher.publishEvent(new PhaseCreatedEvent(initializedPhase.getId(), initializedPhase.getProjectId()));
+        eventPublisher.publishEvent(
+                new PhaseCreatedEvent(
+                        initializedPhase.getId(),
+                        initializedPhase.getPreviousPhase(),
+                        initializedPhase.getProjectId()
+                )
+        );
         return initializedPhase;
     }
 
@@ -145,6 +151,9 @@ public class PhaseService {
         Phase phase = this.getPhaseById(id);
         this.removePhaseFromCurrentPosition(phase);
         this.addPhase(phase, previousPhaseId);
+        eventPublisher.publishEvent(
+                new PhasePositionUpdatedEvent(phase.getId(), previousPhaseId, phase.getProjectId())
+        );
     }
 
 
@@ -239,13 +248,6 @@ public class PhaseService {
 
         firstPhaseOfProject.increaseTicketCount();
         phaseRepository.save(firstPhaseOfProject);
-
-        eventPublisher.publishEvent(
-                new NewTicketAssignedToPhaseEvent(
-                        firstPhaseOfProject.getId(),
-                        ticketCreatedEvent.getTicketId(),
-                        firstPhaseOfProject.getProjectId())
-        );
     }
 
     @EventListener

@@ -4,10 +4,11 @@ import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.InvalidProjectMembersException;
-import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.UnrelatedPhaseException;
+import com.kett.TicketSystem.phase.domain.events.PhasePositionUpdatedEvent;
+import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -55,6 +56,13 @@ public class TicketService {
                     "not all assignees are part of the project with id: " + ticket.getProjectId()
             );
         }
+
+        // set phaseId of ticket
+        UUID firstPhaseOfProjectId =
+                consumedPhaseDataManager
+                        .getFirstPhaseByProjectId(ticket.getProjectId())
+                        .id();
+        ticket.setPhaseId(firstPhaseOfProjectId);
 
         Ticket initializedTicket = ticketRepository.save(ticket);
         eventPublisher.publishEvent(new TicketCreatedEvent(initializedTicket.getId(), initializedTicket.getProjectId(), postingUserId));
@@ -240,14 +248,6 @@ public class TicketService {
 
     @EventListener
     @Async
-    public void handleNewTicketAssignedToPhaseEvent(NewTicketAssignedToPhaseEvent newTicketAssignedToPhaseEvent) {
-        Ticket ticket = this.getTicketById(newTicketAssignedToPhaseEvent.getTicketId());
-        ticket.setPhaseId(newTicketAssignedToPhaseEvent.getPhaseId());
-        ticketRepository.save(ticket);
-    }
-
-    @EventListener
-    @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
         this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
 
@@ -283,7 +283,27 @@ public class TicketService {
     @EventListener
     @Async
     public void handlePhaseCreatedEvent(PhaseCreatedEvent phaseCreatedEvent) {
-        this.consumedPhaseDataManager.add(new PhaseVO(phaseCreatedEvent.getPhaseId(), phaseCreatedEvent.getProjectId()));
+        this.consumedPhaseDataManager.add(
+                new PhaseVO(
+                        phaseCreatedEvent.getPhaseId(),
+                        phaseCreatedEvent.getPreviousPhaseId(),
+                        phaseCreatedEvent.getProjectId()
+                )
+        );
+    }
+
+    @EventListener
+    @Async
+    public void handlePhasePositionUpdatedEvent(PhasePositionUpdatedEvent phasePositionUpdatedEvent) {
+        PhaseVO phaseVO =
+                consumedPhaseDataManager
+                        .get(phasePositionUpdatedEvent.getId())
+                        .orElseThrow(() -> new NoPhaseFoundException(
+                                "could not find phaseVO for phase with id: " + phasePositionUpdatedEvent.getId()
+                        ));
+        consumedPhaseDataManager.overwrite(
+                new PhaseVO(phaseVO.id(), phasePositionUpdatedEvent.getPreviousPhaseId(), phaseVO.projectId())
+        );
     }
 
     @EventListener

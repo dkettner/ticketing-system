@@ -6,7 +6,6 @@ import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.domain.Phase;
-import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
@@ -556,10 +555,8 @@ public class PhaseControllerTests {
 
     @Test
     public void consumeTicketCreatedEvent() {
-        eventCatcher.catchEventOfType(NewTicketAssignedToPhaseEvent.class);
         UUID ticketId = UUID.randomUUID();
         eventPublisher.publishEvent(new TicketCreatedEvent(ticketId, buildUpProjectId, userId));
-        await().until(eventCatcher::hasCaughtEvent);
 
         // get phaseId of buildUpProject
         List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
@@ -567,14 +564,8 @@ public class PhaseControllerTests {
         assertEquals("BACKLOG", phases.get(0).getName());
         UUID phaseId = phases.get(0).getId();
 
-        // test event
-        NewTicketAssignedToPhaseEvent newTicketAssignedToPhaseEvent = (NewTicketAssignedToPhaseEvent) eventCatcher.getEvent();
-        assertEquals(ticketId, newTicketAssignedToPhaseEvent.getTicketId());
-        assertEquals(phaseId, newTicketAssignedToPhaseEvent.getPhaseId());
-        assertEquals(buildUpProjectId, newTicketAssignedToPhaseEvent.getProjectId());
-
         // test instance
-        Phase phase = phaseService.getPhaseById(newTicketAssignedToPhaseEvent.getPhaseId());
+        Phase phase = phaseService.getPhaseById(phases.get(0).getId());
         assertEquals(phase, phases.get(0));
         assertEquals(buildUpProjectId, phase.getProjectId());
         assertEquals(1, phase.getTicketCount());
@@ -582,10 +573,8 @@ public class PhaseControllerTests {
 
     @Test
     public void consumeTicketDeletedEvent() {
-        eventCatcher.catchEventOfType(NewTicketAssignedToPhaseEvent.class);
         UUID ticketId = UUID.randomUUID();
         eventPublisher.publishEvent(new TicketCreatedEvent(ticketId, buildUpProjectId, userId));
-        await().until(eventCatcher::hasCaughtEvent);
 
         // get phaseId of buildUpProject
         List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
@@ -613,15 +602,8 @@ public class PhaseControllerTests {
         UUID doneId = restMinion.postPhase(jwt, buildUpProjectId, "DONE", backlogId);
 
         // mock post ticket
-        eventCatcher.catchEventOfType(NewTicketAssignedToPhaseEvent.class);
         UUID ticketId = UUID.randomUUID();
         eventPublisher.publishEvent(new TicketCreatedEvent(ticketId, buildUpProjectId, userId));
-        await().until(eventCatcher::hasCaughtEvent);
-
-        // test assignment event
-        NewTicketAssignedToPhaseEvent newTicketAssignedToPhaseEvent = (NewTicketAssignedToPhaseEvent) eventCatcher.getEvent();
-        assertEquals(ticketId, newTicketAssignedToPhaseEvent.getTicketId());
-        assertEquals(backlogId, newTicketAssignedToPhaseEvent.getPhaseId());
 
         assertEquals(1, phaseService.getPhaseById(backlogId).getTicketCount());
         assertEquals(0, phaseService.getPhaseById(doneId).getTicketCount());

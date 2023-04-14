@@ -4,7 +4,6 @@ import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEv
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
-import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
@@ -26,7 +25,6 @@ public class DummyEventListener {
     Stack<MembershipDeletedEvent> membershipDeletedEvents = new Stack<>();
     Stack<LastProjectMemberDeletedEvent> lastProjectMemberDeletedEvents = new Stack<>();
 
-    Stack<NewTicketAssignedToPhaseEvent> newTicketAssignedToPhaseEvents = new Stack<>();
     Stack<PhaseCreatedEvent> phaseCreatedEvents = new Stack<>();
     Stack<PhaseDeletedEvent> phaseDeletedEvents = new Stack<>();
 
@@ -67,13 +65,6 @@ public class DummyEventListener {
         return event;
     }
 
-    public Optional<NewTicketAssignedToPhaseEvent> getLatestNewTicketAssignedToPhaseEvent() {
-        Optional<NewTicketAssignedToPhaseEvent> event = Optional.empty();
-        if (!newTicketAssignedToPhaseEvents.isEmpty()) {
-            event = Optional.of(newTicketAssignedToPhaseEvents.pop());
-        }
-        return event;
-    }
     public Optional<PhaseCreatedEvent> getLatestPhaseCreatedEvent() {
         Optional<PhaseCreatedEvent> event = Optional.empty();
         if (!phaseCreatedEvents.isEmpty()) {
@@ -139,7 +130,6 @@ public class DummyEventListener {
         membershipDeletedEvents.clear();
         lastProjectMemberDeletedEvents.clear();
 
-        newTicketAssignedToPhaseEvents.clear();
         phaseCreatedEvents.clear();
         phaseDeletedEvents.clear();
 
@@ -171,10 +161,6 @@ public class DummyEventListener {
         lastProjectMemberDeletedEvents.push(lastProjectMemberDeletedEvent);
     }
 
-    @EventListener
-    public void handleNewTicketAssignedToPhaseEvent(NewTicketAssignedToPhaseEvent newTicketAssignedToPhaseEvent) {
-        newTicketAssignedToPhaseEvents.push(newTicketAssignedToPhaseEvent);
-    }
     @EventListener
     public void handlePhaseCreatedEvent(PhaseCreatedEvent phaseCreatedEvent) {
         phaseCreatedEvents.push(phaseCreatedEvent);
