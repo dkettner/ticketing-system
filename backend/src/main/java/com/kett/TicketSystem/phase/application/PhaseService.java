@@ -187,7 +187,10 @@ public class PhaseService {
     }
 
     public void deletePhasesByProjectId(UUID projectId) {
-        phaseRepository.deleteByProjectId(projectId); // bypasses last phase check
+        List<Phase> deletedPhases = phaseRepository.deleteByProjectId(projectId); // bypasses last phase check
+        deletedPhases.forEach( phase ->
+                eventPublisher.publishEvent(new PhaseDeletedEvent(phase.getId(), phase.getProjectId()))
+        );
     }
 
 

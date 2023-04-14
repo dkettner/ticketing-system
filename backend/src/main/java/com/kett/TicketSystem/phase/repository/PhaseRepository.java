@@ -14,5 +14,5 @@ public interface PhaseRepository extends JpaRepository<Phase, UUID> {
     Optional<Phase> findByProjectIdAndPreviousPhaseIsNull(UUID projectId);
 
     Long removeById(UUID id);
-    void deleteByProjectId(UUID projectId);
+    List<Phase> deleteByProjectId(UUID projectId);
 }
