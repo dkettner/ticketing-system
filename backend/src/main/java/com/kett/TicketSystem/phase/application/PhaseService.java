@@ -245,7 +245,7 @@ public class PhaseService {
                 new NewTicketAssignedToPhaseEvent(
                         firstPhaseOfProject.getId(),
                         ticketCreatedEvent.getTicketId(),
-                        ticketCreatedEvent.getProjectId())
+                        firstPhaseOfProject.getProjectId())
         );
     }
 
@@ -273,7 +273,6 @@ public class PhaseService {
     }
 
     @EventListener
-    @Async
     public void handleTicketDeletedEvent(TicketDeletedEvent ticketDeletedEvent) {
         Phase phase = this.getPhaseById(ticketDeletedEvent.getPhaseId());
         phase.decreaseTicketCount();
