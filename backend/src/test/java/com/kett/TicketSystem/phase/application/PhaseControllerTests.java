@@ -6,11 +6,18 @@ import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.domain.Phase;
+import com.kett.TicketSystem.phase.domain.events.NewTicketAssignedToPhaseEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
+import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
+import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
+import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
+import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketDeletedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketPhaseUpdatedEvent;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import com.kett.TicketSystem.util.EventCatcher;
 import com.kett.TicketSystem.util.RestRequestHelper;
@@ -460,5 +467,170 @@ public class PhaseControllerTests {
         assertEquals(phasesAfterPatch.get(0).getId(), phasesAfterPatch.get(2).getPreviousPhase().getId());
         assertEquals(backlogId, phasesAfterPatch.get(2).getPreviousPhase().getId());
         assertNull(phasesAfterPatch.get(2).getNextPhase());
+    }
+
+    @Test
+    public void consumeDefaultProjectCreatedEventTest() throws Exception {
+        UUID tempProjectId = UUID.randomUUID();
+
+        eventCatcher.catchEventOfType(PhaseCreatedEvent.class);
+        eventPublisher.publishEvent(new DefaultProjectCreatedEvent(tempProjectId, userId));
+        Thread.sleep(100); // give enough time to handle event
+
+        // test at least one PhaseCreatedEvent
+        await().until(eventCatcher::hasCaughtEvent);
+        PhaseCreatedEvent phaseCreatedEvent = (PhaseCreatedEvent) eventCatcher.getEvent();
+        assertEquals(tempProjectId, phaseCreatedEvent.getProjectId());
+
+        // test phases
+        List<Phase> phases = phaseService.getPhasesByProjectId(tempProjectId);
+        assertEquals(4, phases.size());
+
+        assertEquals("DONE", phases.get(0).getName());
+        UUID doneId = phases.get(0).getId();
+        assertFalse(phases.get(0).isFirst());
+        assertTrue(phases.get(0).isLast());
+        assertEquals(phases.get(1).getId(), phases.get(0).getPreviousPhase().getId());
+        assertNull(phases.get(0).getNextPhase());
+
+        assertEquals("REVIEW", phases.get(1).getName());
+        UUID reviewId = phases.get(1).getId();
+        assertFalse(phases.get(1).isFirst());
+        assertFalse(phases.get(1).isLast());
+        assertEquals(phases.get(2).getId(), phases.get(1).getPreviousPhase().getId());
+        assertEquals(phases.get(0).getId(), phases.get(1).getNextPhase().getId());
+
+        assertEquals("DOING", phases.get(2).getName());
+        UUID doingId = phases.get(2).getId();
+        assertFalse(phases.get(2).isFirst());
+        assertFalse(phases.get(2).isLast());
+        assertEquals(phases.get(3).getId(), phases.get(2).getPreviousPhase().getId());
+        assertEquals(phases.get(1).getId(), phases.get(2).getNextPhase().getId());
+
+        assertEquals("BACKLOG", phases.get(3).getName());
+        UUID backlogId = phases.get(3).getId();
+        assertTrue(phases.get(3).isFirst());
+        assertFalse(phases.get(3).isLast());
+        assertNull(phases.get(3).getPreviousPhase());
+        assertEquals(phases.get(2).getId(), phases.get(3).getNextPhase().getId());
+    }
+
+    @Test
+    public void consumeProjectCreatedEventTest() throws Exception {
+        UUID tempProjectId = UUID.randomUUID();
+
+        eventCatcher.catchEventOfType(PhaseCreatedEvent.class);
+        eventPublisher.publishEvent(new ProjectCreatedEvent(tempProjectId, userId));
+        Thread.sleep(100); // give enough time to handle event
+
+        // test event
+        await().until(eventCatcher::hasCaughtEvent);
+        PhaseCreatedEvent phaseCreatedEvent = (PhaseCreatedEvent) eventCatcher.getEvent();
+        assertEquals(tempProjectId, phaseCreatedEvent.getProjectId());
+
+        // test phases
+        List<Phase> phases = phaseService.getPhasesByProjectId(tempProjectId);
+        assertEquals(1, phases.size());
+
+        assertEquals("BACKLOG", phases.get(0).getName());
+        assertEquals(phases.get(0).getId(), phaseCreatedEvent.getPhaseId());
+        assertTrue(phases.get(0).isFirst());
+        assertTrue(phases.get(0).isLast());
+        assertNull(phases.get(0).getPreviousPhase());
+        assertNull(phases.get(0).getNextPhase());
+    }
+
+    @Test
+    public void consumeProjectDeletedEventTest() throws Exception {
+        eventCatcher.catchEventOfType(PhaseDeletedEvent.class);
+        eventPublisher.publishEvent(new ProjectDeletedEvent(buildUpProjectId));
+
+        // test event
+        await().until(eventCatcher::hasCaughtEvent);
+        PhaseDeletedEvent phaseDeletedEvent = (PhaseDeletedEvent) eventCatcher.getEvent();
+        assertEquals(buildUpProjectId, phaseDeletedEvent.getProjectId());
+
+        // test if phase is actually gone
+        assertThrows(NoPhaseFoundException.class, () -> phaseService.getPhasesByProjectId(buildUpProjectId));
+    }
+
+    @Test
+    public void consumeTicketCreatedEvent() {
+        eventCatcher.catchEventOfType(NewTicketAssignedToPhaseEvent.class);
+        UUID ticketId = UUID.randomUUID();
+        eventPublisher.publishEvent(new TicketCreatedEvent(ticketId, buildUpProjectId, userId));
+        await().until(eventCatcher::hasCaughtEvent);
+
+        // get phaseId of buildUpProject
+        List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        assertEquals(1, phases.size());
+        assertEquals("BACKLOG", phases.get(0).getName());
+        UUID phaseId = phases.get(0).getId();
+
+        // test event
+        NewTicketAssignedToPhaseEvent newTicketAssignedToPhaseEvent = (NewTicketAssignedToPhaseEvent) eventCatcher.getEvent();
+        assertEquals(ticketId, newTicketAssignedToPhaseEvent.getTicketId());
+        assertEquals(phaseId, newTicketAssignedToPhaseEvent.getPhaseId());
+        assertEquals(buildUpProjectId, newTicketAssignedToPhaseEvent.getProjectId());
+
+        // test instance
+        Phase phase = phaseService.getPhaseById(newTicketAssignedToPhaseEvent.getPhaseId());
+        assertEquals(phase, phases.get(0));
+        assertEquals(buildUpProjectId, phase.getProjectId());
+        assertEquals(1, phase.getTicketCount());
+    }
+
+    @Test
+    public void consumeTicketDeletedEvent() {
+        eventCatcher.catchEventOfType(NewTicketAssignedToPhaseEvent.class);
+        UUID ticketId = UUID.randomUUID();
+        eventPublisher.publishEvent(new TicketCreatedEvent(ticketId, buildUpProjectId, userId));
+        await().until(eventCatcher::hasCaughtEvent);
+
+        // get phaseId of buildUpProject
+        List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        assertEquals("BACKLOG", phases.get(0).getName());
+        assertEquals(1, phases.size());
+        assertEquals(1, phases.get(0).getTicketCount());
+        UUID phaseId = phases.get(0).getId();
+
+        eventPublisher.publishEvent(new TicketDeletedEvent(ticketId, buildUpProjectId, phaseId));
+
+        // test instance
+        Phase phase = phaseService.getPhaseById(phaseId);
+        assertEquals(phase, phases.get(0));
+        assertEquals(buildUpProjectId, phase.getProjectId());
+        assertEquals(0, phase.getTicketCount());
+    }
+
+    @Test
+    public void consumeTicketPhaseUpdatedEventTest() throws Exception {
+        // get ids of phases
+        List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        assertEquals("BACKLOG", phases.get(0).getName());
+        assertEquals(1, phases.size());
+        UUID backlogId = phases.get(0).getId();
+        UUID doneId = restMinion.postPhase(jwt, buildUpProjectId, "DONE", backlogId);
+
+        // mock post ticket
+        eventCatcher.catchEventOfType(NewTicketAssignedToPhaseEvent.class);
+        UUID ticketId = UUID.randomUUID();
+        eventPublisher.publishEvent(new TicketCreatedEvent(ticketId, buildUpProjectId, userId));
+        await().until(eventCatcher::hasCaughtEvent);
+
+        // test assignment event
+        NewTicketAssignedToPhaseEvent newTicketAssignedToPhaseEvent = (NewTicketAssignedToPhaseEvent) eventCatcher.getEvent();
+        assertEquals(ticketId, newTicketAssignedToPhaseEvent.getTicketId());
+        assertEquals(backlogId, newTicketAssignedToPhaseEvent.getPhaseId());
+
+        assertEquals(1, phaseService.getPhaseById(backlogId).getTicketCount());
+        assertEquals(0, phaseService.getPhaseById(doneId).getTicketCount());
+
+        // change position of ticket
+        eventPublisher.publishEvent(new TicketPhaseUpdatedEvent(ticketId, buildUpProjectId, backlogId, doneId));
+
+        // test if ticketCount of phases got updated
+        assertEquals(0, phaseService.getPhaseById(backlogId).getTicketCount());
+        assertEquals(1, phaseService.getPhaseById(doneId).getTicketCount());
     }
 }
