@@ -10,6 +10,8 @@ import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketDeletedEvent;
+import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import com.kett.TicketSystem.util.EventCatcher;
@@ -33,8 +35,8 @@ import java.util.ArrayList;
 import java.util.UUID;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -176,7 +178,7 @@ public class TicketControllerTests {
     }
 
     @Test
-    public void postTicketWithoutAssigneesTest() throws Exception {
+    public void postTicketTest() throws Exception {
         eventCatcher.catchEventOfType(TicketCreatedEvent.class);
         TicketPostDto ticketPostDto = new TicketPostDto(buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>());
         MvcResult postResult0 =
@@ -190,7 +192,7 @@ public class TicketControllerTests {
                         .andExpect(jsonPath("$.projectId").value(buildUpProjectId.toString()))
                         .andExpect(jsonPath("$.title").value(ticketTitle0))
                         .andExpect(jsonPath("$.description").value(ticketDescription0))
-                        .andExpect(jsonPath("$.phaseId").isEmpty())
+                        .andExpect(jsonPath("$.phaseId").exists())
                         .andExpect(jsonPath("$.creationTime").exists())
                         .andExpect(jsonPath("$.dueTime").exists())
                         .andReturn();
@@ -212,5 +214,32 @@ public class TicketControllerTests {
         assertEquals(ticketPostDto.getAssigneeIds(), ticket.getAssigneeIds());
         assertEquals(ticketPostDto.getDueTime(), ticket.getDueTime());
         assertTrue(ticket.getCreationTime().isBefore(LocalDateTime.now()));
+    }
+
+    @Test
+    public void deleteTicketTest() throws Exception {
+        UUID ticketId = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>()
+        );
+
+        Thread.sleep(5000);
+
+        eventCatcher.catchEventOfType(TicketDeletedEvent.class);
+        MvcResult deleteResult =
+                mockMvc.perform(
+                                delete("/tickets/" + ticketId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test event
+        await().until(eventCatcher::hasCaughtEvent);
+        TicketDeletedEvent ticketDeletedEvent = (TicketDeletedEvent) eventCatcher.getEvent();
+        assertEquals(ticketId, ticketDeletedEvent.getTicketId());
+        assertEquals(buildUpProjectId, ticketDeletedEvent.getProjectId());
+
+        // test instance
+        assertThrows(NoTicketFoundException.class, () -> ticketService.getTicketById(ticketId));
     }
 }
