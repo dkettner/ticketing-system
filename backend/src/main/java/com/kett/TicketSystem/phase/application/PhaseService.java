@@ -25,6 +25,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -148,12 +149,23 @@ public class PhaseService {
     }
 
     public void patchPhasePosition(UUID id, UUID previousPhaseId) throws PhaseException, NoPhaseFoundException {
-        Phase phase = this.getPhaseById(id);
-        this.removePhaseFromCurrentPosition(phase);
-        this.addPhase(phase, previousPhaseId);
-        eventPublisher.publishEvent(
-                new PhasePositionUpdatedEvent(phase.getId(), previousPhaseId, phase.getProjectId())
-        );
+        Phase patchedPhase = this.getPhaseById(id);
+        Phase oldNextPhase = patchedPhase.getNextPhase();
+        Phase oldPreviousPhase = patchedPhase.getPreviousPhase();
+
+        this.removePhaseFromCurrentPosition(patchedPhase);
+        this.addPhase(patchedPhase, previousPhaseId);
+
+        // up to three positions updated -> up to three events published
+        List<PhasePositionUpdatedEvent> events = new ArrayList<>();
+        events.add(new PhasePositionUpdatedEvent(patchedPhase.getId(), previousPhaseId, patchedPhase.getProjectId()));
+        if (oldNextPhase != null) {
+            events.add(new PhasePositionUpdatedEvent(oldNextPhase.getId(), oldPreviousPhase, patchedPhase.getProjectId()));
+        }
+        if (previousPhaseId != null) {
+            events.add(new PhasePositionUpdatedEvent(previousPhaseId, patchedPhase.getId(), patchedPhase.getProjectId()));
+        }
+        events.forEach(eventPublisher::publishEvent);
     }
 
 
