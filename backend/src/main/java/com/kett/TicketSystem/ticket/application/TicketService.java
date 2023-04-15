@@ -292,7 +292,6 @@ public class TicketService {
     }
 
     @EventListener
-    @Async
     public void handlePhasePositionUpdatedEvent(PhasePositionUpdatedEvent phasePositionUpdatedEvent) {
         consumedPhaseDataManager.overwrite(
                 new PhaseVO(
