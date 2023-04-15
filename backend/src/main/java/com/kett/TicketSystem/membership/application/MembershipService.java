@@ -212,6 +212,7 @@ public class MembershipService {
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
         this.consumedProjectDataManager.add(defaultProjectCreatedEvent.getProjectId());
+        this.consumedUserDataManager.add(defaultProjectCreatedEvent.getUserId());
         Membership defaultMembership = new Membership(
                 defaultProjectCreatedEvent.getProjectId(),
                 defaultProjectCreatedEvent.getUserId(),
