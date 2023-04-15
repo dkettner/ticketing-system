@@ -7,6 +7,7 @@ import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
+import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
@@ -36,8 +37,7 @@ import java.util.UUID;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -214,6 +214,34 @@ public class TicketControllerTests {
         assertEquals(ticketPostDto.getAssigneeIds(), ticket.getAssigneeIds());
         assertEquals(ticketPostDto.getDueTime(), ticket.getDueTime());
         assertTrue(ticket.getCreationTime().isBefore(LocalDateTime.now()));
+    }
+
+    @Test
+    public void patchTicketNameAndDescriptionAndDueTimeTest() throws Exception {
+        UUID ticketId = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>()
+        );
+
+        String newTitle = "a totally new title";
+        String newDescription = "never seen anything like this";
+        LocalDateTime newDueTime = dateOfTomorrow.plusDays(1);
+        TicketPatchDto ticketPatchDto = new TicketPatchDto(newTitle, newDescription, newDueTime, null, null);
+        MvcResult patchResult =
+                mockMvc.perform(
+                                patch("/tickets/" + ticketId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(ticketPatchDto))
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test instance
+        Ticket ticket = ticketService.getTicketById(ticketId);
+        assertEquals(ticketId, ticket.getId());
+        assertEquals(buildUpProjectId, ticket.getProjectId());
+        assertEquals(ticketPatchDto.getTitle(), ticket.getTitle());
+        assertEquals(ticketPatchDto.getDescription(), ticket.getDescription());
+        assertEquals(ticketPatchDto.getDueTime(), ticket.getDueTime());
     }
 
     @Test
