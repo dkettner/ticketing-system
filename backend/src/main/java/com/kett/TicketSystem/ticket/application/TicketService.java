@@ -8,7 +8,6 @@ import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.domain.events.PhasePositionUpdatedEvent;
-import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -295,14 +294,12 @@ public class TicketService {
     @EventListener
     @Async
     public void handlePhasePositionUpdatedEvent(PhasePositionUpdatedEvent phasePositionUpdatedEvent) {
-        PhaseVO phaseVO =
-                consumedPhaseDataManager
-                        .get(phasePositionUpdatedEvent.getId())
-                        .orElseThrow(() -> new NoPhaseFoundException(
-                                "could not find phaseVO for phase with id: " + phasePositionUpdatedEvent.getId()
-                        ));
         consumedPhaseDataManager.overwrite(
-                new PhaseVO(phaseVO.id(), phasePositionUpdatedEvent.getPreviousPhaseId(), phaseVO.projectId())
+                new PhaseVO(
+                        phasePositionUpdatedEvent.getId(),
+                        phasePositionUpdatedEvent.getPreviousPhaseId(),
+                        phasePositionUpdatedEvent.getProjectId()
+                )
         );
     }
 

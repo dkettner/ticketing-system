@@ -15,6 +15,7 @@ public class ConsumedPhaseDataManager implements IConsumedDataManager<PhaseVO> {
     @Override
     public Boolean add(PhaseVO date) {
         if (this.exists(date.id())) {
+            // if it already exists, then date is stale data
             return false;
         }
 
@@ -26,11 +27,9 @@ public class ConsumedPhaseDataManager implements IConsumedDataManager<PhaseVO> {
     public Boolean overwrite(PhaseVO date) {
         if (this.exists(date.id())) {
             this.remove(date.id());
-            this.add(date);
-            return true;
-        } else {
-            return false;
         }
+        phases.add(date);
+        return true;
     }
 
     @Override
