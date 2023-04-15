@@ -2,6 +2,7 @@ package com.kett.TicketSystem.ticket.domain;
 
 import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
 import lombok.*;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -44,6 +45,7 @@ public class Ticket {
     private UUID phaseId;
 
     @Getter
+    @Type(type="uuid-char")
     @ElementCollection(targetClass = UUID.class, fetch = FetchType.EAGER)
     private List<UUID> assigneeIds = new ArrayList<>();
 
