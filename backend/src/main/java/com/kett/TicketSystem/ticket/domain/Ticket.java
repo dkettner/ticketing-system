@@ -35,6 +35,7 @@ public class Ticket {
     private LocalDateTime dueTime;
 
     @Getter
+    @Column(length = 16)
     private UUID projectId;
 
     @Getter
