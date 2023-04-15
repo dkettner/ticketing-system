@@ -187,6 +187,15 @@ public class PhaseService {
         this.removePhaseFromCurrentPosition(phase);
         phaseRepository.removeById(id);
         eventPublisher.publishEvent(new PhaseDeletedEvent(phase.getId(), phase.getProjectId()));
+        if (!phase.isLast()) {
+            eventPublisher.publishEvent(
+                    new PhasePositionUpdatedEvent(
+                            phase.getNextPhase().getId(),
+                            phase.getPreviousPhase(),
+                            phase.getProjectId()
+                    )
+            );
+        }
     }
 
     private void removePhaseFromCurrentPosition(Phase phase) {
