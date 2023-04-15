@@ -223,7 +223,6 @@ public class MembershipService {
     }
 
     @EventListener
-    @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         List<Membership> deletedMemberships = membershipRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
         deletedMemberships.forEach(membership ->
