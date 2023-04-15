@@ -12,6 +12,7 @@ import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketDeletedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketPhaseUpdatedEvent;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import com.kett.TicketSystem.user.repository.UserRepository;
@@ -242,6 +243,43 @@ public class TicketControllerTests {
         assertEquals(ticketPatchDto.getTitle(), ticket.getTitle());
         assertEquals(ticketPatchDto.getDescription(), ticket.getDescription());
         assertEquals(ticketPatchDto.getDueTime(), ticket.getDueTime());
+    }
+
+    @Test
+    public void patchTicketPhaseIdTimeTest() throws Exception {
+        UUID ticketId = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>()
+        );
+        UUID backlogPhaseId = ticketService.getTicketById(ticketId).getPhaseId();
+        UUID donePhaseId = restMinion.postPhase(jwt0, buildUpProjectId, "DONE", backlogPhaseId);
+
+        eventCatcher.catchEventOfType(TicketPhaseUpdatedEvent.class);
+        TicketPatchDto ticketPatchDto = new TicketPatchDto(null, null, null, donePhaseId, null);
+        MvcResult patchResult =
+                mockMvc.perform(
+                                patch("/tickets/" + ticketId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(ticketPatchDto))
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test event
+        await().until(eventCatcher::hasCaughtEvent);
+        TicketPhaseUpdatedEvent ticketPhaseUpdatedEvent = (TicketPhaseUpdatedEvent) eventCatcher.getEvent();
+        assertEquals(ticketId, ticketPhaseUpdatedEvent.getTicketId());
+        assertEquals(buildUpProjectId, ticketPhaseUpdatedEvent.getProjectId());
+        assertEquals(donePhaseId, ticketPhaseUpdatedEvent.getNewPhaseId());
+        assertEquals(backlogPhaseId, ticketPhaseUpdatedEvent.getOldPhaseId());
+
+        // test instance
+        Ticket ticket = ticketService.getTicketById(ticketId);
+        assertEquals(ticketId, ticket.getId());
+        assertEquals(buildUpProjectId, ticket.getProjectId());
+        assertEquals(ticketPatchDto.getPhaseId(), ticket.getPhaseId());
+        assertEquals(ticketTitle0, ticket.getTitle());
+        assertEquals(ticketDescription0, ticket.getDescription());
+        assertEquals(dateOfTomorrow, ticket.getDueTime());
     }
 
     @Test
