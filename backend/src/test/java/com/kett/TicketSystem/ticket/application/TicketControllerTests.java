@@ -83,7 +83,6 @@ public class TicketControllerTests {
     private String buildUpProjectDescription;
     private UUID buildUpProjectId;
 
-    private UUID ticketId0;
     private String ticketTitle0;
     private String ticketDescription0;
     private LocalDateTime dateOfTomorrow;
@@ -199,6 +198,140 @@ public class TicketControllerTests {
                         .andExpect(jsonPath("$.phaseId").exists())
                         .andExpect(jsonPath("$.creationTime").exists())
                         .andExpect(jsonPath("$.dueTime").exists())
+                        .andReturn();
+    }
+
+    @Test
+    public void getTicketByPhaseIdQueryTest() throws Exception {
+        UUID ticketId0 = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>()
+        );
+
+        String ticketTitle1 = "blub";
+        String ticketDescription1 = "asdlkfjaslkdfasdf";
+        LocalDateTime dateOfTheDayAfterTomorrow = dateOfTomorrow.plusDays(1);
+        UUID ticketId1 = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle1, ticketDescription1, dateOfTheDayAfterTomorrow, new ArrayList<>()
+        );
+
+        UUID backlogId = ticketService.getTicketById(ticketId0).getPhaseId();
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/tickets" )
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("phase-id", backlogId.toString())
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$").isArray())
+                        .andExpect(jsonPath("$[0].id").value(ticketId0.toString()))
+                        .andExpect(jsonPath("$[0].projectId").value(buildUpProjectId.toString()))
+                        .andExpect(jsonPath("$[0].title").value(ticketTitle0))
+                        .andExpect(jsonPath("$[0].description").value(ticketDescription0))
+                        .andExpect(jsonPath("$[0].phaseId").value(backlogId.toString()))
+                        .andExpect(jsonPath("$[0].creationTime").exists())
+                        .andExpect(jsonPath("$[0].dueTime").exists())
+                        .andExpect(jsonPath("$[1].id").value(ticketId1.toString()))
+                        .andExpect(jsonPath("$[1].projectId").value(buildUpProjectId.toString()))
+                        .andExpect(jsonPath("$[1].title").value(ticketTitle1))
+                        .andExpect(jsonPath("$[1].description").value(ticketDescription1))
+                        .andExpect(jsonPath("$[1].phaseId").value(backlogId.toString()))
+                        .andExpect(jsonPath("$[1].creationTime").exists())
+                        .andExpect(jsonPath("$[1].dueTime").exists())
+                        .andReturn();
+    }
+
+    @Test
+    public void getTicketByProjectIdQueryTest() throws Exception {
+        // first ticket
+        UUID ticketId0 = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>()
+        );
+
+        // post a second phase
+        UUID backlogId = ticketService.getTicketById(ticketId0).getPhaseId();
+        UUID donePhaseId = restMinion.postPhase(jwt0, buildUpProjectId, "DONE", backlogId);
+
+        // second ticket
+        String ticketTitle1 = "blub";
+        String ticketDescription1 = "asdlkfjaslkdfasdf";
+        LocalDateTime dateOfTheDayAfterTomorrow = dateOfTomorrow.plusDays(1);
+        UUID ticketId1 = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle1, ticketDescription1, dateOfTheDayAfterTomorrow, new ArrayList<>()
+        );
+
+        // move first ticket to second phase
+        restMinion.patchTicket(jwt0, ticketId0, null, null, null, donePhaseId, null);
+
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/tickets" )
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("project-id", buildUpProjectId.toString())
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$").isArray())
+                        .andExpect(jsonPath("$[0].id").value(ticketId0.toString()))
+                        .andExpect(jsonPath("$[0].projectId").value(buildUpProjectId.toString()))
+                        .andExpect(jsonPath("$[0].title").value(ticketTitle0))
+                        .andExpect(jsonPath("$[0].description").value(ticketDescription0))
+                        .andExpect(jsonPath("$[0].phaseId").value(donePhaseId.toString()))
+                        .andExpect(jsonPath("$[0].creationTime").exists())
+                        .andExpect(jsonPath("$[0].dueTime").exists())
+                        .andExpect(jsonPath("$[1].id").value(ticketId1.toString()))
+                        .andExpect(jsonPath("$[1].projectId").value(buildUpProjectId.toString()))
+                        .andExpect(jsonPath("$[1].title").value(ticketTitle1))
+                        .andExpect(jsonPath("$[1].description").value(ticketDescription1))
+                        .andExpect(jsonPath("$[1].phaseId").value(backlogId.toString()))
+                        .andExpect(jsonPath("$[1].creationTime").exists())
+                        .andExpect(jsonPath("$[1].dueTime").exists())
+                        .andReturn();
+    }
+
+    @Test
+    public void getTicketByAssigneeIdQueryTest() throws Exception {
+        List<UUID> assigneeIds = new ArrayList<>();
+        assigneeIds.add(userId1);
+
+        // first ticket to first project
+        UUID ticketId0 = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, assigneeIds
+        );
+
+        // post a second project of different user
+        String secondTitle = "second title";
+        String secondDescription = "second description";
+        UUID secondProjectId = restMinion.postProject(jwt1, secondTitle, secondDescription);
+
+        // post second ticket to second project
+        String ticketTitle1 = "blub";
+        String ticketDescription1 = "asdlkfjaslkdfasdf";
+        LocalDateTime dateOfTheDayAfterTomorrow = dateOfTomorrow.plusDays(1);
+        UUID ticketId1 = restMinion.postTicket(
+                jwt1, secondProjectId, ticketTitle1, ticketDescription1, dateOfTheDayAfterTomorrow, assigneeIds
+        );
+
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/tickets" )
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .queryParam("assignee-id", userId1.toString())
+                                        .cookie(new Cookie("jwt", jwt1)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$").isArray())
+                        .andExpect(jsonPath("$[0].id").value(ticketId0.toString()))
+                        .andExpect(jsonPath("$[0].projectId").value(buildUpProjectId.toString()))
+                        .andExpect(jsonPath("$[0].title").value(ticketTitle0))
+                        .andExpect(jsonPath("$[0].description").value(ticketDescription0))
+                        .andExpect(jsonPath("$[0].phaseId").exists())
+                        .andExpect(jsonPath("$[0].creationTime").exists())
+                        .andExpect(jsonPath("$[0].dueTime").exists())
+                        .andExpect(jsonPath("$[1].id").value(ticketId1.toString()))
+                        .andExpect(jsonPath("$[1].projectId").value(secondProjectId.toString()))
+                        .andExpect(jsonPath("$[1].title").value(ticketTitle1))
+                        .andExpect(jsonPath("$[1].description").value(ticketDescription1))
+                        .andExpect(jsonPath("$[1].phaseId").exists())
+                        .andExpect(jsonPath("$[1].creationTime").exists())
+                        .andExpect(jsonPath("$[1].dueTime").exists())
                         .andReturn();
     }
 
