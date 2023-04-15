@@ -10,6 +10,7 @@ import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
+import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketDeletedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketPhaseUpdatedEvent;
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.awaitility.Awaitility.await;
@@ -277,6 +279,42 @@ public class TicketControllerTests {
         assertEquals(ticketId, ticket.getId());
         assertEquals(buildUpProjectId, ticket.getProjectId());
         assertEquals(ticketPatchDto.getPhaseId(), ticket.getPhaseId());
+        assertEquals(ticketTitle0, ticket.getTitle());
+        assertEquals(ticketDescription0, ticket.getDescription());
+        assertEquals(dateOfTomorrow, ticket.getDueTime());
+    }
+
+    @Test
+    public void patchTicketAssigneeIdsTest() throws Exception {
+        UUID ticketId = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>()
+        );
+
+        eventCatcher.catchEventOfType(TicketAssignedEvent.class);
+        List<UUID> assigneeIds = new ArrayList<>();
+        assigneeIds.add(userId1);
+        TicketPatchDto ticketPatchDto = new TicketPatchDto(null, null, null, null, assigneeIds);
+        MvcResult patchResult =
+                mockMvc.perform(
+                                patch("/tickets/" + ticketId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(ticketPatchDto))
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
+
+        // test event
+        await().until(eventCatcher::hasCaughtEvent);
+        TicketAssignedEvent ticketAssignedEvent = (TicketAssignedEvent) eventCatcher.getEvent();
+        assertEquals(ticketId, ticketAssignedEvent.getTicketId());
+        assertEquals(buildUpProjectId, ticketAssignedEvent.getProjectId());
+        assertEquals(assigneeIds.get(0), ticketAssignedEvent.getAssigneeId());
+
+        // test instance
+        Ticket ticket = ticketService.getTicketById(ticketId);
+        assertEquals(ticketId, ticket.getId());
+        assertEquals(buildUpProjectId, ticket.getProjectId());
+        assertTrue(ticket.isAssignee(assigneeIds.get(0)));
         assertEquals(ticketTitle0, ticket.getTitle());
         assertEquals(ticketDescription0, ticket.getDescription());
         assertEquals(dateOfTomorrow, ticket.getDueTime());
