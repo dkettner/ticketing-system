@@ -10,6 +10,7 @@ import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPatchDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
+import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import org.springframework.http.MediaType;
@@ -182,5 +183,25 @@ public class RestRequestHelper {
                         .andReturn();
         String postResponse = postResult.getResponse().getContentAsString();
         return UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
+    }
+
+    public void patchTicket(
+            String jwt,
+            UUID ticketId,
+            String title,
+            String description,
+            LocalDateTime dueTime,
+            UUID newPhaseId,
+            List<UUID> assigneeIds
+    ) throws Exception {
+        TicketPatchDto ticketPatchDto = new TicketPatchDto(title, description, dueTime, newPhaseId, assigneeIds);
+        MvcResult patchResult =
+                mockMvc.perform(
+                                patch("/tickets/" + ticketId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(objectMapper.writeValueAsString(ticketPatchDto))
+                                        .cookie(new Cookie("jwt", jwt)))
+                        .andExpect(status().isNoContent())
+                        .andReturn();
     }
 }
