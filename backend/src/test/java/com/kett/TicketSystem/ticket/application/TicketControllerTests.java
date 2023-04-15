@@ -181,6 +181,28 @@ public class TicketControllerTests {
     }
 
     @Test
+    public void getTicketByIdTest() throws Exception {
+        UUID ticketId = restMinion.postTicket(
+                jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>()
+        );
+
+        MvcResult getResult =
+                mockMvc.perform(
+                                get("/tickets/" + ticketId)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .cookie(new Cookie("jwt", jwt0)))
+                        .andExpect(status().isOk())
+                        .andExpect(jsonPath("$.id").value(ticketId.toString()))
+                        .andExpect(jsonPath("$.projectId").value(buildUpProjectId.toString()))
+                        .andExpect(jsonPath("$.title").value(ticketTitle0))
+                        .andExpect(jsonPath("$.description").value(ticketDescription0))
+                        .andExpect(jsonPath("$.phaseId").exists())
+                        .andExpect(jsonPath("$.creationTime").exists())
+                        .andExpect(jsonPath("$.dueTime").exists())
+                        .andReturn();
+    }
+
+    @Test
     public void postTicketTest() throws Exception {
         eventCatcher.catchEventOfType(TicketCreatedEvent.class);
         TicketPostDto ticketPostDto = new TicketPostDto(buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>());
