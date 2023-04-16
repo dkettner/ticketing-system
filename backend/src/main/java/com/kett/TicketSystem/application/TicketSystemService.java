@@ -22,7 +22,7 @@ import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.phase.application.PhaseService;
-import com.kett.TicketSystem.ticket.application.TicketService;
+import com.kett.TicketSystem.ticket.domain.TicketDomainService;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
@@ -46,7 +46,7 @@ public class TicketSystemService {
     private final NotificationService notificationService;
     private final PhaseService phaseService;
     private final ProjectService projectService;
-    private final TicketService ticketService;
+    private final TicketDomainService ticketDomainService;
     private final UserService userService;
     private final DtoMapper dtoMapper;
 
@@ -54,9 +54,10 @@ public class TicketSystemService {
     public TicketSystemService (
             AuthenticationService authenticationService,
             MembershipService membershipService,
-            NotificationService notificationService, PhaseService phaseService,
+            NotificationService notificationService,
+            PhaseService phaseService,
             ProjectService projectService,
-            TicketService ticketService,
+            TicketDomainService ticketDomainService,
             UserService userService
     ) {
         this.authenticationService = authenticationService;
@@ -64,7 +65,7 @@ public class TicketSystemService {
         this.notificationService = notificationService;
         this.phaseService = phaseService;
         this.projectService = projectService;
-        this.ticketService = ticketService;
+        this.ticketDomainService = ticketDomainService;
         this.userService = userService;
         this.dtoMapper = new DtoMapper();
     }
@@ -247,10 +248,10 @@ public class TicketSystemService {
     // ticket
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)))")
     public TicketResponseDto getTicketById(UUID id) {
-        Ticket ticket = ticketService.getTicketById(id);
+        Ticket ticket = ticketDomainService.getTicketById(id);
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
 
@@ -258,13 +259,13 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#phaseId)), " +
             "'ROLE_PROJECT_MEMBER_'.concat(@phaseService.getProjectIdByPhaseId(#phaseId)))")
     public List<TicketResponseDto> getTicketsByPhaseId(UUID phaseId) {
-        List<Ticket> tickets = ticketService.getTicketsByPhaseId(phaseId);
+        List<Ticket> tickets = ticketDomainService.getTicketsByPhaseId(phaseId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#assigneeId))")
     public List<TicketResponseDto> getTicketsByAssigneeId(UUID assigneeId) {
-        List<Ticket> tickets = ticketService.getTicketsByAssigneeId(assigneeId);
+        List<Ticket> tickets = ticketDomainService.getTicketsByAssigneeId(assigneeId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
@@ -272,7 +273,7 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
     public List<TicketResponseDto> getTicketsByProjectId(UUID projectId) {
-        List<Ticket> tickets = ticketService.getTicketsByProjectId(projectId);
+        List<Ticket> tickets = ticketDomainService.getTicketsByProjectId(projectId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
@@ -280,7 +281,7 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto, EmailAddress postingUserEmail) {
-        Ticket ticket = ticketService.addTicket(
+        Ticket ticket = ticketDomainService.addTicket(
                 dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, null),
                 userService.getUserIdByEmail(postingUserEmail)
         );
@@ -288,10 +289,10 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)))")
     public void patchTicketById(UUID id, TicketPatchDto ticketPatchDto) {
-        ticketService.patchTicket(
+        ticketDomainService.patchTicket(
                 id,
                 ticketPatchDto.getTitle(),
                 ticketPatchDto.getDescription(),
@@ -302,10 +303,10 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)))")
     public void deleteTicketById(UUID id) {
-        ticketService.deleteTicketById(id);
+        ticketDomainService.deleteTicketById(id);
     }
 
 

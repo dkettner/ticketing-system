@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.ticket.application;
+package com.kett.TicketSystem.ticket.domain;
 
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
@@ -11,7 +11,7 @@ import com.kett.TicketSystem.phase.domain.events.PhasePositionUpdatedEvent;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
-import com.kett.TicketSystem.ticket.domain.Ticket;
+import com.kett.TicketSystem.ticket.application.*;
 import com.kett.TicketSystem.ticket.domain.events.*;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
@@ -27,7 +27,7 @@ import java.util.*;
 
 @Service
 @Transactional
-public class TicketService {
+public class TicketDomainService {
     private final TicketRepository ticketRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final ConsumedProjectDataManager consumedProjectDataManager;
@@ -35,7 +35,7 @@ public class TicketService {
     private final ConsumedMembershipDataManager consumedMembershipDataManager;
 
     @Autowired
-    public TicketService(TicketRepository ticketRepository, ApplicationEventPublisher eventPublisher) {
+    public TicketDomainService(TicketRepository ticketRepository, ApplicationEventPublisher eventPublisher) {
         this.ticketRepository = ticketRepository;
         this.eventPublisher = eventPublisher;
         this.consumedProjectDataManager = new ConsumedProjectDataManager();

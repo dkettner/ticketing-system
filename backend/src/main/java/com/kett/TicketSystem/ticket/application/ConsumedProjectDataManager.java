@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class ConsumedProjectDataManager implements IConsumedDataManager<UUID> {
     // TODO: use persistent storage instead
-    List<UUID> existingProjects = new ArrayList<>(); // TicketService only cares about the IDs of the projects
+    List<UUID> existingProjects = new ArrayList<>(); // TicketDomainService only cares about the IDs of the projects
 
     @Override
     public Boolean add(UUID date) {

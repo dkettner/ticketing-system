@@ -10,6 +10,7 @@ import com.kett.TicketSystem.project.repository.ProjectRepository;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
+import com.kett.TicketSystem.ticket.domain.TicketDomainService;
 import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketDeletedEvent;
@@ -54,7 +55,7 @@ public class TicketControllerTests {
     private final RestRequestHelper restMinion;
     private final ApplicationEventPublisher eventPublisher;
     private final EventCatcher eventCatcher;
-    private final TicketService ticketService;
+    private final TicketDomainService ticketDomainService;
     private final TicketRepository ticketRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
@@ -93,7 +94,7 @@ public class TicketControllerTests {
             ObjectMapper objectMapper,
             ApplicationEventPublisher eventPublisher,
             EventCatcher eventCatcher,
-            TicketService ticketService,
+            TicketDomainService ticketDomainService,
             TicketRepository ticketRepository,
             UserRepository userRepository,
             ProjectRepository projectRepository,
@@ -106,7 +107,7 @@ public class TicketControllerTests {
         this.restMinion = new RestRequestHelper(mockMvc, objectMapper);
         this.eventPublisher = eventPublisher;
         this.eventCatcher = eventCatcher;
-        this.ticketService = ticketService;
+        this.ticketDomainService = ticketDomainService;
         this.ticketRepository = ticketRepository;
         this.userRepository = userRepository;
         this.membershipRepository = membershipRepository;
@@ -214,7 +215,7 @@ public class TicketControllerTests {
                 jwt0, buildUpProjectId, ticketTitle1, ticketDescription1, dateOfTheDayAfterTomorrow, new ArrayList<>()
         );
 
-        UUID backlogId = ticketService.getTicketById(ticketId0).getPhaseId();
+        UUID backlogId = ticketDomainService.getTicketById(ticketId0).getPhaseId();
         MvcResult getResult =
                 mockMvc.perform(
                                 get("/tickets" )
@@ -248,7 +249,7 @@ public class TicketControllerTests {
         );
 
         // post a second phase
-        UUID backlogId = ticketService.getTicketById(ticketId0).getPhaseId();
+        UUID backlogId = ticketDomainService.getTicketById(ticketId0).getPhaseId();
         UUID donePhaseId = restMinion.postPhase(jwt0, buildUpProjectId, "DONE", backlogId);
 
         // second ticket
@@ -365,7 +366,7 @@ public class TicketControllerTests {
         assertEquals(userId0, ticketCreatedEvent.getUserId());
 
         // test instance
-        Ticket ticket = ticketService.getTicketById(ticketId);
+        Ticket ticket = ticketDomainService.getTicketById(ticketId);
         assertEquals(ticketId, ticket.getId());
         assertEquals(ticketPostDto.getTitle(), ticket.getTitle());
         assertEquals(ticketPostDto.getDescription(), ticket.getDescription());
@@ -394,7 +395,7 @@ public class TicketControllerTests {
                         .andReturn();
 
         // test instance
-        Ticket ticket = ticketService.getTicketById(ticketId);
+        Ticket ticket = ticketDomainService.getTicketById(ticketId);
         assertEquals(ticketId, ticket.getId());
         assertEquals(buildUpProjectId, ticket.getProjectId());
         assertEquals(ticketPatchDto.getTitle(), ticket.getTitle());
@@ -407,7 +408,7 @@ public class TicketControllerTests {
         UUID ticketId = restMinion.postTicket(
                 jwt0, buildUpProjectId, ticketTitle0, ticketDescription0, dateOfTomorrow, new ArrayList<>()
         );
-        UUID backlogPhaseId = ticketService.getTicketById(ticketId).getPhaseId();
+        UUID backlogPhaseId = ticketDomainService.getTicketById(ticketId).getPhaseId();
         UUID donePhaseId = restMinion.postPhase(jwt0, buildUpProjectId, "DONE", backlogPhaseId);
 
         eventCatcher.catchEventOfType(TicketPhaseUpdatedEvent.class);
@@ -430,7 +431,7 @@ public class TicketControllerTests {
         assertEquals(backlogPhaseId, ticketPhaseUpdatedEvent.getOldPhaseId());
 
         // test instance
-        Ticket ticket = ticketService.getTicketById(ticketId);
+        Ticket ticket = ticketDomainService.getTicketById(ticketId);
         assertEquals(ticketId, ticket.getId());
         assertEquals(buildUpProjectId, ticket.getProjectId());
         assertEquals(ticketPatchDto.getPhaseId(), ticket.getPhaseId());
@@ -466,7 +467,7 @@ public class TicketControllerTests {
         assertEquals(assigneeIds.get(0), ticketAssignedEvent.getAssigneeId());
 
         // test instance
-        Ticket ticket = ticketService.getTicketById(ticketId);
+        Ticket ticket = ticketDomainService.getTicketById(ticketId);
         assertEquals(ticketId, ticket.getId());
         assertEquals(buildUpProjectId, ticket.getProjectId());
         assertTrue(ticket.isAssignee(assigneeIds.get(0)));
@@ -497,6 +498,6 @@ public class TicketControllerTests {
         assertEquals(buildUpProjectId, ticketDeletedEvent.getProjectId());
 
         // test instance
-        assertThrows(NoTicketFoundException.class, () -> ticketService.getTicketById(ticketId));
+        assertThrows(NoTicketFoundException.class, () -> ticketDomainService.getTicketById(ticketId));
     }
 }
