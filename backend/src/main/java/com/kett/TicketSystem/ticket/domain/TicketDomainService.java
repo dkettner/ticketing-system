@@ -14,6 +14,7 @@ import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.ticket.domain.consumedData.*;
 import com.kett.TicketSystem.ticket.domain.events.*;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
+import com.kett.TicketSystem.ticket.repository.MembershipDataOfTicketRepository;
 import com.kett.TicketSystem.ticket.repository.ProjectDataOfTicketRepository;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,20 +33,21 @@ public class TicketDomainService {
     private final TicketRepository ticketRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final ProjectDataOfTicketRepository projectDataOfTicketRepository;
+    private final MembershipDataOfTicketRepository membershipDataOfTicketRepository;
     private final ConsumedPhaseDataManager consumedPhaseDataManager;
-    private final ConsumedMembershipDataManager consumedMembershipDataManager;
 
     @Autowired
     public TicketDomainService(
             TicketRepository ticketRepository,
             ApplicationEventPublisher eventPublisher,
-            ProjectDataOfTicketRepository projectDataOfTicketRepository
+            ProjectDataOfTicketRepository projectDataOfTicketRepository,
+            MembershipDataOfTicketRepository membershipDataOfTicketRepository
     ) {
         this.ticketRepository = ticketRepository;
         this.eventPublisher = eventPublisher;
         this.projectDataOfTicketRepository = projectDataOfTicketRepository;
+        this.membershipDataOfTicketRepository = membershipDataOfTicketRepository;
         this.consumedPhaseDataManager = new ConsumedPhaseDataManager();
-        this.consumedMembershipDataManager = new ConsumedMembershipDataManager();
     }
 
 
@@ -74,13 +76,11 @@ public class TicketDomainService {
     }
 
     private Boolean allAssigneesAreProjectMembers(UUID projectId, List<UUID> assigneeIds) {
-        Optional<ProjectMembersVO> projectMembersVO = consumedMembershipDataManager.get(projectId);
-        if (projectMembersVO.isEmpty()) {
-            return false;
-        }
-
-        List<UUID> projectMemberIds = projectMembersVO.get().memberIds();
-        return new HashSet<>(projectMemberIds).containsAll(assigneeIds);
+        return assigneeIds
+                .stream()
+                .allMatch(assigneeId ->
+                        membershipDataOfTicketRepository.existsByUserIdAndProjectId(assigneeId, projectId)
+                );
     }
 
 
@@ -226,13 +226,7 @@ public class TicketDomainService {
         tickets.forEach(ticket -> ticket.removeAssignee(membershipDeletedEvent.getUserId()));
         ticketRepository.saveAll(tickets);
 
-        // Update projectMembersVO
-        Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(membershipDeletedEvent.getProjectId());
-        if (projectMembersVO.isPresent()) {
-            List<UUID> projectMembers = projectMembersVO.get().memberIds();
-            projectMembers.remove(membershipDeletedEvent.getUserId());
-            this.consumedMembershipDataManager.overwrite(new ProjectMembersVO(membershipDeletedEvent.getProjectId(), projectMembers));
-        }
+        membershipDataOfTicketRepository.deleteByMembershipId(membershipDeletedEvent.getMembershipId());
     }
 
     @EventListener
@@ -241,16 +235,13 @@ public class TicketDomainService {
         if (!projectDataOfTicketRepository.existsByProjectId(membershipAcceptedEvent.getProjectId())){
             projectDataOfTicketRepository.save(new ProjectDataOfTicket(membershipAcceptedEvent.getProjectId()));
         }
-
-        Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(membershipAcceptedEvent.getProjectId());
-        if (projectMembersVO.isEmpty()) {
-            this.consumedMembershipDataManager.add(new ProjectMembersVO(membershipAcceptedEvent.getProjectId(), new ArrayList<>()));
-            projectMembersVO = this.consumedMembershipDataManager.get(membershipAcceptedEvent.getProjectId());
-        }
-
-        List<UUID> projectMembers = projectMembersVO.get().memberIds();
-        projectMembers.add(membershipAcceptedEvent.getUserId());
-        this.consumedMembershipDataManager.overwrite(new ProjectMembersVO(membershipAcceptedEvent.getProjectId(), projectMembers));
+        membershipDataOfTicketRepository.save(
+                new MembershipDataOfTicket(
+                        membershipAcceptedEvent.getMembershipId(),
+                        membershipAcceptedEvent.getUserId(),
+                        membershipAcceptedEvent.getProjectId()
+                )
+        );
     }
 
     @EventListener
@@ -259,11 +250,6 @@ public class TicketDomainService {
         if (!projectDataOfTicketRepository.existsByProjectId(projectCreatedEvent.getProjectId())){
             projectDataOfTicketRepository.save(new ProjectDataOfTicket(projectCreatedEvent.getProjectId()));
         }
-
-        Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(projectCreatedEvent.getProjectId());
-        if (projectMembersVO.isEmpty()) {
-            this.consumedMembershipDataManager.add(new ProjectMembersVO(projectCreatedEvent.getProjectId(), new ArrayList<>()));
-        }
     }
 
     @EventListener
@@ -271,11 +257,6 @@ public class TicketDomainService {
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
         if (!projectDataOfTicketRepository.existsByProjectId(defaultProjectCreatedEvent.getProjectId())) {
             projectDataOfTicketRepository.save(new ProjectDataOfTicket(defaultProjectCreatedEvent.getProjectId()));
-        }
-
-        Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(defaultProjectCreatedEvent.getProjectId());
-        if (projectMembersVO.isEmpty()) {
-            this.consumedMembershipDataManager.add(new ProjectMembersVO(defaultProjectCreatedEvent.getProjectId(), new ArrayList<>()));
         }
     }
 
@@ -288,7 +269,6 @@ public class TicketDomainService {
         this.consumedPhaseDataManager.removeByPredicate(phaseVO ->
                 phaseVO.projectId().equals(projectDeletedEvent.getProjectId())
         );
-        this.consumedMembershipDataManager.remove(projectDeletedEvent.getProjectId());
     }
 
     @EventListener
