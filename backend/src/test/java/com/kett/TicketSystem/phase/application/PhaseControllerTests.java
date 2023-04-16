@@ -36,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.servlet.http.Cookie;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.*;
@@ -365,7 +366,7 @@ public class PhaseControllerTests {
 
         // test event
         try {
-            await().until(eventCatcher::hasCaughtEvent);
+            await().atMost(3, TimeUnit.SECONDS).until(eventCatcher::hasCaughtEvent);
             fail();
         } catch (Exception e) {
             // test passed
