@@ -1,7 +1,7 @@
 package com.kett.TicketSystem.membership.domain;
 
-import com.kett.TicketSystem.membership.domain.consumedData.ConsumedProjectDataManager;
-import com.kett.TicketSystem.membership.domain.consumedData.ConsumedUserDataManager;
+import com.kett.TicketSystem.membership.domain.consumedData.ProjectDataOfMembership;
+import com.kett.TicketSystem.membership.domain.consumedData.UserDataOfMembership;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
@@ -10,6 +10,8 @@ import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExist
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
+import com.kett.TicketSystem.membership.repository.ProjectDataOfMembershipRepository;
+import com.kett.TicketSystem.membership.repository.UserDataOfMembershipRepository;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -32,25 +34,30 @@ import java.util.*;
 public class MembershipDomainService {
     private final MembershipRepository membershipRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final ConsumedProjectDataManager consumedProjectDataManager;
-    private final ConsumedUserDataManager consumedUserDataManager;
+    private final UserDataOfMembershipRepository userDataOfMembershipRepository;
+    private final ProjectDataOfMembershipRepository projectDataOfMembershipRepository;
 
     @Autowired
-    public MembershipDomainService(MembershipRepository membershipRepository, ApplicationEventPublisher eventPublisher) {
+    public MembershipDomainService(
+            MembershipRepository membershipRepository,
+            ApplicationEventPublisher eventPublisher,
+            UserDataOfMembershipRepository userDataOfMembershipRepository,
+            ProjectDataOfMembershipRepository projectDataOfMembershipRepository
+    ) {
         this.membershipRepository = membershipRepository;
         this.eventPublisher = eventPublisher;
-        this.consumedProjectDataManager = new ConsumedProjectDataManager();
-        this.consumedUserDataManager = new ConsumedUserDataManager();
+        this.userDataOfMembershipRepository = userDataOfMembershipRepository;
+        this.projectDataOfMembershipRepository = projectDataOfMembershipRepository;
     }
 
 
     // create
 
     public Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
-        if (!consumedProjectDataManager.exists(membership.getProjectId())) {
+        if (!projectDataOfMembershipRepository.existsByProjectId(membership.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + membership.getProjectId());
         }
-        if (!consumedUserDataManager.exists(membership.getUserId())) {
+        if (!userDataOfMembershipRepository.existsByUserId(membership.getUserId())) {
             throw new NoUserFoundException("could not find user with id: " + membership.getUserId());
         }
         if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
@@ -197,28 +204,30 @@ public class MembershipDomainService {
     @EventListener
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-        this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
+        projectDataOfMembershipRepository.save(new ProjectDataOfMembership(projectCreatedEvent.getProjectId()));
         Membership defaultMembership = new Membership(
                 projectCreatedEvent.getProjectId(),
                 projectCreatedEvent.getUserId(),
                 Role.ADMIN
         );
         defaultMembership.setState(State.ACCEPTED);
-        Membership initializedMembership = this.addMembership(defaultMembership);
+        this.addMembership(defaultMembership);
     }
 
     @EventListener
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        this.consumedProjectDataManager.add(defaultProjectCreatedEvent.getProjectId());
-        this.consumedUserDataManager.add(defaultProjectCreatedEvent.getUserId());
+        projectDataOfMembershipRepository.save(new ProjectDataOfMembership(defaultProjectCreatedEvent.getProjectId()));
+        if (!userDataOfMembershipRepository.existsByUserId(defaultProjectCreatedEvent.getUserId())) {
+            userDataOfMembershipRepository.save(new UserDataOfMembership(defaultProjectCreatedEvent.getUserId()));
+        }
         Membership defaultMembership = new Membership(
                 defaultProjectCreatedEvent.getProjectId(),
                 defaultProjectCreatedEvent.getUserId(),
                 Role.ADMIN
         );
         defaultMembership.setState(State.ACCEPTED);
-        Membership initializedMembership = this.addMembership(defaultMembership);
+        this.addMembership(defaultMembership);
     }
 
     @EventListener
@@ -229,13 +238,15 @@ public class MembershipDomainService {
                         new MembershipDeletedEvent(membership.getId(), membership.getProjectId(), membership.getUserId())
                 )
         );
-        this.consumedProjectDataManager.remove(projectDeletedEvent.getProjectId());
+        projectDataOfMembershipRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
     }
 
     @EventListener
     @Async
     public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
-        this.consumedUserDataManager.add(userCreatedEvent.getUserId());
+        if (!userDataOfMembershipRepository.existsByUserId(userCreatedEvent.getUserId())) {
+            userDataOfMembershipRepository.save(new UserDataOfMembership(userCreatedEvent.getUserId()));
+        }
     }
 
     @EventListener
@@ -247,6 +258,6 @@ public class MembershipDomainService {
                     new MembershipDeletedEvent(membership.getId(), membership.getProjectId(), membership.getUserId())
             );
         });
-        this.consumedUserDataManager.remove(userDeletedEvent.getUserId());
+        userDataOfMembershipRepository.deleteByUserId(userDeletedEvent.getUserId());
     }
 }
