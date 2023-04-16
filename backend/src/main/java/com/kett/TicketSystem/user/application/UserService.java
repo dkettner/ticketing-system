@@ -1,9 +1,9 @@
 package com.kett.TicketSystem.user.application;
 
+import com.kett.TicketSystem.membership.domain.MembershipDomainService;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.membership.application.MembershipService;
 import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.common.exceptions.NoUserFoundException;
@@ -30,19 +30,19 @@ import java.util.UUID;
 @Transactional
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
-    private final MembershipService membershipService;
+    private final MembershipDomainService membershipDomainService;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
     public UserService(
             UserRepository userRepository,
-            MembershipService membershipService,
+            MembershipDomainService membershipDomainService,
             PasswordEncoder passwordEncoder,
             ApplicationEventPublisher eventPublisher
     ) {
         this.userRepository = userRepository;
-        this.membershipService = membershipService;
+        this.membershipDomainService = membershipDomainService;
         this.passwordEncoder = passwordEncoder;
         this.eventPublisher = eventPublisher;
     }
@@ -101,7 +101,7 @@ public class UserService implements UserDetailsService {
     }
 
     private List<GrantedAuthority> getAllUserAuthoritiesByUserId(UUID id) {
-        List<GrantedAuthority> projectAuthorities = membershipService.getProjectAuthoritiesByUserId(id);
+        List<GrantedAuthority> projectAuthorities = membershipDomainService.getProjectAuthoritiesByUserId(id);
         SimpleGrantedAuthority userAuthority = new SimpleGrantedAuthority("ROLE_USER_" + id);
 
         List<GrantedAuthority> allGrantedAuthorities = new ArrayList<>();

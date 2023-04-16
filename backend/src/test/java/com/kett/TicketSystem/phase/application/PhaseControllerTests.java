@@ -6,6 +6,7 @@ import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.domain.Phase;
+import com.kett.TicketSystem.phase.domain.PhaseDomainService;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
@@ -54,7 +55,7 @@ public class PhaseControllerTests {
     private final RestRequestHelper restMinion;
     private final ApplicationEventPublisher eventPublisher;
     private final EventCatcher eventCatcher;
-    private final PhaseService phaseService;
+    private final PhaseDomainService phaseDomainService;
     private final PhaseRepository phaseRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
@@ -83,7 +84,7 @@ public class PhaseControllerTests {
             ObjectMapper objectMapper,
             ApplicationEventPublisher eventPublisher,
             EventCatcher eventCatcher,
-            PhaseService phaseService,
+            PhaseDomainService phaseDomainService,
             PhaseRepository phaseRepository,
             ProjectRepository projectRepository,
             UserRepository userRepository
@@ -93,7 +94,7 @@ public class PhaseControllerTests {
         this.eventCatcher = eventCatcher;
         this.restMinion = new RestRequestHelper(mockMvc, objectMapper);
         this.eventPublisher = eventPublisher;
-        this.phaseService = phaseService;
+        this.phaseDomainService = phaseDomainService;
         this.phaseRepository = phaseRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
@@ -148,7 +149,7 @@ public class PhaseControllerTests {
     @Test
     public void getPhaseByIdTest() throws Exception {
         UUID phaseId = restMinion.postPhase(jwt, buildUpProjectId, phaseName0, null);
-        Phase phase = phaseService.getPhaseById(phaseId);
+        Phase phase = phaseDomainService.getPhaseById(phaseId);
         MvcResult getResult =
                 mockMvc.perform(
                                 get("/phases/" + phaseId)
@@ -167,7 +168,7 @@ public class PhaseControllerTests {
     @Test
     public void getPhasesByQueryTest() throws Exception {
         UUID phaseId = restMinion.postPhase(jwt, buildUpProjectId, phaseName0, null);
-        List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> phases = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
 
         // defaultPhase + new phase = 2
         MvcResult getResult =
@@ -223,7 +224,7 @@ public class PhaseControllerTests {
         assertEquals(phasePostDto0.getProjectId(), phaseCreatedEvent.getProjectId());
 
         // test instance
-        Phase phase0 = phaseService.getPhaseById(phaseId0);
+        Phase phase0 = phaseDomainService.getPhaseById(phaseId0);
         assertEquals(phaseId0, phase0.getId());
         assertEquals(phasePostDto0.getProjectId(), phase0.getProjectId());
         assertEquals(phasePostDto0.getName(), phase0.getName());
@@ -257,7 +258,7 @@ public class PhaseControllerTests {
         assertEquals(phasePostDto1.getProjectId(), phaseCreatedEvent1.getProjectId());
 
         // test instance
-        Phase phase1 = phaseService.getPhaseById(phaseId1);
+        Phase phase1 = phaseDomainService.getPhaseById(phaseId1);
         assertEquals(phaseId1, phase1.getId());
         assertEquals(phasePostDto1.getProjectId(), phase1.getProjectId());
         assertEquals(phasePostDto1.getName(), phase1.getName());
@@ -271,7 +272,7 @@ public class PhaseControllerTests {
         restMinion.postPhase(jwt, buildUpProjectId, phaseName0, null);
 
         // test initial state
-        List<Phase> initialPhases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> initialPhases = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
         assertEquals(3, initialPhases.size());
 
         assertEquals("BACKLOG", initialPhases.get(0).getName());
@@ -312,10 +313,10 @@ public class PhaseControllerTests {
         assertEquals(buildUpProjectId, phaseDeletedEvent.getProjectId());
 
         // test if phase was actually deleted
-        assertThrows(NoPhaseFoundException.class, () -> phaseService.getPhaseById(phaseId1));
+        assertThrows(NoPhaseFoundException.class, () -> phaseDomainService.getPhaseById(phaseId1));
 
         // test other phases after delete
-        List<Phase> phasesAfterFirstDelete = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> phasesAfterFirstDelete = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
         assertEquals(2, phasesAfterFirstDelete.size());
         assertEquals(backlogId, phasesAfterFirstDelete.get(0).getId());
         assertTrue(phasesAfterFirstDelete.get(0).isLast());
@@ -343,10 +344,10 @@ public class PhaseControllerTests {
         assertEquals(buildUpProjectId, phaseDeletedEvent1.getProjectId());
 
         // test if phase was actually deleted
-        assertThrows(NoPhaseFoundException.class, () -> phaseService.getPhaseById(backlogId));
+        assertThrows(NoPhaseFoundException.class, () -> phaseDomainService.getPhaseById(backlogId));
 
         // test other phases after delete
-        List<Phase> phasesAfterSecondDelete = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> phasesAfterSecondDelete = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
         assertEquals(1, phasesAfterSecondDelete.size());
         assertEquals(phaseId0, phasesAfterSecondDelete.get(0).getId());
         assertTrue(phasesAfterSecondDelete.get(0).isFirst());
@@ -373,12 +374,12 @@ public class PhaseControllerTests {
         }
 
         // test if phase was actually deleted
-        Phase phase = phaseService.getPhaseById(phaseId0);
+        Phase phase = phaseDomainService.getPhaseById(phaseId0);
     }
 
     @Test
     public void patchPhaseNameTest() throws Exception {
-        List<Phase> initialPhases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> initialPhases = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
         assertEquals(1, initialPhases.size());
         assertEquals("BACKLOG", initialPhases.get(0).getName());
         UUID backlogId = initialPhases.get(0).getId();
@@ -395,7 +396,7 @@ public class PhaseControllerTests {
                         .andReturn();
 
         // test if name changed
-        Phase phase = phaseService.getPhaseById(backlogId);
+        Phase phase = phaseDomainService.getPhaseById(backlogId);
         assertEquals(backlogId, phase.getId());
         assertEquals(newName, phase.getName());
         assertNotEquals("BACKLOG", phase.getName());
@@ -407,7 +408,7 @@ public class PhaseControllerTests {
         restMinion.postPhase(jwt, buildUpProjectId, phaseName0, null);
 
         // test initial state
-        List<Phase> initialPhases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> initialPhases = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
         assertEquals(3, initialPhases.size());
 
         assertEquals("BACKLOG", initialPhases.get(0).getName());
@@ -443,7 +444,7 @@ public class PhaseControllerTests {
                         .andReturn();
 
         // test initial state
-        List<Phase> phasesAfterPatch = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> phasesAfterPatch = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
         assertEquals(3, phasesAfterPatch.size());
 
         assertEquals("BACKLOG", phasesAfterPatch.get(0).getName());
@@ -483,7 +484,7 @@ public class PhaseControllerTests {
         assertEquals(tempProjectId, phaseCreatedEvent.getProjectId());
 
         // test phases
-        List<Phase> phases = phaseService.getPhasesByProjectId(tempProjectId);
+        List<Phase> phases = phaseDomainService.getPhasesByProjectId(tempProjectId);
         assertEquals(4, phases.size());
 
         assertEquals("DONE", phases.get(0).getName());
@@ -529,7 +530,7 @@ public class PhaseControllerTests {
         assertEquals(tempProjectId, phaseCreatedEvent.getProjectId());
 
         // test phases
-        List<Phase> phases = phaseService.getPhasesByProjectId(tempProjectId);
+        List<Phase> phases = phaseDomainService.getPhasesByProjectId(tempProjectId);
         assertEquals(1, phases.size());
 
         assertEquals("BACKLOG", phases.get(0).getName());
@@ -551,7 +552,7 @@ public class PhaseControllerTests {
         assertEquals(buildUpProjectId, phaseDeletedEvent.getProjectId());
 
         // test if phase is actually gone
-        assertThrows(NoPhaseFoundException.class, () -> phaseService.getPhasesByProjectId(buildUpProjectId));
+        assertThrows(NoPhaseFoundException.class, () -> phaseDomainService.getPhasesByProjectId(buildUpProjectId));
     }
 
     @Test
@@ -560,13 +561,13 @@ public class PhaseControllerTests {
         eventPublisher.publishEvent(new TicketCreatedEvent(ticketId, buildUpProjectId, userId));
 
         // get phaseId of buildUpProject
-        List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> phases = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
         assertEquals(1, phases.size());
         assertEquals("BACKLOG", phases.get(0).getName());
         UUID phaseId = phases.get(0).getId();
 
         // test instance
-        Phase phase = phaseService.getPhaseById(phases.get(0).getId());
+        Phase phase = phaseDomainService.getPhaseById(phases.get(0).getId());
         assertEquals(phase, phases.get(0));
         assertEquals(buildUpProjectId, phase.getProjectId());
         assertEquals(1, phase.getTicketCount());
@@ -578,7 +579,7 @@ public class PhaseControllerTests {
         eventPublisher.publishEvent(new TicketCreatedEvent(ticketId, buildUpProjectId, userId));
 
         // get phaseId of buildUpProject
-        List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> phases = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
         assertEquals("BACKLOG", phases.get(0).getName());
         assertEquals(1, phases.size());
         assertEquals(1, phases.get(0).getTicketCount());
@@ -587,7 +588,7 @@ public class PhaseControllerTests {
         eventPublisher.publishEvent(new TicketDeletedEvent(ticketId, buildUpProjectId, phaseId));
 
         // test instance
-        Phase phase = phaseService.getPhaseById(phaseId);
+        Phase phase = phaseDomainService.getPhaseById(phaseId);
         assertEquals(phase, phases.get(0));
         assertEquals(buildUpProjectId, phase.getProjectId());
         assertEquals(0, phase.getTicketCount());
@@ -596,7 +597,7 @@ public class PhaseControllerTests {
     @Test
     public void consumeTicketPhaseUpdatedEventTest() throws Exception {
         // get ids of phases
-        List<Phase> phases = phaseService.getPhasesByProjectId(buildUpProjectId);
+        List<Phase> phases = phaseDomainService.getPhasesByProjectId(buildUpProjectId);
         assertEquals("BACKLOG", phases.get(0).getName());
         assertEquals(1, phases.size());
         UUID backlogId = phases.get(0).getId();
@@ -606,14 +607,14 @@ public class PhaseControllerTests {
         UUID ticketId = UUID.randomUUID();
         eventPublisher.publishEvent(new TicketCreatedEvent(ticketId, buildUpProjectId, userId));
 
-        assertEquals(1, phaseService.getPhaseById(backlogId).getTicketCount());
-        assertEquals(0, phaseService.getPhaseById(doneId).getTicketCount());
+        assertEquals(1, phaseDomainService.getPhaseById(backlogId).getTicketCount());
+        assertEquals(0, phaseDomainService.getPhaseById(doneId).getTicketCount());
 
         // change position of ticket
         eventPublisher.publishEvent(new TicketPhaseUpdatedEvent(ticketId, buildUpProjectId, backlogId, doneId));
 
         // test if ticketCount of phases got updated
-        assertEquals(0, phaseService.getPhaseById(backlogId).getTicketCount());
-        assertEquals(1, phaseService.getPhaseById(doneId).getTicketCount());
+        assertEquals(0, phaseDomainService.getPhaseById(backlogId).getTicketCount());
+        assertEquals(1, phaseDomainService.getPhaseById(doneId).getTicketCount());
     }
 }

@@ -1,14 +1,15 @@
-package com.kett.TicketSystem.phase.application;
+package com.kett.TicketSystem.phase.domain;
 
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.phase.domain.consumedData.ProjectDataOfPhase;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhasePositionUpdatedEvent;
 import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
+import com.kett.TicketSystem.phase.repository.ProjectDataOfPhaseRepository;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
-import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.common.exceptions.UnrelatedPhaseException;
@@ -32,23 +33,39 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class PhaseService {
+public class PhaseDomainService {
     private final PhaseRepository phaseRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final ConsumedProjectDataManager consumedProjectDataManager;
+    private final ProjectDataOfPhaseRepository projectDataOfPhaseRepository;
 
     @Autowired
-    public PhaseService(PhaseRepository phaseRepository, ApplicationEventPublisher eventPublisher) {
+    public PhaseDomainService(
+            PhaseRepository phaseRepository,
+            ApplicationEventPublisher eventPublisher,
+            ProjectDataOfPhaseRepository projectDataOfPhaseRepository
+    ) {
         this.phaseRepository = phaseRepository;
         this.eventPublisher = eventPublisher;
-        this.consumedProjectDataManager = new ConsumedProjectDataManager();
+        this.projectDataOfPhaseRepository = projectDataOfPhaseRepository;
     }
 
 
     // create
 
-    public Phase addPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException {
-        if (!consumedProjectDataManager.exists(phase.getProjectId())) {
+    public Phase createPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException  {
+        Phase initializedPhase = addPhase(phase, previousPhaseId);
+        eventPublisher.publishEvent(
+                new PhaseCreatedEvent(
+                        initializedPhase.getId(),
+                        initializedPhase.getPreviousPhase(),
+                        initializedPhase.getProjectId()
+                )
+        );
+        return initializedPhase;
+    }
+
+    private Phase addPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException {
+        if (!projectDataOfPhaseRepository.existsByProjectId(phase.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + phase.getProjectId());
         }
 
@@ -71,13 +88,6 @@ public class PhaseService {
         } else {
             initializedPhase = addAfterPrevious(phase, previousPhase);
         }
-        eventPublisher.publishEvent(
-                new PhaseCreatedEvent(
-                        initializedPhase.getId(),
-                        initializedPhase.getPreviousPhase(),
-                        initializedPhase.getProjectId()
-                )
-        );
         return initializedPhase;
     }
 
@@ -229,31 +239,31 @@ public class PhaseService {
     @EventListener
     @Async
     public void handleDefaultProjectCreated(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        this.consumedProjectDataManager.add(defaultProjectCreatedEvent.getProjectId());
+        projectDataOfPhaseRepository.save(new ProjectDataOfPhase(defaultProjectCreatedEvent.getProjectId()));
 
         Phase backlog = new Phase(defaultProjectCreatedEvent.getProjectId(), "BACKLOG", null, null);
         Phase doing = new Phase(defaultProjectCreatedEvent.getProjectId(), "DOING", null, null);
         Phase review = new Phase(defaultProjectCreatedEvent.getProjectId(), "REVIEW", null, null);
         Phase done = new Phase(defaultProjectCreatedEvent.getProjectId(), "DONE", null, null);
 
-        this.addPhase(done, null);
-        this.addPhase(review, null);
-        this.addPhase(doing, null);
-        this.addPhase(backlog, null);
+        this.createPhase(done, null);
+        this.createPhase(review, null);
+        this.createPhase(doing, null);
+        this.createPhase(backlog, null);
     }
 
     @EventListener
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
-        this.consumedProjectDataManager.remove(projectDeletedEvent.getProjectId());
+        projectDataOfPhaseRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
         this.deletePhasesByProjectId(projectDeletedEvent.getProjectId());
     }
 
     @EventListener
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-        this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
-        this.addPhase(
+        projectDataOfPhaseRepository.save(new ProjectDataOfPhase(projectCreatedEvent.getProjectId()));
+        this.createPhase(
                 new Phase(projectCreatedEvent.getProjectId(), "BACKLOG", null, null),
                 null
         );

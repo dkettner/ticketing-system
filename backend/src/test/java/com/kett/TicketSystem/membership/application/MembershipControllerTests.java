@@ -6,6 +6,7 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.membership.domain.MembershipDomainService;
 import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
@@ -52,7 +53,7 @@ public class MembershipControllerTests {
     private final ApplicationEventPublisher eventPublisher;
     private final RestRequestHelper restMinion;
     private final UserRepository userRepository;
-    private final MembershipService membershipService;
+    private final MembershipDomainService membershipDomainService;
     private final MembershipRepository membershipRepository;
 
     private UUID userId0;
@@ -78,7 +79,7 @@ public class MembershipControllerTests {
             EventCatcher eventCatcher,
             ApplicationEventPublisher eventPublisher,
             UserRepository userRepository,
-            MembershipService membershipService,
+            MembershipDomainService membershipDomainService,
             MembershipRepository membershipRepository
     ) {
         this.mockMvc = mockMvc;
@@ -87,7 +88,7 @@ public class MembershipControllerTests {
         this.eventPublisher = eventPublisher;
         this.restMinion = new RestRequestHelper(mockMvc, objectMapper);
         this.userRepository = userRepository;
-        this.membershipService = membershipService;
+        this.membershipDomainService = membershipDomainService;
         this.membershipRepository = membershipRepository;
     }
 
@@ -283,7 +284,7 @@ public class MembershipControllerTests {
         assertEquals(membershipPostDto.getUserId(), unacceptedProjectMembershipCreatedEvent.getInviteeId());
 
         // test instance
-        Membership membership = membershipService.getMembershipById(membershipId);
+        Membership membership = membershipDomainService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(membershipPostDto.getUserId(), membership.getUserId());
         assertEquals(membershipPostDto.getProjectId(), membership.getProjectId());
@@ -318,7 +319,7 @@ public class MembershipControllerTests {
         assertEquals(projectId0, membershipAcceptedEvent.getProjectId());
 
         // test instance
-        Membership membership = membershipService.getMembershipById(membershipId);
+        Membership membership = membershipDomainService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId1, membership.getUserId());
         assertEquals(projectId0, membership.getProjectId());
@@ -357,7 +358,7 @@ public class MembershipControllerTests {
                         .andReturn();
 
         // test instance
-        Membership membership = membershipService.getMembershipById(membershipId);
+        Membership membership = membershipDomainService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId1, membership.getUserId());
         assertEquals(projectId0, membership.getProjectId());
@@ -395,7 +396,7 @@ public class MembershipControllerTests {
                         .andReturn();
 
         // test instance
-        Membership membership = membershipService.getMembershipById(membershipId);
+        Membership membership = membershipDomainService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId1, membership.getUserId());
         assertEquals(projectId0, membership.getProjectId());
@@ -421,7 +422,7 @@ public class MembershipControllerTests {
                         .andReturn();
 
         // test instance
-        Membership membership = membershipService.getMembershipById(membershipId);
+        Membership membership = membershipDomainService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId1, membership.getUserId());
         assertEquals(projectId0, membership.getProjectId());
@@ -447,7 +448,7 @@ public class MembershipControllerTests {
                         .andReturn();
 
         // test instance
-        Membership membership = membershipService.getMembershipById(membershipId);
+        Membership membership = membershipDomainService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId1, membership.getUserId());
         assertEquals(projectId0, membership.getProjectId());
@@ -473,7 +474,7 @@ public class MembershipControllerTests {
                         .andReturn();
 
         // test instance
-        Membership membership = membershipService.getMembershipById(membershipId);
+        Membership membership = membershipDomainService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId1, membership.getUserId());
         assertEquals(projectId0, membership.getProjectId());
@@ -505,7 +506,7 @@ public class MembershipControllerTests {
         assertEquals(userId1, membershipDeletedEvent.getUserId());
 
         // test instance
-        assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipById(membershipId));
+        assertThrows(NoMembershipFoundException.class, () -> membershipDomainService.getMembershipById(membershipId));
     }
 
     @Test
@@ -532,7 +533,7 @@ public class MembershipControllerTests {
         assertEquals(userId1, membershipDeletedEvent.getUserId());
 
         // test instance
-        assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipById(membershipId));
+        assertThrows(NoMembershipFoundException.class, () -> membershipDomainService.getMembershipById(membershipId));
     }
 
     @Test
@@ -548,7 +549,7 @@ public class MembershipControllerTests {
 
         // test membership instance
         UUID membershipId = membershipAcceptedEvent.getMembershipId();
-        Membership membership = membershipService.getMembershipById(membershipId);
+        Membership membership = membershipDomainService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId0, membership.getUserId());
         assertEquals(randomProjectId, membership.getProjectId());
@@ -569,7 +570,7 @@ public class MembershipControllerTests {
 
         // test membership instance
         UUID membershipId = membershipAcceptedEvent.getMembershipId();
-        Membership membership = membershipService.getMembershipById(membershipId);
+        Membership membership = membershipDomainService.getMembershipById(membershipId);
         assertEquals(membershipId, membership.getId());
         assertEquals(userId0, membership.getUserId());
         assertEquals(randomProjectId, membership.getProjectId());
@@ -596,7 +597,7 @@ public class MembershipControllerTests {
         assertEquals(userId0, membershipDeletedEvent.getUserId());
 
         // test instance
-        assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipById(membershipId));
+        assertThrows(NoMembershipFoundException.class, () -> membershipDomainService.getMembershipById(membershipId));
     }
 
     @Test
@@ -615,7 +616,7 @@ public class MembershipControllerTests {
 
         restMinion.deleteUser(jwt0, userId0);
 
-        assertThrows(NoMembershipFoundException.class, () -> membershipService.getMembershipsByUserId(userId0));
+        assertThrows(NoMembershipFoundException.class, () -> membershipDomainService.getMembershipsByUserId(userId0));
     }
 }
 

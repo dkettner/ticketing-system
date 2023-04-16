@@ -3,7 +3,7 @@ package com.kett.TicketSystem.application;
 import com.kett.TicketSystem.authentication.AuthenticationService;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.membership.application.MembershipService;
+import com.kett.TicketSystem.membership.domain.MembershipDomainService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
@@ -18,11 +18,11 @@ import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
+import com.kett.TicketSystem.phase.domain.PhaseDomainService;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
-import com.kett.TicketSystem.phase.application.PhaseService;
-import com.kett.TicketSystem.ticket.application.TicketService;
+import com.kett.TicketSystem.ticket.domain.TicketDomainService;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
@@ -42,29 +42,30 @@ import java.util.UUID;
 @Service
 public class TicketSystemService {
     private final AuthenticationService authenticationService;
-    private final MembershipService membershipService;
+    private final MembershipDomainService membershipDomainService;
     private final NotificationService notificationService;
-    private final PhaseService phaseService;
+    private final PhaseDomainService phaseDomainService;
     private final ProjectService projectService;
-    private final TicketService ticketService;
+    private final TicketDomainService ticketDomainService;
     private final UserService userService;
     private final DtoMapper dtoMapper;
 
     @Autowired
     public TicketSystemService (
             AuthenticationService authenticationService,
-            MembershipService membershipService,
-            NotificationService notificationService, PhaseService phaseService,
+            MembershipDomainService membershipDomainService,
+            NotificationService notificationService,
+            PhaseDomainService phaseDomainService,
             ProjectService projectService,
-            TicketService ticketService,
+            TicketDomainService ticketDomainService,
             UserService userService
     ) {
         this.authenticationService = authenticationService;
-        this.membershipService = membershipService;
+        this.membershipDomainService = membershipDomainService;
         this.notificationService = notificationService;
-        this.phaseService = phaseService;
+        this.phaseDomainService = phaseDomainService;
         this.projectService = projectService;
-        this.ticketService = ticketService;
+        this.ticketDomainService = ticketDomainService;
         this.userService = userService;
         this.dtoMapper = new DtoMapper();
     }
@@ -80,16 +81,16 @@ public class TicketSystemService {
 
     // membership
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
-            "'ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@membershipDomainService.getProjectIdByMembershipId(#id))," +
+            "'ROLE_USER_'.concat(@membershipDomainService.getUserIdByMembershipId(#id)))")
     public MembershipResponseDto getMembershipById(UUID id) {
-        Membership membership = membershipService.getMembershipById(id);
+        Membership membership = membershipDomainService.getMembershipById(id);
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#userId))")
     public List<MembershipResponseDto> getMembershipsByUserId(UUID userId) {
-        List<Membership> memberships = membershipService.getMembershipsByUserId(userId);
+        List<Membership> memberships = membershipDomainService.getMembershipsByUserId(userId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
@@ -103,33 +104,33 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
     public List<MembershipResponseDto> getMembershipsByProjectId(UUID projectId) {
-        List<Membership> memberships = membershipService.getMembershipsByProjectId(projectId);
+        List<Membership> memberships = membershipDomainService.getMembershipsByProjectId(projectId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipPostDto.projectId))")
     public MembershipResponseDto addMembership(MembershipPostDto membershipPostDto) {
-        Membership membership = membershipService.addMembership(
+        Membership membership = membershipDomainService.addMembership(
                 dtoMapper.mapMembershipPostDtoToMembership(membershipPostDto)
         );
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@membershipDomainService.getUserIdByMembershipId(#id)))")
     public void updateMembershipState(UUID id, MembershipPutStateDto membershipPutStateDto) {
-        membershipService.updateMemberShipState(id, membershipPutStateDto.getState());
+        membershipDomainService.updateMemberShipState(id, membershipPutStateDto.getState());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipDomainService.getProjectIdByMembershipId(#id)))")
     public void updateMembershipRole(UUID id, MembershipPutRoleDto membershipPutRoleDto) {
-        membershipService.updateMembershipRole(id, membershipPutRoleDto.getRole());
+        membershipDomainService.updateMembershipRole(id, membershipPutRoleDto.getRole());
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
-            "'ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@membershipDomainService.getProjectIdByMembershipId(#id))," +
+            "'ROLE_USER_'.concat(@membershipDomainService.getUserIdByMembershipId(#id)))")
     public void deleteMembershipById(UUID id) {
-        membershipService.deleteMembershipById(id);
+        membershipDomainService.deleteMembershipById(id);
     }
 
 
@@ -166,10 +167,10 @@ public class TicketSystemService {
     // phase
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
     public PhaseResponseDto getPhaseById(UUID id) {
-        Phase phase = phaseService.getPhaseById(id);
+        Phase phase = phaseDomainService.getPhaseById(id);
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
 
@@ -177,32 +178,32 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
     public List<PhaseResponseDto> getPhasesByProjectId(UUID projectId) {
-        List<Phase> phases = phaseService.getPhasesByProjectId(projectId);
+        List<Phase> phases = phaseDomainService.getPhasesByProjectId(projectId);
         return dtoMapper.mapPhaseListToPhaseResponseDtoList(phases);
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#phasePostDto.projectId))")
     public PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
-        Phase phase = phaseService.addPhase(
+        Phase phase = phaseDomainService.createPhase(
                 dtoMapper.mapPhasePostDtoToPhase(phasePostDto), phasePostDto.getPreviousPhaseId()
         );
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
 
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
     public void patchPhaseName(UUID id, PhasePatchNameDto phasePatchNameDto) {
-        phaseService.patchPhaseName(id, phasePatchNameDto.getName());
+        phaseDomainService.patchPhaseName(id, phasePatchNameDto.getName());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
     public void patchPhasePosition(UUID id, PhasePatchPositionDto phasePatchPositionDto) {
-        phaseService.patchPhasePosition(id, phasePatchPositionDto.getPreviousPhase());
+        phaseDomainService.patchPhasePosition(id, phasePatchPositionDto.getPreviousPhase());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
     public void deletePhaseById(UUID id) {
-        phaseService.deleteById(id);
+        phaseDomainService.deleteById(id);
     }
 
 
@@ -247,24 +248,24 @@ public class TicketSystemService {
     // ticket
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)))")
     public TicketResponseDto getTicketById(UUID id) {
-        Ticket ticket = ticketService.getTicketById(id);
+        Ticket ticket = ticketDomainService.getTicketById(id);
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#phaseId)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@phaseService.getProjectIdByPhaseId(#phaseId)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#phaseId)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@phaseDomainService.getProjectIdByPhaseId(#phaseId)))")
     public List<TicketResponseDto> getTicketsByPhaseId(UUID phaseId) {
-        List<Ticket> tickets = ticketService.getTicketsByPhaseId(phaseId);
+        List<Ticket> tickets = ticketDomainService.getTicketsByPhaseId(phaseId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#assigneeId))")
     public List<TicketResponseDto> getTicketsByAssigneeId(UUID assigneeId) {
-        List<Ticket> tickets = ticketService.getTicketsByAssigneeId(assigneeId);
+        List<Ticket> tickets = ticketDomainService.getTicketsByAssigneeId(assigneeId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
@@ -272,7 +273,7 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
     public List<TicketResponseDto> getTicketsByProjectId(UUID projectId) {
-        List<Ticket> tickets = ticketService.getTicketsByProjectId(projectId);
+        List<Ticket> tickets = ticketDomainService.getTicketsByProjectId(projectId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
     }
 
@@ -280,7 +281,7 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#ticketPostDto.projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#ticketPostDto.projectId))")
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto, EmailAddress postingUserEmail) {
-        Ticket ticket = ticketService.addTicket(
+        Ticket ticket = ticketDomainService.addTicket(
                 dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, null),
                 userService.getUserIdByEmail(postingUserEmail)
         );
@@ -288,10 +289,10 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)))")
     public void patchTicketById(UUID id, TicketPatchDto ticketPatchDto) {
-        ticketService.patchTicket(
+        ticketDomainService.patchTicket(
                 id,
                 ticketPatchDto.getTitle(),
                 ticketPatchDto.getDescription(),
@@ -302,10 +303,10 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@ticketService.getProjectIdByTicketId(#id)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@ticketService.getProjectIdByTicketId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketDomainService.getProjectIdByTicketId(#id)))")
     public void deleteTicketById(UUID id) {
-        ticketService.deleteTicketById(id);
+        ticketDomainService.deleteTicketById(id);
     }
 
 
