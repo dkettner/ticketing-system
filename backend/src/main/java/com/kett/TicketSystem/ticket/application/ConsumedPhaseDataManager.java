@@ -38,7 +38,10 @@ public class ConsumedPhaseDataManager implements IConsumedDataManager<PhaseVO> {
     }
 
     public Boolean removeByPredicate(Predicate<PhaseVO> predicate) {
-        return phases.removeIf(predicate);
+        if (!phases.isEmpty()) {
+            return phases.removeIf(predicate);
+        }
+        return false;
     }
 
     public PhaseVO getFirstPhaseByProjectId(UUID projectId) {
