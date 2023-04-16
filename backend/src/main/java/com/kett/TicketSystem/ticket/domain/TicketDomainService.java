@@ -14,6 +14,7 @@ import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.ticket.domain.consumedData.*;
 import com.kett.TicketSystem.ticket.domain.events.*;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
+import com.kett.TicketSystem.ticket.repository.ProjectDataOfTicketRepository;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -30,15 +31,19 @@ import java.util.*;
 public class TicketDomainService {
     private final TicketRepository ticketRepository;
     private final ApplicationEventPublisher eventPublisher;
-    private final ConsumedProjectDataManager consumedProjectDataManager;
+    private final ProjectDataOfTicketRepository projectDataOfTicketRepository;
     private final ConsumedPhaseDataManager consumedPhaseDataManager;
     private final ConsumedMembershipDataManager consumedMembershipDataManager;
 
     @Autowired
-    public TicketDomainService(TicketRepository ticketRepository, ApplicationEventPublisher eventPublisher) {
+    public TicketDomainService(
+            TicketRepository ticketRepository,
+            ApplicationEventPublisher eventPublisher,
+            ProjectDataOfTicketRepository projectDataOfTicketRepository
+    ) {
         this.ticketRepository = ticketRepository;
         this.eventPublisher = eventPublisher;
-        this.consumedProjectDataManager = new ConsumedProjectDataManager();
+        this.projectDataOfTicketRepository = projectDataOfTicketRepository;
         this.consumedPhaseDataManager = new ConsumedPhaseDataManager();
         this.consumedMembershipDataManager = new ConsumedMembershipDataManager();
     }
@@ -47,7 +52,7 @@ public class TicketDomainService {
     // create
 
     public Ticket addTicket(Ticket ticket, UUID postingUserId) throws NoProjectFoundException, InvalidProjectMembersException {
-        if (!consumedProjectDataManager.exists(ticket.getProjectId())) {
+        if (!projectDataOfTicketRepository.existsByProjectId(ticket.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + ticket.getProjectId());
         }
         if (!allAssigneesAreProjectMembers(ticket.getProjectId(), ticket.getAssigneeIds())) {
@@ -233,7 +238,10 @@ public class TicketDomainService {
     @EventListener
     @Async
     public void handleMembershipAcceptedEvent(MembershipAcceptedEvent membershipAcceptedEvent) {
-        this.consumedProjectDataManager.add(membershipAcceptedEvent.getProjectId());
+        if (!projectDataOfTicketRepository.existsByProjectId(membershipAcceptedEvent.getProjectId())){
+            projectDataOfTicketRepository.save(new ProjectDataOfTicket(membershipAcceptedEvent.getProjectId()));
+        }
+
         Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(membershipAcceptedEvent.getProjectId());
         if (projectMembersVO.isEmpty()) {
             this.consumedMembershipDataManager.add(new ProjectMembersVO(membershipAcceptedEvent.getProjectId(), new ArrayList<>()));
@@ -248,7 +256,9 @@ public class TicketDomainService {
     @EventListener
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-        this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
+        if (!projectDataOfTicketRepository.existsByProjectId(projectCreatedEvent.getProjectId())){
+            projectDataOfTicketRepository.save(new ProjectDataOfTicket(projectCreatedEvent.getProjectId()));
+        }
 
         Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(projectCreatedEvent.getProjectId());
         if (projectMembersVO.isEmpty()) {
@@ -259,7 +269,9 @@ public class TicketDomainService {
     @EventListener
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        this.consumedProjectDataManager.add(defaultProjectCreatedEvent.getProjectId());
+        if (!projectDataOfTicketRepository.existsByProjectId(defaultProjectCreatedEvent.getProjectId())) {
+            projectDataOfTicketRepository.save(new ProjectDataOfTicket(defaultProjectCreatedEvent.getProjectId()));
+        }
 
         Optional<ProjectMembersVO> projectMembersVO = this.consumedMembershipDataManager.get(defaultProjectCreatedEvent.getProjectId());
         if (projectMembersVO.isEmpty()) {
@@ -272,7 +284,7 @@ public class TicketDomainService {
     @Async
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
-        this.consumedProjectDataManager.remove(projectDeletedEvent.getProjectId());
+        projectDataOfTicketRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
         this.consumedPhaseDataManager.removeByPredicate(phaseVO ->
                 phaseVO.projectId().equals(projectDeletedEvent.getProjectId())
         );
