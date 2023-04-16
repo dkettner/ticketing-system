@@ -1,6 +1,5 @@
 package com.kett.TicketSystem.membership.application;
 
-import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.common.exceptions.NoParametersException;
 import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
@@ -24,17 +23,17 @@ import java.util.UUID;
 @CrossOrigin(origins = {"http://127.0.0.1:5173"}, allowCredentials = "true")
 @RequestMapping("/memberships")
 public class MembershipController {
-    private final TicketSystemService ticketSystemService;
+    private final MembershipApplicationService membershipApplicationService;
 
     @Autowired
-    public MembershipController(TicketSystemService ticketSystemService) {
-        this.ticketSystemService = ticketSystemService;
+    public MembershipController(MembershipApplicationService membershipApplicationService) {
+        this.membershipApplicationService = membershipApplicationService;
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<MembershipResponseDto> getMembershipById(@PathVariable UUID id) {
-        MembershipResponseDto membershipResponseDto = ticketSystemService.getMembershipById(id);
+        MembershipResponseDto membershipResponseDto = membershipApplicationService.getMembershipById(id);
         return new ResponseEntity<>(membershipResponseDto, HttpStatus.OK);
     }
 
@@ -53,11 +52,11 @@ public class MembershipController {
 
         List<MembershipResponseDto> membershipResponseDtos;
         if (userId != null) {
-            membershipResponseDtos = ticketSystemService.getMembershipsByUserId(userId);
+            membershipResponseDtos = membershipApplicationService.getMembershipsByUserId(userId);
         } else if (projectId != null) {
-            membershipResponseDtos = ticketSystemService.getMembershipsByProjectId(projectId);
+            membershipResponseDtos = membershipApplicationService.getMembershipsByProjectId(projectId);
         } else if (email != null) {
-            membershipResponseDtos = ticketSystemService.getMembershipsByEmail(EmailAddress.fromString(email));
+            membershipResponseDtos = membershipApplicationService.getMembershipsByEmail(EmailAddress.fromString(email));
         } else {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
@@ -67,7 +66,7 @@ public class MembershipController {
 
     @PostMapping
     public ResponseEntity<MembershipResponseDto> postMembership(@RequestBody MembershipPostDto membershipPostDto) {
-        MembershipResponseDto membershipResponseDto = ticketSystemService.addMembership(membershipPostDto);
+        MembershipResponseDto membershipResponseDto = membershipApplicationService.addMembership(membershipPostDto);
         URI returnURI = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -81,19 +80,19 @@ public class MembershipController {
 
     @PutMapping("/{id}/state")
     public ResponseEntity<?> updateMembershipState(@PathVariable UUID id, @RequestBody MembershipPutStateDto membershipPutStateDto) {
-        ticketSystemService.updateMembershipState(id, membershipPutStateDto);
+        membershipApplicationService.updateMembershipState(id, membershipPutStateDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/{id}/role")
     public ResponseEntity<?> updateMembershipRole(@PathVariable UUID id, @RequestBody MembershipPutRoleDto membershipPutRoleDto) {
-        ticketSystemService.updateMembershipRole(id, membershipPutRoleDto);
+        membershipApplicationService.updateMembershipRole(id, membershipPutRoleDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMembership(@PathVariable UUID id) {
-        ticketSystemService.deleteMembershipById(id);
+        membershipApplicationService.deleteMembershipById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

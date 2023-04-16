@@ -2,11 +2,6 @@ package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.domain.MembershipDomainService;
-import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
-import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
-import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
-import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
-import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.notification.application.NotificationService;
 import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
 import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
@@ -39,7 +34,6 @@ import java.util.UUID;
 
 @Service
 public class TicketSystemService {
-    private final MembershipDomainService membershipDomainService;
     private final NotificationService notificationService;
     private final PhaseDomainService phaseDomainService;
     private final ProjectService projectService;
@@ -49,74 +43,19 @@ public class TicketSystemService {
 
     @Autowired
     public TicketSystemService (
-            MembershipDomainService membershipDomainService,
             NotificationService notificationService,
             PhaseDomainService phaseDomainService,
             ProjectService projectService,
             TicketDomainService ticketDomainService,
-            UserService userService
+            UserService userService,
+            DtoMapper dtoMapper
     ) {
-        this.membershipDomainService = membershipDomainService;
         this.notificationService = notificationService;
         this.phaseDomainService = phaseDomainService;
         this.projectService = projectService;
         this.ticketDomainService = ticketDomainService;
         this.userService = userService;
-        this.dtoMapper = new DtoMapper();
-    }
-
-    // membership
-    @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@membershipDomainService.getProjectIdByMembershipId(#id))," +
-            "'ROLE_USER_'.concat(@membershipDomainService.getUserIdByMembershipId(#id)))")
-    public MembershipResponseDto getMembershipById(UUID id) {
-        Membership membership = membershipDomainService.getMembershipById(id);
-        return dtoMapper.mapMembershipToMembershipResponseDto(membership);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#userId))")
-    public List<MembershipResponseDto> getMembershipsByUserId(UUID userId) {
-        List<Membership> memberships = membershipDomainService.getMembershipsByUserId(userId);
-        return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userService.getUserIdByEmail(#email)))")
-    public List<MembershipResponseDto> getMembershipsByEmail(EmailAddress email) {
-        UUID userId = userService.getUserIdByEmail(email);
-        return this.getMembershipsByUserId(userId);
-    }
-
-    @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
-    public List<MembershipResponseDto> getMembershipsByProjectId(UUID projectId) {
-        List<Membership> memberships = membershipDomainService.getMembershipsByProjectId(projectId);
-        return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipPostDto.projectId))")
-    public MembershipResponseDto addMembership(MembershipPostDto membershipPostDto) {
-        Membership membership = membershipDomainService.addMembership(
-                dtoMapper.mapMembershipPostDtoToMembership(membershipPostDto)
-        );
-        return dtoMapper.mapMembershipToMembershipResponseDto(membership);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@membershipDomainService.getUserIdByMembershipId(#id)))")
-    public void updateMembershipState(UUID id, MembershipPutStateDto membershipPutStateDto) {
-        membershipDomainService.updateMemberShipState(id, membershipPutStateDto.getState());
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipDomainService.getProjectIdByMembershipId(#id)))")
-    public void updateMembershipRole(UUID id, MembershipPutRoleDto membershipPutRoleDto) {
-        membershipDomainService.updateMembershipRole(id, membershipPutRoleDto.getRole());
-    }
-
-    @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@membershipDomainService.getProjectIdByMembershipId(#id))," +
-            "'ROLE_USER_'.concat(@membershipDomainService.getUserIdByMembershipId(#id)))")
-    public void deleteMembershipById(UUID id) {
-        membershipDomainService.deleteMembershipById(id);
+        this.dtoMapper = dtoMapper;
     }
 
 
