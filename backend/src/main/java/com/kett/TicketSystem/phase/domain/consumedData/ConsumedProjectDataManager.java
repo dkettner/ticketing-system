@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.phase.application;
+package com.kett.TicketSystem.phase.domain.consumedData;
 
 import com.kett.TicketSystem.common.IConsumedDataManager;
 
@@ -9,7 +9,7 @@ import java.util.UUID;
 
 public class ConsumedProjectDataManager implements IConsumedDataManager<UUID> {
     // TODO: use persistent storage instead
-    List<UUID> existingProjects = new ArrayList<>(); // PhaseService only cares about the IDs of the projects
+    List<UUID> existingProjects = new ArrayList<>(); // PhaseDomainService only cares about the IDs of the projects
 
     @Override
     public Boolean add(UUID date) {

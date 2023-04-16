@@ -18,10 +18,10 @@ import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
+import com.kett.TicketSystem.phase.domain.PhaseDomainService;
 import com.kett.TicketSystem.project.application.ProjectService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
-import com.kett.TicketSystem.phase.application.PhaseService;
 import com.kett.TicketSystem.ticket.domain.TicketDomainService;
 import com.kett.TicketSystem.ticket.application.dto.TicketPatchDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
@@ -44,7 +44,7 @@ public class TicketSystemService {
     private final AuthenticationService authenticationService;
     private final MembershipService membershipService;
     private final NotificationService notificationService;
-    private final PhaseService phaseService;
+    private final PhaseDomainService phaseDomainService;
     private final ProjectService projectService;
     private final TicketDomainService ticketDomainService;
     private final UserService userService;
@@ -55,7 +55,7 @@ public class TicketSystemService {
             AuthenticationService authenticationService,
             MembershipService membershipService,
             NotificationService notificationService,
-            PhaseService phaseService,
+            PhaseDomainService phaseDomainService,
             ProjectService projectService,
             TicketDomainService ticketDomainService,
             UserService userService
@@ -63,7 +63,7 @@ public class TicketSystemService {
         this.authenticationService = authenticationService;
         this.membershipService = membershipService;
         this.notificationService = notificationService;
-        this.phaseService = phaseService;
+        this.phaseDomainService = phaseDomainService;
         this.projectService = projectService;
         this.ticketDomainService = ticketDomainService;
         this.userService = userService;
@@ -167,10 +167,10 @@ public class TicketSystemService {
     // phase
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
     public PhaseResponseDto getPhaseById(UUID id) {
-        Phase phase = phaseService.getPhaseById(id);
+        Phase phase = phaseDomainService.getPhaseById(id);
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
 
@@ -178,32 +178,32 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
     public List<PhaseResponseDto> getPhasesByProjectId(UUID projectId) {
-        List<Phase> phases = phaseService.getPhasesByProjectId(projectId);
+        List<Phase> phases = phaseDomainService.getPhasesByProjectId(projectId);
         return dtoMapper.mapPhaseListToPhaseResponseDtoList(phases);
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#phasePostDto.projectId))")
     public PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
-        Phase phase = phaseService.createPhase(
+        Phase phase = phaseDomainService.createPhase(
                 dtoMapper.mapPhasePostDtoToPhase(phasePostDto), phasePostDto.getPreviousPhaseId()
         );
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
     }
 
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
     public void patchPhaseName(UUID id, PhasePatchNameDto phasePatchNameDto) {
-        phaseService.patchPhaseName(id, phasePatchNameDto.getName());
+        phaseDomainService.patchPhaseName(id, phasePatchNameDto.getName());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
     public void patchPhasePosition(UUID id, PhasePatchPositionDto phasePatchPositionDto) {
-        phaseService.patchPhasePosition(id, phasePatchPositionDto.getPreviousPhase());
+        phaseDomainService.patchPhasePosition(id, phasePatchPositionDto.getPreviousPhase());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
     public void deletePhaseById(UUID id) {
-        phaseService.deleteById(id);
+        phaseDomainService.deleteById(id);
     }
 
 
@@ -256,8 +256,8 @@ public class TicketSystemService {
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@phaseService.getProjectIdByPhaseId(#phaseId)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@phaseService.getProjectIdByPhaseId(#phaseId)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#phaseId)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@phaseDomainService.getProjectIdByPhaseId(#phaseId)))")
     public List<TicketResponseDto> getTicketsByPhaseId(UUID phaseId) {
         List<Ticket> tickets = ticketDomainService.getTicketsByPhaseId(phaseId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);

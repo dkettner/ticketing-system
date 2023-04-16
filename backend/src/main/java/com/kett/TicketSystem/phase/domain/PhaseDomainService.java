@@ -1,6 +1,7 @@
-package com.kett.TicketSystem.phase.application;
+package com.kett.TicketSystem.phase.domain;
 
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
+import com.kett.TicketSystem.phase.domain.consumedData.ConsumedProjectDataManager;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhasePositionUpdatedEvent;
@@ -8,7 +9,6 @@ import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
-import com.kett.TicketSystem.phase.domain.Phase;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.common.exceptions.UnrelatedPhaseException;
@@ -32,13 +32,13 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class PhaseService {
+public class PhaseDomainService {
     private final PhaseRepository phaseRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final ConsumedProjectDataManager consumedProjectDataManager;
 
     @Autowired
-    public PhaseService(PhaseRepository phaseRepository, ApplicationEventPublisher eventPublisher) {
+    public PhaseDomainService(PhaseRepository phaseRepository, ApplicationEventPublisher eventPublisher) {
         this.phaseRepository = phaseRepository;
         this.eventPublisher = eventPublisher;
         this.consumedProjectDataManager = new ConsumedProjectDataManager();
