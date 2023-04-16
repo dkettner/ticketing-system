@@ -2,7 +2,7 @@ package com.kett.TicketSystem.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
+import com.kett.TicketSystem.authentication.application.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
 import com.kett.TicketSystem.membership.domain.Role;

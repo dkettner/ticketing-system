@@ -2,7 +2,7 @@ package com.kett.TicketSystem.user.application;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
-import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
+import com.kett.TicketSystem.authentication.application.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.application.dto.UserPatchDto;

@@ -1,7 +1,6 @@
-package com.kett.TicketSystem.authentication;
+package com.kett.TicketSystem.authentication.application;
 
-import com.kett.TicketSystem.application.TicketSystemService;
-import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
+import com.kett.TicketSystem.authentication.application.dto.AuthenticationPostDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -16,17 +15,17 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = {"http://127.0.0.1:5173"}, allowCredentials = "true")
 @RequestMapping("/authentication")
 public class AuthenticationController {
-    private final TicketSystemService ticketSystemService;
+    private final AuthenticationApplicationService authenticationApplicationService;
 
     @Autowired
-    public AuthenticationController(TicketSystemService ticketSystemService) {
-        this.ticketSystemService = ticketSystemService;
+    public AuthenticationController(AuthenticationApplicationService authenticationApplicationService) {
+        this.authenticationApplicationService = authenticationApplicationService;
     }
 
 
     @PostMapping
     public ResponseEntity<?> authenticateUser(@RequestBody AuthenticationPostDto authenticationPostDto) {
-        String jwtValue = ticketSystemService.authenticateUser(authenticationPostDto);
+        String jwtValue = authenticationApplicationService.authenticateUser(authenticationPostDto);
         ResponseCookie responseCookie =
                 ResponseCookie
                         .from("jwt", jwtValue)

@@ -1,8 +1,8 @@
 package com.kett.TicketSystem.authentication;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
-import com.kett.TicketSystem.authentication.jwt.JwtTokenProvider;
+import com.kett.TicketSystem.authentication.application.dto.AuthenticationPostDto;
+import com.kett.TicketSystem.authentication.domain.jwt.JwtTokenProvider;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;

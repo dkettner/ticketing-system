@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.authentication.jwt;
+package com.kett.TicketSystem.authentication.domain.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;

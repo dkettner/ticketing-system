@@ -1,7 +1,5 @@
 package com.kett.TicketSystem.application;
 
-import com.kett.TicketSystem.authentication.AuthenticationService;
-import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.domain.MembershipDomainService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
@@ -41,7 +39,6 @@ import java.util.UUID;
 
 @Service
 public class TicketSystemService {
-    private final AuthenticationService authenticationService;
     private final MembershipDomainService membershipDomainService;
     private final NotificationService notificationService;
     private final PhaseDomainService phaseDomainService;
@@ -52,7 +49,6 @@ public class TicketSystemService {
 
     @Autowired
     public TicketSystemService (
-            AuthenticationService authenticationService,
             MembershipDomainService membershipDomainService,
             NotificationService notificationService,
             PhaseDomainService phaseDomainService,
@@ -60,7 +56,6 @@ public class TicketSystemService {
             TicketDomainService ticketDomainService,
             UserService userService
     ) {
-        this.authenticationService = authenticationService;
         this.membershipDomainService = membershipDomainService;
         this.notificationService = notificationService;
         this.phaseDomainService = phaseDomainService;
@@ -69,15 +64,6 @@ public class TicketSystemService {
         this.userService = userService;
         this.dtoMapper = new DtoMapper();
     }
-
-
-
-    // authentication
-    public String authenticateUser(AuthenticationPostDto authenticationPostDto) {
-        return authenticationService
-                .authenticateUser(authenticationPostDto.getEmail(), authenticationPostDto.getPassword());
-    }
-
 
     // membership
     @PreAuthorize("hasAnyAuthority(" +

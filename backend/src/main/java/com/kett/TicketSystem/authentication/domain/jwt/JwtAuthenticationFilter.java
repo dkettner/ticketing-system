@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.authentication.jwt;
+package com.kett.TicketSystem.authentication.domain.jwt;
 
 import com.kett.TicketSystem.user.application.UserService;
 import org.springframework.beans.factory.annotation.Autowired;

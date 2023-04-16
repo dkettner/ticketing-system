@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.authentication.dto;
+package com.kett.TicketSystem.authentication.application.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

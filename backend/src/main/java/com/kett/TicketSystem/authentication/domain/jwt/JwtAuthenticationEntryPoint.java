@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.authentication.jwt;
+package com.kett.TicketSystem.authentication.domain.jwt;
 
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.AuthenticationEntryPoint;
