@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.ticket.application;
+package com.kett.TicketSystem.ticket.domain.consumedData;
 
 import com.kett.TicketSystem.common.IConsumedDataManager;
 
