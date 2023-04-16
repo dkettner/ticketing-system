@@ -47,7 +47,19 @@ public class PhaseService {
 
     // create
 
-    public Phase addPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException {
+    public Phase createPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException  {
+        Phase initializedPhase = addPhase(phase, previousPhaseId);
+        eventPublisher.publishEvent(
+                new PhaseCreatedEvent(
+                        initializedPhase.getId(),
+                        initializedPhase.getPreviousPhase(),
+                        initializedPhase.getProjectId()
+                )
+        );
+        return initializedPhase;
+    }
+
+    private Phase addPhase(Phase phase, UUID previousPhaseId) throws NoPhaseFoundException, UnrelatedPhaseException {
         if (!consumedProjectDataManager.exists(phase.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + phase.getProjectId());
         }
@@ -71,13 +83,6 @@ public class PhaseService {
         } else {
             initializedPhase = addAfterPrevious(phase, previousPhase);
         }
-        eventPublisher.publishEvent(
-                new PhaseCreatedEvent(
-                        initializedPhase.getId(),
-                        initializedPhase.getPreviousPhase(),
-                        initializedPhase.getProjectId()
-                )
-        );
         return initializedPhase;
     }
 
@@ -236,10 +241,10 @@ public class PhaseService {
         Phase review = new Phase(defaultProjectCreatedEvent.getProjectId(), "REVIEW", null, null);
         Phase done = new Phase(defaultProjectCreatedEvent.getProjectId(), "DONE", null, null);
 
-        this.addPhase(done, null);
-        this.addPhase(review, null);
-        this.addPhase(doing, null);
-        this.addPhase(backlog, null);
+        this.createPhase(done, null);
+        this.createPhase(review, null);
+        this.createPhase(doing, null);
+        this.createPhase(backlog, null);
     }
 
     @EventListener
@@ -253,7 +258,7 @@ public class PhaseService {
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
         this.consumedProjectDataManager.add(projectCreatedEvent.getProjectId());
-        this.addPhase(
+        this.createPhase(
                 new Phase(projectCreatedEvent.getProjectId(), "BACKLOG", null, null),
                 null
         );

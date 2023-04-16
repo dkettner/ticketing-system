@@ -184,7 +184,7 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#phasePostDto.projectId))")
     public PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
-        Phase phase = phaseService.addPhase(
+        Phase phase = phaseService.createPhase(
                 dtoMapper.mapPhasePostDtoToPhase(phasePostDto), phasePostDto.getPreviousPhaseId()
         );
         return dtoMapper.mapPhaseToPhaseResponseDto(phase);
