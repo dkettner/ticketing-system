@@ -3,7 +3,7 @@ package com.kett.TicketSystem.application;
 import com.kett.TicketSystem.authentication.AuthenticationService;
 import com.kett.TicketSystem.authentication.dto.AuthenticationPostDto;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.membership.application.MembershipService;
+import com.kett.TicketSystem.membership.domain.MembershipDomainService;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
@@ -42,7 +42,7 @@ import java.util.UUID;
 @Service
 public class TicketSystemService {
     private final AuthenticationService authenticationService;
-    private final MembershipService membershipService;
+    private final MembershipDomainService membershipDomainService;
     private final NotificationService notificationService;
     private final PhaseDomainService phaseDomainService;
     private final ProjectService projectService;
@@ -53,7 +53,7 @@ public class TicketSystemService {
     @Autowired
     public TicketSystemService (
             AuthenticationService authenticationService,
-            MembershipService membershipService,
+            MembershipDomainService membershipDomainService,
             NotificationService notificationService,
             PhaseDomainService phaseDomainService,
             ProjectService projectService,
@@ -61,7 +61,7 @@ public class TicketSystemService {
             UserService userService
     ) {
         this.authenticationService = authenticationService;
-        this.membershipService = membershipService;
+        this.membershipDomainService = membershipDomainService;
         this.notificationService = notificationService;
         this.phaseDomainService = phaseDomainService;
         this.projectService = projectService;
@@ -81,16 +81,16 @@ public class TicketSystemService {
 
     // membership
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
-            "'ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@membershipDomainService.getProjectIdByMembershipId(#id))," +
+            "'ROLE_USER_'.concat(@membershipDomainService.getUserIdByMembershipId(#id)))")
     public MembershipResponseDto getMembershipById(UUID id) {
-        Membership membership = membershipService.getMembershipById(id);
+        Membership membership = membershipDomainService.getMembershipById(id);
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#userId))")
     public List<MembershipResponseDto> getMembershipsByUserId(UUID userId) {
-        List<Membership> memberships = membershipService.getMembershipsByUserId(userId);
+        List<Membership> memberships = membershipDomainService.getMembershipsByUserId(userId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
@@ -104,33 +104,33 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
     public List<MembershipResponseDto> getMembershipsByProjectId(UUID projectId) {
-        List<Membership> memberships = membershipService.getMembershipsByProjectId(projectId);
+        List<Membership> memberships = membershipDomainService.getMembershipsByProjectId(projectId);
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipPostDto.projectId))")
     public MembershipResponseDto addMembership(MembershipPostDto membershipPostDto) {
-        Membership membership = membershipService.addMembership(
+        Membership membership = membershipDomainService.addMembership(
                 dtoMapper.mapMembershipPostDtoToMembership(membershipPostDto)
         );
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@membershipDomainService.getUserIdByMembershipId(#id)))")
     public void updateMembershipState(UUID id, MembershipPutStateDto membershipPutStateDto) {
-        membershipService.updateMemberShipState(id, membershipPutStateDto.getState());
+        membershipDomainService.updateMemberShipState(id, membershipPutStateDto.getState());
     }
 
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id)))")
+    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@membershipDomainService.getProjectIdByMembershipId(#id)))")
     public void updateMembershipRole(UUID id, MembershipPutRoleDto membershipPutRoleDto) {
-        membershipService.updateMembershipRole(id, membershipPutRoleDto.getRole());
+        membershipDomainService.updateMembershipRole(id, membershipPutRoleDto.getRole());
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@membershipService.getProjectIdByMembershipId(#id))," +
-            "'ROLE_USER_'.concat(@membershipService.getUserIdByMembershipId(#id)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@membershipDomainService.getProjectIdByMembershipId(#id))," +
+            "'ROLE_USER_'.concat(@membershipDomainService.getUserIdByMembershipId(#id)))")
     public void deleteMembershipById(UUID id) {
-        membershipService.deleteMembershipById(id);
+        membershipDomainService.deleteMembershipById(id);
     }
 
 

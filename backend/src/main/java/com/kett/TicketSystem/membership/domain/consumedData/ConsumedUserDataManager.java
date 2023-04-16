@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.membership.application;
+package com.kett.TicketSystem.membership.domain.consumedData;
 
 import com.kett.TicketSystem.common.IConsumedDataManager;
 
@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ConsumedProjectDataManager implements IConsumedDataManager<UUID> {
+public class ConsumedUserDataManager implements IConsumedDataManager<UUID> {
     // TODO: use persistent storage instead
-    List<UUID> existingProjects = new ArrayList<>(); // MembershipService only cares about the IDs of the projects
+    List<UUID> existingUsers = new ArrayList<>(); // MembershipDomainService only cares about the IDs of the users
 
     @Override
     public Boolean add(UUID date) {
@@ -17,15 +17,15 @@ public class ConsumedProjectDataManager implements IConsumedDataManager<UUID> {
             return false;
         }
 
-        existingProjects.add(date);
+        existingUsers.add(date);
         return true;
     }
 
     @Override
     public Boolean overwrite(UUID date) {
         if (this.exists(date)) {
-            existingProjects.remove(date);
-            existingProjects.add(date);
+            existingUsers.remove(date);
+            existingUsers.add(date);
             return true;
         } else {
             return false;
@@ -34,12 +34,12 @@ public class ConsumedProjectDataManager implements IConsumedDataManager<UUID> {
 
     @Override
     public Boolean remove(UUID id) {
-        return existingProjects.remove(id);
+        return existingUsers.remove(id);
     }
 
     @Override
     public Optional<UUID> get(UUID id) {  // in this case redundant
-        return existingProjects
+        return existingUsers
                 .stream()
                 .filter(projectId -> projectId.equals(id))
                 .findFirst();
@@ -47,6 +47,6 @@ public class ConsumedProjectDataManager implements IConsumedDataManager<UUID> {
 
     @Override
     public Boolean exists(UUID id) {
-        return existingProjects.contains(id);
+        return existingUsers.contains(id);
     }
 }

@@ -1,8 +1,7 @@
-package com.kett.TicketSystem.membership.application;
+package com.kett.TicketSystem.membership.domain;
 
-import com.kett.TicketSystem.membership.domain.Membership;
-import com.kett.TicketSystem.membership.domain.Role;
-import com.kett.TicketSystem.membership.domain.State;
+import com.kett.TicketSystem.membership.domain.consumedData.ConsumedProjectDataManager;
+import com.kett.TicketSystem.membership.domain.consumedData.ConsumedUserDataManager;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
@@ -30,14 +29,14 @@ import java.util.*;
 
 @Service
 @Transactional
-public class MembershipService {
+public class MembershipDomainService {
     private final MembershipRepository membershipRepository;
     private final ApplicationEventPublisher eventPublisher;
     private final ConsumedProjectDataManager consumedProjectDataManager;
     private final ConsumedUserDataManager consumedUserDataManager;
 
     @Autowired
-    public MembershipService(MembershipRepository membershipRepository, ApplicationEventPublisher eventPublisher) {
+    public MembershipDomainService(MembershipRepository membershipRepository, ApplicationEventPublisher eventPublisher) {
         this.membershipRepository = membershipRepository;
         this.eventPublisher = eventPublisher;
         this.consumedProjectDataManager = new ConsumedProjectDataManager();

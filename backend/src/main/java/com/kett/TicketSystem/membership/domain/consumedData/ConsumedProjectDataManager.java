@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.membership.application;
+package com.kett.TicketSystem.membership.domain.consumedData;
 
 import com.kett.TicketSystem.common.IConsumedDataManager;
 
@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-public class ConsumedUserDataManager implements IConsumedDataManager<UUID> {
+public class ConsumedProjectDataManager implements IConsumedDataManager<UUID> {
     // TODO: use persistent storage instead
-    List<UUID> existingUsers = new ArrayList<>(); // MembershipService only cares about the IDs of the users
+    List<UUID> existingProjects = new ArrayList<>(); // MembershipDomainService only cares about the IDs of the projects
 
     @Override
     public Boolean add(UUID date) {
@@ -17,15 +17,15 @@ public class ConsumedUserDataManager implements IConsumedDataManager<UUID> {
             return false;
         }
 
-        existingUsers.add(date);
+        existingProjects.add(date);
         return true;
     }
 
     @Override
     public Boolean overwrite(UUID date) {
         if (this.exists(date)) {
-            existingUsers.remove(date);
-            existingUsers.add(date);
+            existingProjects.remove(date);
+            existingProjects.add(date);
             return true;
         } else {
             return false;
@@ -34,12 +34,12 @@ public class ConsumedUserDataManager implements IConsumedDataManager<UUID> {
 
     @Override
     public Boolean remove(UUID id) {
-        return existingUsers.remove(id);
+        return existingProjects.remove(id);
     }
 
     @Override
     public Optional<UUID> get(UUID id) {  // in this case redundant
-        return existingUsers
+        return existingProjects
                 .stream()
                 .filter(projectId -> projectId.equals(id))
                 .findFirst();
@@ -47,6 +47,6 @@ public class ConsumedUserDataManager implements IConsumedDataManager<UUID> {
 
     @Override
     public Boolean exists(UUID id) {
-        return existingUsers.contains(id);
+        return existingProjects.contains(id);
     }
 }
