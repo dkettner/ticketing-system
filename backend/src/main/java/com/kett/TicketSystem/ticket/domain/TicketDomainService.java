@@ -15,6 +15,7 @@ import com.kett.TicketSystem.ticket.domain.consumedData.*;
 import com.kett.TicketSystem.ticket.domain.events.*;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.repository.MembershipDataOfTicketRepository;
+import com.kett.TicketSystem.ticket.repository.PhaseDataOfTicketRepository;
 import com.kett.TicketSystem.ticket.repository.ProjectDataOfTicketRepository;
 import com.kett.TicketSystem.ticket.repository.TicketRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,20 +35,21 @@ public class TicketDomainService {
     private final ApplicationEventPublisher eventPublisher;
     private final ProjectDataOfTicketRepository projectDataOfTicketRepository;
     private final MembershipDataOfTicketRepository membershipDataOfTicketRepository;
-    private final ConsumedPhaseDataManager consumedPhaseDataManager;
+    private final PhaseDataOfTicketRepository phaseDataOfTicketRepository;
 
     @Autowired
     public TicketDomainService(
             TicketRepository ticketRepository,
             ApplicationEventPublisher eventPublisher,
             ProjectDataOfTicketRepository projectDataOfTicketRepository,
-            MembershipDataOfTicketRepository membershipDataOfTicketRepository
+            MembershipDataOfTicketRepository membershipDataOfTicketRepository,
+            PhaseDataOfTicketRepository phaseDataOfTicketRepository
     ) {
         this.ticketRepository = ticketRepository;
         this.eventPublisher = eventPublisher;
         this.projectDataOfTicketRepository = projectDataOfTicketRepository;
         this.membershipDataOfTicketRepository = membershipDataOfTicketRepository;
-        this.consumedPhaseDataManager = new ConsumedPhaseDataManager();
+        this.phaseDataOfTicketRepository = phaseDataOfTicketRepository;
     }
 
 
@@ -65,9 +67,10 @@ public class TicketDomainService {
 
         // set phaseId of ticket
         UUID firstPhaseOfProjectId =
-                consumedPhaseDataManager
-                        .getFirstPhaseByProjectId(ticket.getProjectId())
-                        .id();
+                phaseDataOfTicketRepository
+                        .findByProjectIdAndPreviousPhaseIdIsNull(ticket.getProjectId())
+                        .get(0)
+                        .getPhaseId();
         ticket.setPhaseId(firstPhaseOfProjectId);
 
         Ticket initializedTicket = ticketRepository.save(ticket);
@@ -170,10 +173,7 @@ public class TicketDomainService {
     }
 
     private Boolean phaseBelongsToProject(UUID phaseId, UUID projectIdCandidate) {
-        Optional<PhaseVO> phaseVO = consumedPhaseDataManager.get(phaseId);
-        return phaseVO
-                .map(it -> it.projectId().equals(projectIdCandidate))
-                .orElse(false);
+        return phaseDataOfTicketRepository.existsByPhaseIdAndProjectId(phaseId, projectIdCandidate);
     }
 
     private void publishAssignmentEvents(Ticket ticket, List<UUID> newAssignees, List<UUID> oldAssignees) {
@@ -266,16 +266,13 @@ public class TicketDomainService {
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
         this.deleteTicketsByProjectId(projectDeletedEvent.getProjectId());
         projectDataOfTicketRepository.deleteByProjectId(projectDeletedEvent.getProjectId());
-        this.consumedPhaseDataManager.removeByPredicate(phaseVO ->
-                phaseVO.projectId().equals(projectDeletedEvent.getProjectId())
-        );
     }
 
     @EventListener
     @Async
     public void handlePhaseCreatedEvent(PhaseCreatedEvent phaseCreatedEvent) {
-        this.consumedPhaseDataManager.add(
-                new PhaseVO(
+        phaseDataOfTicketRepository.save(
+                new PhaseDataOfTicket(
                         phaseCreatedEvent.getPhaseId(),
                         phaseCreatedEvent.getPreviousPhaseId(),
                         phaseCreatedEvent.getProjectId()
@@ -284,19 +281,17 @@ public class TicketDomainService {
     }
 
     @EventListener
+    @Async
     public void handlePhasePositionUpdatedEvent(PhasePositionUpdatedEvent phasePositionUpdatedEvent) {
-        consumedPhaseDataManager.overwrite(
-                new PhaseVO(
-                        phasePositionUpdatedEvent.getId(),
-                        phasePositionUpdatedEvent.getPreviousPhaseId(),
-                        phasePositionUpdatedEvent.getProjectId()
-                )
-        );
+        List<PhaseDataOfTicket> foundPhaseData = phaseDataOfTicketRepository.findByPhaseId(phasePositionUpdatedEvent.getPhaseId());
+        PhaseDataOfTicket phaseDataOfTicket = foundPhaseData.get(0);
+        phaseDataOfTicket.setPreviousPhaseId(phasePositionUpdatedEvent.getPreviousPhaseId());
+        phaseDataOfTicketRepository.save(phaseDataOfTicket);
     }
 
     @EventListener
     @Async
     public void handlePhaseDeletedEvent(PhaseDeletedEvent phaseDeletedEvent) {
-        this.consumedPhaseDataManager.remove(phaseDeletedEvent.getPhaseId());
+        phaseDataOfTicketRepository.deleteByPhaseId(phaseDeletedEvent.getPhaseId());
     }
 }
