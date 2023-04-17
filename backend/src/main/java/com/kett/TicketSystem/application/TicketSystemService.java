@@ -1,11 +1,6 @@
 package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.membership.domain.MembershipDomainService;
-import com.kett.TicketSystem.notification.application.NotificationService;
-import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
-import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
-import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
@@ -34,7 +29,6 @@ import java.util.UUID;
 
 @Service
 public class TicketSystemService {
-    private final NotificationService notificationService;
     private final PhaseDomainService phaseDomainService;
     private final ProjectService projectService;
     private final TicketDomainService ticketDomainService;
@@ -43,49 +37,17 @@ public class TicketSystemService {
 
     @Autowired
     public TicketSystemService (
-            NotificationService notificationService,
             PhaseDomainService phaseDomainService,
             ProjectService projectService,
             TicketDomainService ticketDomainService,
             UserService userService,
             DtoMapper dtoMapper
     ) {
-        this.notificationService = notificationService;
         this.phaseDomainService = phaseDomainService;
         this.projectService = projectService;
         this.ticketDomainService = ticketDomainService;
         this.userService = userService;
         this.dtoMapper = dtoMapper;
-    }
-
-
-    // notification
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationService.getGetRecipientIdByNotificationId(#id)))")
-    public NotificationResponseDto getNotificationById(UUID id) {
-        Notification notification = notificationService.getNotificationById(id);
-        return dtoMapper.mapNotificationToNotificationResponseDto(notification);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#recipientId))")
-    public List<NotificationResponseDto> getNotificationsByRecipientId(UUID recipientId) {
-        List<Notification> notifications = notificationService.getNotificationsByRecipientId(recipientId);
-        return dtoMapper.mapNotificationListToNotificationResponseDtoList(notifications);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userService.getUserIdByEmail(#email)))")
-    public List<NotificationResponseDto> getNotificationsByEmail(EmailAddress email) {
-        UUID recipientId = userService.getUserIdByEmail(email);
-        return this.getNotificationsByRecipientId(recipientId);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationService.getGetRecipientIdByNotificationId(#id)))")
-    public void patchNotificationReadState(UUID id, NotificationPatchIsReadDto notificationPatchIsReadDto) {
-        notificationService.patchReadState(id, notificationPatchIsReadDto.getIsRead());
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationService.getGetRecipientIdByNotificationId(#id)))")
-    public void deleteNotificationById(UUID id) {
-        notificationService.deleteById(id);
     }
 
 

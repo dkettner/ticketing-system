@@ -1,6 +1,5 @@
 package com.kett.TicketSystem.notification.application;
 
-import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.NoParametersException;
 import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
@@ -20,17 +19,17 @@ import java.util.UUID;
 @CrossOrigin(origins = {"http://127.0.0.1:5173"}, allowCredentials = "true")
 @RequestMapping("/notifications")
 public class NotificationController {
-    private final TicketSystemService ticketSystemService;
+    private final NotificationApplicationService notificationApplicationService;
 
     @Autowired
-    public NotificationController(TicketSystemService ticketSystemService) {
-        this.ticketSystemService = ticketSystemService;
+    public NotificationController(NotificationApplicationService notificationApplicationService) {
+        this.notificationApplicationService = notificationApplicationService;
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<NotificationResponseDto> getNotificationById(@PathVariable UUID id) {
-        NotificationResponseDto notificationResponseDto = ticketSystemService.getNotificationById(id);
+        NotificationResponseDto notificationResponseDto = notificationApplicationService.getNotificationById(id);
         return new ResponseEntity<>(notificationResponseDto, HttpStatus.OK);
     }
 
@@ -45,9 +44,9 @@ public class NotificationController {
 
         List<NotificationResponseDto> notificationResponseDtos;
         if (recipientId != null) {
-            notificationResponseDtos = ticketSystemService.getNotificationsByRecipientId(recipientId);
+            notificationResponseDtos = notificationApplicationService.getNotificationsByRecipientId(recipientId);
         } else if (email != null) {
-            notificationResponseDtos = ticketSystemService.getNotificationsByEmail(EmailAddress.fromString(email));
+            notificationResponseDtos = notificationApplicationService.getNotificationsByEmail(EmailAddress.fromString(email));
         } else {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
@@ -57,13 +56,13 @@ public class NotificationController {
 
     @PatchMapping("/{id}/is-read")
     public ResponseEntity<?> patchNotificationReadState(@PathVariable UUID id, @RequestBody NotificationPatchIsReadDto notificationPatchIsReadDto) {
-        ticketSystemService.patchNotificationReadState(id, notificationPatchIsReadDto);
+        notificationApplicationService.patchNotificationReadState(id, notificationPatchIsReadDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteNotification(@PathVariable UUID id) {
-        ticketSystemService.deleteNotificationById(id);
+        notificationApplicationService.deleteNotificationById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

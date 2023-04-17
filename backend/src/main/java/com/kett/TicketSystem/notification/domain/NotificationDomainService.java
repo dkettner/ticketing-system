@@ -1,8 +1,7 @@
-package com.kett.TicketSystem.notification.application;
+package com.kett.TicketSystem.notification.domain;
 
 import com.kett.TicketSystem.common.exceptions.IllegalStateUpdateException;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
-import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
 import com.kett.TicketSystem.notification.domain.exceptions.NotificationException;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
@@ -20,11 +19,11 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class NotificationService {
+public class NotificationDomainService {
     private final NotificationRepository notificationRepository;
 
     @Autowired
-    public NotificationService(NotificationRepository notificationRepository) {
+    public NotificationDomainService(NotificationRepository notificationRepository) {
         this.notificationRepository = notificationRepository;
     }
 

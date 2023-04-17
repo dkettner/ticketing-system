@@ -5,6 +5,7 @@ import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
 import com.kett.TicketSystem.notification.domain.Notification;
+import com.kett.TicketSystem.notification.domain.NotificationDomainService;
 import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
 import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
@@ -41,7 +42,7 @@ public class NotificationControllerTests {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final ApplicationEventPublisher eventPublisher;
-    private final NotificationService notificationService;
+    private final NotificationDomainService notificationDomainService;
     private final NotificationRepository notificationRepository;
     private final UserRepository userRepository;
     private final RestRequestHelper restMinion;
@@ -67,13 +68,13 @@ public class NotificationControllerTests {
             MockMvc mockMvc,
             ObjectMapper objectMapper,
             ApplicationEventPublisher eventPublisher,
-            NotificationService notificationService,
+            NotificationDomainService notificationDomainService,
             NotificationRepository notificationRepository,
             UserRepository userRepository) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.eventPublisher = eventPublisher;
-        this.notificationService = notificationService;
+        this.notificationDomainService = notificationDomainService;
         this.notificationRepository = notificationRepository;
         this.userRepository = userRepository;
         this.restMinion = new RestRequestHelper(mockMvc, objectMapper);
@@ -251,7 +252,7 @@ public class NotificationControllerTests {
                                 .cookie(new Cookie("jwt", jwt0)))
                         .andExpect(status().isNoContent())
                         .andReturn();
-        Notification patchedNotification = notificationService.getNotificationById(notificationId);
+        Notification patchedNotification = notificationDomainService.getNotificationById(notificationId);
         assertEquals(notificationId, patchedNotification.getId());
         assertEquals(userId0, patchedNotification.getRecipientId());
         assertTrue(patchedNotification.getIsRead());
@@ -266,7 +267,7 @@ public class NotificationControllerTests {
                                         .cookie(new Cookie("jwt", jwt0)))
                         .andExpect(status().isConflict())
                         .andReturn();
-        Notification unpatchedNotification = notificationService.getNotificationById(notificationId);
+        Notification unpatchedNotification = notificationDomainService.getNotificationById(notificationId);
         assertEquals(patchedNotification, unpatchedNotification);
     }
 
@@ -294,7 +295,7 @@ public class NotificationControllerTests {
                                         .cookie(new Cookie("jwt", jwt0)))
                         .andExpect(status().isNoContent())
                         .andReturn();
-        assertThrows(NoNotificationFoundException.class, () -> notificationService.getNotificationById(notificationId));
+        assertThrows(NoNotificationFoundException.class, () -> notificationDomainService.getNotificationById(notificationId));
     }
 
     @Test
@@ -323,7 +324,7 @@ public class NotificationControllerTests {
         // shame: give services time to handle event
         Thread.sleep(100);
 
-        List<Notification> notifications = notificationService.getNotificationsByRecipientId(userId0);
+        List<Notification> notifications = notificationDomainService.getNotificationsByRecipientId(userId0);
         assertEquals(1, notifications.size());
         Notification notification = notifications.get(0);
         assertEquals(userId0, notification.getRecipientId());
@@ -346,7 +347,7 @@ public class NotificationControllerTests {
         // shame: give services time to handle event
         Thread.sleep(100);
 
-        List<Notification> notifications = notificationService.getNotificationsByRecipientId(userId0);
+        List<Notification> notifications = notificationDomainService.getNotificationsByRecipientId(userId0);
         assertEquals(1, notifications.size());
         Notification notification = notifications.get(0);
         assertEquals(userId0, notification.getRecipientId());
@@ -369,7 +370,7 @@ public class NotificationControllerTests {
         // shame: give services time to handle event
         Thread.sleep(100);
 
-        List<Notification> notifications = notificationService.getNotificationsByRecipientId(userId0);
+        List<Notification> notifications = notificationDomainService.getNotificationsByRecipientId(userId0);
         assertEquals(1, notifications.size());
         Notification notification = notifications.get(0);
         assertEquals(userId0, notification.getRecipientId());
