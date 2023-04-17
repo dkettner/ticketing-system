@@ -8,6 +8,7 @@ import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEv
 import com.kett.TicketSystem.project.application.dto.ProjectPatchDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.domain.Project;
+import com.kett.TicketSystem.project.domain.ProjectDomainService;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -47,7 +48,7 @@ public class ProjectControllerTests {
     private final ObjectMapper objectMapper;
     private final EventCatcher eventCatcher;
     private final ApplicationEventPublisher eventPublisher;
-    private final ProjectService projectService;
+    private final ProjectDomainService projectDomainService;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
     private final RestRequestHelper restMinion;
@@ -72,7 +73,7 @@ public class ProjectControllerTests {
             ObjectMapper objectMapper,
             EventCatcher eventCatcher,
             ApplicationEventPublisher eventPublisher,
-            ProjectService projectService,
+            ProjectDomainService projectDomainService,
             ProjectRepository projectRepository,
             UserRepository userRepository
     ) {
@@ -80,7 +81,7 @@ public class ProjectControllerTests {
         this.objectMapper = objectMapper;
         this.eventCatcher = eventCatcher;
         this.eventPublisher = eventPublisher;
-        this.projectService = projectService;
+        this.projectDomainService = projectDomainService;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
         this.restMinion = new RestRequestHelper(this.mockMvc, this.objectMapper);
@@ -141,7 +142,7 @@ public class ProjectControllerTests {
         // test instance
         String postResponse = postResult.getResponse().getContentAsString();
         projectId = UUID.fromString(JsonPath.parse(postResponse).read("$.id"));
-        Project project = projectService.getProjectById(projectId);
+        Project project = projectDomainService.getProjectById(projectId);
         assertEquals(projectId, project.getId());
         assertEquals(projectPostDto.getName(), project.getName());
         assertEquals(projectPostDto.getDescription(), project.getDescription());
@@ -195,7 +196,7 @@ public class ProjectControllerTests {
         assertEquals(buildUpProjectId, projectDeletedEvent.getProjectId());
 
         // test instance
-        assertThrows(NoProjectFoundException.class, () -> projectService.getProjectById(buildUpProjectId));
+        assertThrows(NoProjectFoundException.class, () -> projectDomainService.getProjectById(buildUpProjectId));
     }
 
     @Test
@@ -212,7 +213,7 @@ public class ProjectControllerTests {
                         .andExpect(status().isNoContent())
                         .andReturn();
 
-        Project project = projectService.getProjectById(buildUpProjectId);
+        Project project = projectDomainService.getProjectById(buildUpProjectId);
         assertEquals(buildUpProjectId, project.getId());
         assertEquals(projectPatchDto.getName(), project.getName());
         assertEquals(projectPatchDto.getDescription(), project.getDescription());
@@ -235,7 +236,7 @@ public class ProjectControllerTests {
         assertEquals(userId, defaultProjectCreatedEvent.getUserId());
 
         // test if project was actually created
-        Project defaultProject = projectService.getProjectById(defaultProjectCreatedEvent.getProjectId());
+        Project defaultProject = projectDomainService.getProjectById(defaultProjectCreatedEvent.getProjectId());
     }
 
     @Test
@@ -254,6 +255,6 @@ public class ProjectControllerTests {
         assertEquals(buildUpProjectId, projectDeletedEvent.getProjectId());
 
         // test instance
-        assertThrows(NoProjectFoundException.class, () -> projectService.getProjectById(buildUpProjectId));
+        assertThrows(NoProjectFoundException.class, () -> projectDomainService.getProjectById(buildUpProjectId));
     }
 }

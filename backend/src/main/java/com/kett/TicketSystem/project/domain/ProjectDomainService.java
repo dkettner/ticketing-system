@@ -1,9 +1,8 @@
-package com.kett.TicketSystem.project.application;
+package com.kett.TicketSystem.project.domain;
 
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
-import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -21,12 +20,12 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class ProjectService {
+public class ProjectDomainService {
     private final ProjectRepository projectRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public ProjectService(ProjectRepository projectRepository, ApplicationEventPublisher eventPublisher) {
+    public ProjectDomainService(ProjectRepository projectRepository, ApplicationEventPublisher eventPublisher) {
         this.projectRepository = projectRepository;
         this.eventPublisher = eventPublisher;
     }

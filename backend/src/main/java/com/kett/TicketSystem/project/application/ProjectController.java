@@ -1,7 +1,5 @@
 package com.kett.TicketSystem.project.application;
 
-import com.kett.TicketSystem.application.TicketSystemService;
-
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.project.application.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,24 +18,24 @@ import java.util.UUID;
 @CrossOrigin(origins = {"http://127.0.0.1:5173"}, allowCredentials = "true")
 @RequestMapping("/projects")
 public class ProjectController {
-    private final TicketSystemService ticketSystemService;
+    private final ProjectApplicationService projectApplicationService;
 
     @Autowired
-    public ProjectController(TicketSystemService ticketSystemService) {
-        this.ticketSystemService = ticketSystemService;
+    public ProjectController(ProjectApplicationService projectApplicationService) {
+        this.projectApplicationService = projectApplicationService;
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<ProjectResponseDto> getProjectById(@PathVariable UUID id) {
-        ProjectResponseDto projectResponseDto = ticketSystemService.fetchProjectById(id);
+        ProjectResponseDto projectResponseDto = projectApplicationService.fetchProjectById(id);
         return new ResponseEntity<>(projectResponseDto, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<ProjectResponseDto> postProject(@RequestBody ProjectPostDto projectPostDto) {
         EmailAddress userEmail = EmailAddress.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
-        ProjectResponseDto projectResponseDto = ticketSystemService.addProject(projectPostDto, userEmail);
+        ProjectResponseDto projectResponseDto = projectApplicationService.addProject(projectPostDto, userEmail);
         URI returnURI = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -51,13 +49,13 @@ public class ProjectController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> patchProjectById(@PathVariable UUID id, @RequestBody ProjectPatchDto projectPatchDto) {
-        ticketSystemService.patchProjectById(id, projectPatchDto);
+        projectApplicationService.patchProjectById(id, projectPatchDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProject(@PathVariable UUID id) {
-        ticketSystemService.deleteProjectById(id);
+        projectApplicationService.deleteProjectById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
