@@ -17,9 +17,11 @@ public class UserDataOfTicket {
     @Column(length = 16)
     UUID id;
 
-    @Column(length = 16)
+    @Column(length = 16, unique = true)
     UUID userId;
 
+    @Setter
+    @Column(unique = true)
     EmailAddress userEmail;
 
     public UserDataOfTicket(@NonNull UUID userId, @NonNull EmailAddress userEmail) {

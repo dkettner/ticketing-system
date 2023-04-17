@@ -16,7 +16,7 @@ public class MembershipDataOfTicket {
     @Column(length = 16)
     UUID id;
 
-    @Column(length = 16)
+    @Column(length = 16, unique = true)
     UUID membershipId;
 
     @Column(length = 16)

@@ -327,8 +327,9 @@ public class TicketDomainService {
     @EventListener
     @Async
     public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
-        userDataOfTicketRepository.deleteByUserId(userPatchedEvent.getUserId());
-        userDataOfTicketRepository.save(new UserDataOfTicket(userPatchedEvent.getUserId(), userPatchedEvent.getEmailAddress()));
+        UserDataOfTicket userDataOfTicket = userDataOfTicketRepository.findByUserId(userPatchedEvent.getUserId()).get(0);
+        userDataOfTicket.setUserEmail(userPatchedEvent.getEmailAddress());
+        userDataOfTicketRepository.save(userDataOfTicket);
     }
 
     @EventListener
