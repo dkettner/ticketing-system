@@ -1,13 +1,7 @@
 package com.kett.TicketSystem.application;
 
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
-import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
-import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
-import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
-import com.kett.TicketSystem.phase.domain.Phase;
-import com.kett.TicketSystem.phase.domain.PhaseDomainService;
-import com.kett.TicketSystem.project.application.ProjectService;
+import com.kett.TicketSystem.project.domain.ProjectDomainService;
 import com.kett.TicketSystem.project.application.dto.*;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.ticket.domain.TicketDomainService;
@@ -29,68 +23,22 @@ import java.util.UUID;
 
 @Service
 public class TicketSystemService {
-    private final PhaseDomainService phaseDomainService;
-    private final ProjectService projectService;
+    private final ProjectDomainService projectDomainService;
     private final TicketDomainService ticketDomainService;
     private final UserService userService;
     private final DtoMapper dtoMapper;
 
     @Autowired
     public TicketSystemService (
-            PhaseDomainService phaseDomainService,
-            ProjectService projectService,
+            ProjectDomainService projectDomainService,
             TicketDomainService ticketDomainService,
             UserService userService,
             DtoMapper dtoMapper
     ) {
-        this.phaseDomainService = phaseDomainService;
-        this.projectService = projectService;
+        this.projectDomainService = projectDomainService;
         this.ticketDomainService = ticketDomainService;
         this.userService = userService;
         this.dtoMapper = dtoMapper;
-    }
-
-
-    // phase
-
-    @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
-    public PhaseResponseDto getPhaseById(UUID id) {
-        Phase phase = phaseDomainService.getPhaseById(id);
-        return dtoMapper.mapPhaseToPhaseResponseDto(phase);
-    }
-
-    @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(#projectId), " +
-            "'ROLE_PROJECT_MEMBER_'.concat(#projectId))")
-    public List<PhaseResponseDto> getPhasesByProjectId(UUID projectId) {
-        List<Phase> phases = phaseDomainService.getPhasesByProjectId(projectId);
-        return dtoMapper.mapPhaseListToPhaseResponseDtoList(phases);
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#phasePostDto.projectId))")
-    public PhaseResponseDto addPhase(PhasePostDto phasePostDto) {
-        Phase phase = phaseDomainService.createPhase(
-                dtoMapper.mapPhasePostDtoToPhase(phasePostDto), phasePostDto.getPreviousPhaseId()
-        );
-        return dtoMapper.mapPhaseToPhaseResponseDto(phase);
-    }
-
-
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
-    public void patchPhaseName(UUID id, PhasePatchNameDto phasePatchNameDto) {
-        phaseDomainService.patchPhaseName(id, phasePatchNameDto.getName());
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
-    public void patchPhasePosition(UUID id, PhasePatchPositionDto phasePatchPositionDto) {
-        phaseDomainService.patchPhasePosition(id, phasePatchPositionDto.getPreviousPhase());
-    }
-
-    @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
-    public void deletePhaseById(UUID id) {
-        phaseDomainService.deleteById(id);
     }
 
 
@@ -100,12 +48,12 @@ public class TicketSystemService {
             "'ROLE_PROJECT_ADMIN_'.concat(#id), " +
             "'ROLE_PROJECT_MEMBER_'.concat(#id))")
     public ProjectResponseDto fetchProjectById(UUID id) {
-        Project project = projectService.getProjectById(id);
+        Project project = projectDomainService.getProjectById(id);
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
     public ProjectResponseDto addProject(ProjectPostDto projectPostDto, UUID postingUserId) {
-        Project project = projectService.addProject(
+        Project project = projectDomainService.addProject(
                 dtoMapper.mapProjectPostDtoToProject(projectPostDto),
                 postingUserId
         );
@@ -119,12 +67,12 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")
     public void deleteProjectById(UUID id) {
-        projectService.deleteProjectById(id);
+        projectDomainService.deleteProjectById(id);
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")
     public void patchProjectById(UUID id, ProjectPatchDto projectPatchDto) {
-        projectService.patchProjectById(
+        projectDomainService.patchProjectById(
                 id,
                 projectPatchDto.getName(),
                 projectPatchDto.getDescription()
