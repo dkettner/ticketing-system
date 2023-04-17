@@ -10,7 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface UserDataOfMembershipRepository extends JpaRepository<UserDataOfMembership, UUID> {
-    UserDataOfMembership findByUserId(UUID userId);
+    List<UserDataOfMembership> findByUserId(UUID userId);
     List<UserDataOfMembership> findByUserEmailEquals(EmailAddress emailAddress);
     Integer deleteByUserId(UUID userId);
 

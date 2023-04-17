@@ -272,8 +272,12 @@ public class MembershipDomainService {
     @EventListener
     @Async
     public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
-        userDataOfMembershipRepository.deleteByUserId(userPatchedEvent.getUserId());
-        userDataOfMembershipRepository.save(new UserDataOfMembership(userPatchedEvent.getUserId(), userPatchedEvent.getEmailAddress()));
+        UserDataOfMembership userDataOfMembership =
+                userDataOfMembershipRepository
+                        .findByUserId(userPatchedEvent.getUserId())
+                        .get(0);
+        userDataOfMembership.setUserEmail(userPatchedEvent.getEmailAddress());
+        userDataOfMembershipRepository.save(userDataOfMembership);
     }
 
     @EventListener
