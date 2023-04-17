@@ -4,6 +4,7 @@ import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.IllegalStateUpdateException;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
+import com.kett.TicketSystem.notification.domain.consumedData.UserDataOfNotification;
 import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
 import com.kett.TicketSystem.notification.domain.exceptions.NotificationException;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
@@ -140,8 +141,12 @@ public class NotificationDomainService {
     @EventListener
     @Async
     public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
-        userDataOfNotificationRepository.deleteByUserId(userPatchedEvent.getUserId());
-        userDataOfNotificationRepository.save(new UserDataOfNotification(userPatchedEvent.getUserId(), userPatchedEvent.getEmailAddress()));
+        UserDataOfNotification userDataOfNotification =
+                userDataOfNotificationRepository
+                        .findByUserId(userPatchedEvent.getUserId())
+                        .get(0);
+        userDataOfNotification.setUserEmail(userPatchedEvent.getEmailAddress());
+        userDataOfNotificationRepository.save(userDataOfNotification);
     }
 
     @EventListener

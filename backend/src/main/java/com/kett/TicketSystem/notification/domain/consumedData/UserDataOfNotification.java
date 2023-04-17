@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.notification.domain;
+package com.kett.TicketSystem.notification.domain.consumedData;
 
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import lombok.*;
@@ -17,9 +17,11 @@ public class UserDataOfNotification {
     @Column(length = 16)
     UUID id;
 
-    @Column(length = 16)
+    @Column(length = 16, unique = true)
     UUID userId;
 
+    @Setter
+    @Column(unique = true)
     EmailAddress userEmail;
 
     public UserDataOfNotification(@NonNull UUID userId, @NonNull EmailAddress userEmail) {
