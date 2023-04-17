@@ -7,7 +7,6 @@ import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.application.dto.ProjectResponseDto;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.ProjectDomainService;
-import com.kett.TicketSystem.user.domain.UserDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,17 +16,14 @@ import java.util.UUID;
 @Service
 public class ProjectApplicationService {
     private final ProjectDomainService projectDomainService;
-    private final UserDomainService userDomainService; // TODO: remove UserDomainService dependency
     private final DtoMapper dtoMapper;
 
     @Autowired
     public ProjectApplicationService(
             ProjectDomainService projectDomainService,
-            UserDomainService userDomainService, // TODO: remove UserDomainService dependency
             DtoMapper dtoMapper
     ) {
         this.projectDomainService = projectDomainService;
-        this.userDomainService = userDomainService;
         this.dtoMapper = dtoMapper;
     }
 
@@ -39,17 +35,12 @@ public class ProjectApplicationService {
         return dtoMapper.mapProjectToProjectResponseDto(project);
     }
 
-    public ProjectResponseDto addProject(ProjectPostDto projectPostDto, UUID postingUserId) {
+    public ProjectResponseDto addProject(ProjectPostDto projectPostDto, EmailAddress emailAddress) {
         Project project = projectDomainService.addProject(
                 dtoMapper.mapProjectPostDtoToProject(projectPostDto),
-                postingUserId
+                emailAddress
         );
         return dtoMapper.mapProjectToProjectResponseDto(project);
-    }
-
-    public ProjectResponseDto addProject(ProjectPostDto projectPostDto, EmailAddress postingUserEmail) {
-        UUID userId = userDomainService.getUserIdByEmail(postingUserEmail);
-        return this.addProject(projectPostDto, userId);
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#id))")

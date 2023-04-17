@@ -1,14 +1,19 @@
 package com.kett.TicketSystem.project.domain;
 
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
+import com.kett.TicketSystem.project.domain.consumedData.UserDataOfProject;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.project.domain.exceptions.*;
 import com.kett.TicketSystem.project.repository.ProjectRepository;
+import com.kett.TicketSystem.project.repository.UserDataOfProjectRepository;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
+import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
+import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -16,27 +21,38 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 @Transactional
 public class ProjectDomainService {
     private final ProjectRepository projectRepository;
+    private final UserDataOfProjectRepository userDataOfProjectRepository;
     private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public ProjectDomainService(ProjectRepository projectRepository, ApplicationEventPublisher eventPublisher) {
+    public ProjectDomainService(ProjectRepository projectRepository, UserDataOfProjectRepository userDataOfProjectRepository, ApplicationEventPublisher eventPublisher) {
         this.projectRepository = projectRepository;
+        this.userDataOfProjectRepository = userDataOfProjectRepository;
         this.eventPublisher = eventPublisher;
     }
 
-
     // create
 
-    public Project addProject(Project project, UUID userId) {
+    public Project addProject(Project project, EmailAddress emailAddress) {
+        UUID userId = getUserIdByUserEmailAddress(emailAddress);
         Project initializedProject = projectRepository.save(project);
         eventPublisher.publishEvent(new ProjectCreatedEvent(initializedProject.getId(), userId));
         return initializedProject;
+    }
+
+    private UUID getUserIdByUserEmailAddress(EmailAddress emailAddress) {
+        List<UserDataOfProject> userData = userDataOfProjectRepository.findByUserEmailEquals(emailAddress);
+        if (userData.isEmpty()) {
+            throw new ImpossibleException("no user data found for user: " + emailAddress.toString());
+        }
+        return userData.get(0).getUserId();
     }
 
 
@@ -97,5 +113,24 @@ public class ProjectDomainService {
     @EventListener
     public void handleLastProjectMemberDeletedEvent(LastProjectMemberDeletedEvent lastProjectMemberDeletedEvent) {
         this.deleteProjectById(lastProjectMemberDeletedEvent.getProjectId());
+    }
+
+    @EventListener
+    @Async
+    public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
+        userDataOfProjectRepository.save(new UserDataOfProject(userCreatedEvent.getUserId(), userCreatedEvent.getEmailAddress()));
+    }
+
+    @EventListener
+    @Async
+    public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
+        userDataOfProjectRepository.deleteByUserId(userPatchedEvent.getUserId());
+        userDataOfProjectRepository.save(new UserDataOfProject(userPatchedEvent.getUserId(), userPatchedEvent.getEmailAddress()));
+    }
+
+    @EventListener
+    @Async
+    public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
+        userDataOfProjectRepository.deleteByUserId(userDeletedEvent.getUserId());
     }
 }
