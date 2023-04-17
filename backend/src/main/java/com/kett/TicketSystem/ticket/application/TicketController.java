@@ -1,6 +1,5 @@
 package com.kett.TicketSystem.ticket.application;
 
-import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.NoParametersException;
 import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
@@ -24,17 +23,17 @@ import java.util.UUID;
 @CrossOrigin(origins = {"http://127.0.0.1:5173"}, allowCredentials = "true")
 @RequestMapping("/tickets")
 public class TicketController {
-    private final TicketSystemService ticketSystemService;
+    private final TicketApplicationService ticketApplicationService;
 
     @Autowired
-    public TicketController(TicketSystemService ticketSystemService) {
-        this.ticketSystemService = ticketSystemService;
+    public TicketController(TicketApplicationService ticketApplicationService) {
+        this.ticketApplicationService = ticketApplicationService;
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponseDto> getTicketById(@PathVariable UUID id) {
-        TicketResponseDto ticketResponseDto = ticketSystemService.getTicketById(id);
+        TicketResponseDto ticketResponseDto = ticketApplicationService.getTicketById(id);
         return new ResponseEntity<>(ticketResponseDto, HttpStatus.OK);
     }
 
@@ -52,11 +51,11 @@ public class TicketController {
 
         List<TicketResponseDto> ticketResponseDtos;
         if (phaseId != null) {
-            ticketResponseDtos = ticketSystemService.getTicketsByPhaseId(phaseId);
+            ticketResponseDtos = ticketApplicationService.getTicketsByPhaseId(phaseId);
         } else if (assigneeId != null) {
-            ticketResponseDtos = ticketSystemService.getTicketsByAssigneeId(assigneeId);
+            ticketResponseDtos = ticketApplicationService.getTicketsByAssigneeId(assigneeId);
         } else if (projectId != null) {
-            ticketResponseDtos = ticketSystemService.getTicketsByProjectId(projectId);
+            ticketResponseDtos = ticketApplicationService.getTicketsByProjectId(projectId);
         } else {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
@@ -67,7 +66,7 @@ public class TicketController {
     @PostMapping
     public ResponseEntity<TicketResponseDto> postTicket(@RequestBody TicketPostDto ticketPostDto) {
         EmailAddress userEmail = EmailAddress.fromString(SecurityContextHolder.getContext().getAuthentication().getName());
-        TicketResponseDto ticketResponseDto = ticketSystemService.addTicket(ticketPostDto, userEmail);
+        TicketResponseDto ticketResponseDto = ticketApplicationService.addTicket(ticketPostDto, userEmail);
         URI returnURI = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -81,13 +80,13 @@ public class TicketController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> patchTicket(@PathVariable UUID id, @RequestBody TicketPatchDto ticketPatchDto) {
-        ticketSystemService.patchTicketById(id, ticketPatchDto);
+        ticketApplicationService.patchTicketById(id, ticketPatchDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTicketById(@PathVariable UUID id) {
-        ticketSystemService.deleteTicketById(id);
+        ticketApplicationService.deleteTicketById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
