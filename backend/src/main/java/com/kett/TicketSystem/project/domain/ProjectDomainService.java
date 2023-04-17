@@ -124,8 +124,11 @@ public class ProjectDomainService {
     @EventListener
     @Async
     public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
-        UserDataOfProject userDataOfProject = userDataOfProjectRepository.findByUserId(userPatchedEvent.getUserId()).get(0);
-        userDataOfProject.setUserEmail(userDataOfProject.getUserEmail());
+        UserDataOfProject userDataOfProject =
+                userDataOfProjectRepository
+                        .findByUserId(userPatchedEvent.getUserId())
+                        .get(0);
+        userDataOfProject.setUserEmail(userPatchedEvent.getEmailAddress());
         userDataOfProjectRepository.save(userDataOfProject);
     }
 
