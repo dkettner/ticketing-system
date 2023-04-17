@@ -17,9 +17,11 @@ public class UserDataOfMembership {
     @Column(length = 16)
     UUID id;
 
-    @Column(length = 16)
+    @Column(length = 16, unique = true)
     UUID userId;
 
+    @Setter
+    @Column(unique = true)
     EmailAddress userEmail;
 
     public UserDataOfMembership(@NonNull UUID userId, @NonNull EmailAddress userEmail) {
