@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.membership.domain.consumedData;
 
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import lombok.*;
 
 import javax.persistence.*;
@@ -19,7 +20,10 @@ public class UserDataOfMembership {
     @Column(length = 16)
     UUID userId;
 
-    public UserDataOfMembership(@NonNull UUID userId) {
+    EmailAddress userEmail;
+
+    public UserDataOfMembership(@NonNull UUID userId, @NonNull EmailAddress userEmail) {
         this.userId = userId;
+        this.userEmail = userEmail;
     }
 }

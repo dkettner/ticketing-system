@@ -1,5 +1,6 @@
 package com.kett.TicketSystem.membership.domain;
 
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.domain.consumedData.ProjectDataOfMembership;
 import com.kett.TicketSystem.membership.domain.consumedData.UserDataOfMembership;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
@@ -19,6 +20,7 @@ import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.NoUserFoundException;
+import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -106,6 +108,12 @@ public class MembershipDomainService {
         return memberships;
     }
 
+    public List<Membership> getMembershipsByUserEmail(EmailAddress emailAddress) {
+        return getMembershipsByUserId(
+                getUserIdByUserEmailAddress(emailAddress)
+        );
+    }
+
     public List<GrantedAuthority> getProjectAuthoritiesByUserId(UUID userId) {
         return membershipRepository
                 .findByUserIdAndStateEquals(userId, State.ACCEPTED)
@@ -128,6 +136,14 @@ public class MembershipDomainService {
 
     public UUID getProjectIdByMembershipId(UUID id) throws NoMembershipFoundException {
         return this.getMembershipById(id).getProjectId();
+    }
+
+    public UUID getUserIdByUserEmailAddress(EmailAddress emailAddress) {
+        List<UserDataOfMembership> userData = userDataOfMembershipRepository.findByUserEmailEquals(emailAddress);
+        if (userData.isEmpty()) {
+            throw new ImpossibleException("no user data found for user: " + emailAddress.toString());
+        }
+        return userData.get(0).getUserId();
     }
 
 
@@ -218,9 +234,12 @@ public class MembershipDomainService {
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
         projectDataOfMembershipRepository.save(new ProjectDataOfMembership(defaultProjectCreatedEvent.getProjectId()));
+        /*
         if (!userDataOfMembershipRepository.existsByUserId(defaultProjectCreatedEvent.getUserId())) {
-            userDataOfMembershipRepository.save(new UserDataOfMembership(defaultProjectCreatedEvent.getUserId()));
+            userDataOfMembershipRepository.save(new UserDataOfMembership(defaultProjectCreatedEvent.getUserId(), ));
         }
+        */
+
         Membership defaultMembership = new Membership(
                 defaultProjectCreatedEvent.getProjectId(),
                 defaultProjectCreatedEvent.getUserId(),
@@ -245,8 +264,15 @@ public class MembershipDomainService {
     @Async
     public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
         if (!userDataOfMembershipRepository.existsByUserId(userCreatedEvent.getUserId())) {
-            userDataOfMembershipRepository.save(new UserDataOfMembership(userCreatedEvent.getUserId()));
+            userDataOfMembershipRepository.save(new UserDataOfMembership(userCreatedEvent.getUserId(), userCreatedEvent.getEmailAddress()));
         }
+    }
+
+    @EventListener
+    @Async
+    public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
+        userDataOfMembershipRepository.deleteByUserId(userPatchedEvent.getUserId());
+        userDataOfMembershipRepository.save(new UserDataOfMembership(userPatchedEvent.getUserId(), userPatchedEvent.getEmailAddress()));
     }
 
     @EventListener

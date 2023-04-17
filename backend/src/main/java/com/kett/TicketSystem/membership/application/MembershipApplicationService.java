@@ -9,7 +9,6 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.MembershipDomainService;
-import com.kett.TicketSystem.user.domain.UserDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -20,13 +19,11 @@ import java.util.UUID;
 @Service
 public class MembershipApplicationService {
     private final MembershipDomainService membershipDomainService;
-    private final UserDomainService userDomainService;
     private final DtoMapper dtoMapper;
 
     @Autowired
-    public MembershipApplicationService(MembershipDomainService membershipDomainService, UserDomainService userDomainService, DtoMapper dtoMapper) {
+    public MembershipApplicationService(MembershipDomainService membershipDomainService, DtoMapper dtoMapper) {
         this.membershipDomainService = membershipDomainService;
-        this.userDomainService = userDomainService; // TODO: get rid of userService dependency
         this.dtoMapper = dtoMapper;
     }
 
@@ -44,10 +41,10 @@ public class MembershipApplicationService {
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userDomainService.getUserIdByEmail(#email)))")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@membershipDomainService.getUserIdByUserEmailAddress(#email)))")
     public List<MembershipResponseDto> getMembershipsByEmail(EmailAddress email) {
-        UUID userId = userDomainService.getUserIdByEmail(email);
-        return this.getMembershipsByUserId(userId);
+        List<Membership> memberships = membershipDomainService.getMembershipsByUserEmail(email);
+        return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
     @PreAuthorize("hasAnyAuthority(" +
