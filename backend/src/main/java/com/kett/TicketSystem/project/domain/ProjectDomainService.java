@@ -102,6 +102,7 @@ public class ProjectDomainService {
     @EventListener
     @Async
     public void handleUserCreated(UserCreatedEvent userCreatedEvent) {
+        userDataOfProjectRepository.save(new UserDataOfProject(userCreatedEvent.getUserId(), userCreatedEvent.getEmailAddress()));
         Project defaultProject = new Project(
                 "Example Project",
                 "This project was created automatically. Use it to get accustomed to everything."
@@ -113,12 +114,6 @@ public class ProjectDomainService {
     @EventListener
     public void handleLastProjectMemberDeletedEvent(LastProjectMemberDeletedEvent lastProjectMemberDeletedEvent) {
         this.deleteProjectById(lastProjectMemberDeletedEvent.getProjectId());
-    }
-
-    @EventListener
-    @Async
-    public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
-        userDataOfProjectRepository.save(new UserDataOfProject(userCreatedEvent.getUserId(), userCreatedEvent.getEmailAddress()));
     }
 
     @EventListener
