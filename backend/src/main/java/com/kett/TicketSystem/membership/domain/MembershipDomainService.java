@@ -55,12 +55,39 @@ public class MembershipDomainService {
 
     // create
 
-    public Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
-        if (!projectDataOfMembershipRepository.existsByProjectId(membership.getProjectId())) {
-            throw new NoProjectFoundException("could not find project with id: " + membership.getProjectId());
-        }
+    public Membership addNewMembership(Membership membership) throws MembershipAlreadyExistsException {
         if (!userDataOfMembershipRepository.existsByUserId(membership.getUserId())) {
             throw new NoUserFoundException("could not find user with id: " + membership.getUserId());
+        }
+
+        Membership initializedMembership = addMembership(membership);
+        eventPublisher.publishEvent(
+                new UnacceptedProjectMembershipCreatedEvent(
+                        initializedMembership.getId(),
+                        initializedMembership.getUserId(),
+                        initializedMembership.getProjectId()
+                )
+        );
+
+        return initializedMembership;
+    }
+
+    private Membership addDefaultMembership(Membership membership) throws MembershipAlreadyExistsException {
+        membership.setState(State.ACCEPTED);
+        Membership initializedMembership = addMembership(membership);
+        eventPublisher.publishEvent(
+                new MembershipAcceptedEvent(
+                        initializedMembership.getId(),
+                        initializedMembership.getProjectId(),
+                        initializedMembership.getUserId()
+                )
+        );
+        return initializedMembership;
+    }
+
+    private Membership addMembership(Membership membership) throws MembershipAlreadyExistsException {
+        if (!projectDataOfMembershipRepository.existsByProjectId(membership.getProjectId())) {
+            throw new NoProjectFoundException("could not find project with id: " + membership.getProjectId());
         }
         if (membershipRepository.existsByUserIdAndProjectId(membership.getUserId(), membership.getProjectId())) {
             throw new MembershipAlreadyExistsException(
@@ -70,25 +97,7 @@ public class MembershipDomainService {
             );
         }
 
-        Membership initializedMembership = membershipRepository.save(membership);
-        if (initializedMembership.getState().equals(State.OPEN)) {
-            eventPublisher.publishEvent(
-                    new UnacceptedProjectMembershipCreatedEvent(
-                            initializedMembership.getId(),
-                            initializedMembership.getUserId(),
-                            initializedMembership.getProjectId()
-                    )
-            );
-        } else {
-            eventPublisher.publishEvent(
-                    new MembershipAcceptedEvent(
-                            initializedMembership.getId(),
-                            initializedMembership.getProjectId(),
-                            initializedMembership.getUserId()
-                    )
-            );
-        }
-        return initializedMembership;
+        return membershipRepository.save(membership);
     }
 
 
@@ -226,27 +235,19 @@ public class MembershipDomainService {
                 projectCreatedEvent.getUserId(),
                 Role.ADMIN
         );
-        defaultMembership.setState(State.ACCEPTED);
-        this.addMembership(defaultMembership);
+        this.addDefaultMembership(defaultMembership);
     }
 
     @EventListener
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
         projectDataOfMembershipRepository.save(new ProjectDataOfMembership(defaultProjectCreatedEvent.getProjectId()));
-        /*
-        if (!userDataOfMembershipRepository.existsByUserId(defaultProjectCreatedEvent.getUserId())) {
-            userDataOfMembershipRepository.save(new UserDataOfMembership(defaultProjectCreatedEvent.getUserId(), ));
-        }
-        */
-
         Membership defaultMembership = new Membership(
                 defaultProjectCreatedEvent.getProjectId(),
                 defaultProjectCreatedEvent.getUserId(),
                 Role.ADMIN
         );
-        defaultMembership.setState(State.ACCEPTED);
-        this.addMembership(defaultMembership);
+        this.addDefaultMembership(defaultMembership);
     }
 
     @EventListener

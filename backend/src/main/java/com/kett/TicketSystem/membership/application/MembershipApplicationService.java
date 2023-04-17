@@ -57,7 +57,7 @@ public class MembershipApplicationService {
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(#membershipPostDto.projectId))")
     public MembershipResponseDto addMembership(MembershipPostDto membershipPostDto) {
-        Membership membership = membershipDomainService.addMembership(
+        Membership membership = membershipDomainService.addNewMembership(
                 dtoMapper.mapMembershipPostDtoToMembership(membershipPostDto)
         );
         return dtoMapper.mapMembershipToMembershipResponseDto(membership);
