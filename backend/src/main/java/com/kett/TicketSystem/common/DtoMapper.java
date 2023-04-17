@@ -1,4 +1,4 @@
-package com.kett.TicketSystem.application;
+package com.kett.TicketSystem.common;
 
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;

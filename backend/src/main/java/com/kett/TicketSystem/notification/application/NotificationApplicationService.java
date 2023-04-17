@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.notification.application;
 
-import com.kett.TicketSystem.application.DtoMapper;
+import com.kett.TicketSystem.common.DtoMapper;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
 import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;

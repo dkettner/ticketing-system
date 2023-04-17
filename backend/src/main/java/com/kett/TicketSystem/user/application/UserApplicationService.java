@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.user.application;
 
-import com.kett.TicketSystem.application.DtoMapper;
+import com.kett.TicketSystem.common.DtoMapper;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.domain.UserDomainService;
 import com.kett.TicketSystem.user.application.dto.UserPatchDto;
@@ -26,8 +26,6 @@ public class UserApplicationService {
         this.userDomainService = userDomainService;
         this.dtoMapper = dtoMapper;
     }
-
-    // user
 
     public UserResponseDto getUserById(UUID id) {
         User user = userDomainService.getUserById(id);

@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.project.application;
 
-import com.kett.TicketSystem.application.DtoMapper;
+import com.kett.TicketSystem.common.DtoMapper;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.project.application.dto.ProjectPatchDto;
 import com.kett.TicketSystem.project.application.dto.ProjectPostDto;

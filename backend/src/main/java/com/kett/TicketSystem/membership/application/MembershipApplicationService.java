@@ -1,7 +1,7 @@
 
 package com.kett.TicketSystem.membership.application;
 
-import com.kett.TicketSystem.application.DtoMapper;
+import com.kett.TicketSystem.common.DtoMapper;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.membership.application.dto.MembershipPostDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipPutRoleDto;
