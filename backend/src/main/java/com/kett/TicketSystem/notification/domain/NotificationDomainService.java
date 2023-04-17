@@ -1,13 +1,18 @@
 package com.kett.TicketSystem.notification.domain;
 
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.IllegalStateUpdateException;
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
 import com.kett.TicketSystem.notification.domain.exceptions.NotificationException;
 import com.kett.TicketSystem.notification.repository.NotificationRepository;
+import com.kett.TicketSystem.notification.repository.UserDataOfNotificationRepository;
 import com.kett.TicketSystem.ticket.domain.events.TicketAssignedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketUnassignedEvent;
+import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
+import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -21,10 +26,15 @@ import java.util.UUID;
 @Transactional
 public class NotificationDomainService {
     private final NotificationRepository notificationRepository;
+    private final UserDataOfNotificationRepository userDataOfNotificationRepository;
 
     @Autowired
-    public NotificationDomainService(NotificationRepository notificationRepository) {
+    public NotificationDomainService(
+            NotificationRepository notificationRepository,
+            UserDataOfNotificationRepository userDataOfNotificationRepository
+    ) {
         this.notificationRepository = notificationRepository;
+        this.userDataOfNotificationRepository = userDataOfNotificationRepository;
     }
 
     public Notification getNotificationById(UUID id) throws NoNotificationFoundException {
@@ -41,6 +51,12 @@ public class NotificationDomainService {
         return notifications;
     }
 
+    public List<Notification> getNotificationsByUserEmail(EmailAddress emailAddress) throws NotificationException {
+        return getNotificationsByRecipientId(
+                        getUserIdByUserEmailAddress(emailAddress)
+                );
+    }
+
     public List<Notification> getUnreadNotificationsByRecipientId(UUID recipientId) throws NoNotificationFoundException {
         List<Notification> notifications = notificationRepository.findByRecipientIdAndIsReadFalse(recipientId);
         if (notifications.isEmpty()) {
@@ -53,6 +69,14 @@ public class NotificationDomainService {
         return this
                 .getNotificationById(id)
                 .getRecipientId();
+    }
+
+    public UUID getUserIdByUserEmailAddress(EmailAddress emailAddress) {
+        List<UserDataOfNotification> userData = userDataOfNotificationRepository.findByUserEmailEquals(emailAddress);
+        if (userData.isEmpty()) {
+            throw new ImpossibleException("no user data found for user: " + emailAddress.toString());
+        }
+        return userData.get(0).getUserId();
     }
 
     public void patchReadState(UUID id, Boolean isRead) throws NoNotificationFoundException, NotificationException, IllegalStateUpdateException {
@@ -109,7 +133,21 @@ public class NotificationDomainService {
 
     @EventListener
     @Async
+    public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
+        userDataOfNotificationRepository.save(new UserDataOfNotification(userCreatedEvent.getUserId(), userCreatedEvent.getEmailAddress()));
+    }
+
+    @EventListener
+    @Async
+    public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
+        userDataOfNotificationRepository.deleteByUserId(userPatchedEvent.getUserId());
+        userDataOfNotificationRepository.save(new UserDataOfNotification(userPatchedEvent.getUserId(), userPatchedEvent.getEmailAddress()));
+    }
+
+    @EventListener
+    @Async
     public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
         this.deleteByRecipientId(userDeletedEvent.getUserId());
+        userDataOfNotificationRepository.deleteByUserId(userDeletedEvent.getUserId());
     }
 }

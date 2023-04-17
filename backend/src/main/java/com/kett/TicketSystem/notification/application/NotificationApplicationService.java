@@ -6,7 +6,6 @@ import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsRea
 import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.domain.NotificationDomainService;
-import com.kett.TicketSystem.user.domain.UserDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,17 +16,14 @@ import java.util.UUID;
 @Service
 public class NotificationApplicationService {
     private final NotificationDomainService notificationDomainService;
-    private final UserDomainService userDomainService;
     private final DtoMapper dtoMapper;
 
     @Autowired
     public NotificationApplicationService(
             NotificationDomainService notificationDomainService,
-            UserDomainService userDomainService, // TODO: remove UserDomainService Dependency
             DtoMapper dtoMapper
     ) {
         this.notificationDomainService = notificationDomainService;
-        this.userDomainService = userDomainService;
         this.dtoMapper = dtoMapper;
     }
 
@@ -43,10 +39,10 @@ public class NotificationApplicationService {
         return dtoMapper.mapNotificationListToNotificationResponseDtoList(notifications);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userDomainService.getUserIdByEmail(#email)))")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationDomainService.getUserIdByUserEmailAddress(#email)))")
     public List<NotificationResponseDto> getNotificationsByEmail(EmailAddress email) {
-        UUID recipientId = userDomainService.getUserIdByEmail(email);
-        return this.getNotificationsByRecipientId(recipientId);
+        List<Notification> notifications = notificationDomainService.getNotificationsByUserEmail(email);
+        return dtoMapper.mapNotificationListToNotificationResponseDtoList(notifications);
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationDomainService.getGetRecipientIdByNotificationId(#id)))")
@@ -58,5 +54,4 @@ public class NotificationApplicationService {
     public void deleteNotificationById(UUID id) {
         notificationDomainService.deleteById(id);
     }
-
 }
