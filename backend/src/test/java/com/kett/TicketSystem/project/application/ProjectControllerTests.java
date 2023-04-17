@@ -221,19 +221,23 @@ public class ProjectControllerTests {
 
     @Test
     public void consumeUserCreatedEventTest() throws Exception {
+        UUID mockUserId = UUID.randomUUID();
+        String mockUserName = "Stefan Stephens";
+        EmailAddress mockEmailAddress = EmailAddress.fromString("Stef.steph@timeless.de");
+
         eventCatcher.catchEventOfType(DefaultProjectCreatedEvent.class);
         eventPublisher.publishEvent(
                 new UserCreatedEvent(
-                        userId,
-                        userName,
-                        EmailAddress.fromString(userEmail)
+                        mockUserId,
+                        mockUserName,
+                        mockEmailAddress
                 )
         );
 
         // test DefaultProjectCreatedEvent
         await().until(eventCatcher::hasCaughtEvent);
         DefaultProjectCreatedEvent defaultProjectCreatedEvent = (DefaultProjectCreatedEvent) eventCatcher.getEvent();
-        assertEquals(userId, defaultProjectCreatedEvent.getUserId());
+        assertEquals(mockUserId, defaultProjectCreatedEvent.getUserId());
 
         // test if project was actually created
         Project defaultProject = projectDomainService.getProjectById(defaultProjectCreatedEvent.getProjectId());
