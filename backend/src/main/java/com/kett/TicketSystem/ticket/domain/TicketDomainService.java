@@ -1,5 +1,7 @@
 package com.kett.TicketSystem.ticket.domain;
 
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
+import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.exceptions.NoProjectFoundException;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
@@ -15,10 +17,10 @@ import com.kett.TicketSystem.ticket.domain.consumedData.*;
 import com.kett.TicketSystem.ticket.domain.events.*;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
-import com.kett.TicketSystem.ticket.repository.MembershipDataOfTicketRepository;
-import com.kett.TicketSystem.ticket.repository.PhaseDataOfTicketRepository;
-import com.kett.TicketSystem.ticket.repository.ProjectDataOfTicketRepository;
-import com.kett.TicketSystem.ticket.repository.TicketRepository;
+import com.kett.TicketSystem.ticket.repository.*;
+import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
+import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
+import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.event.EventListener;
@@ -37,6 +39,7 @@ public class TicketDomainService {
     private final ProjectDataOfTicketRepository projectDataOfTicketRepository;
     private final MembershipDataOfTicketRepository membershipDataOfTicketRepository;
     private final PhaseDataOfTicketRepository phaseDataOfTicketRepository;
+    private final UserDataOfTicketRepository userDataOfTicketRepository;
 
     @Autowired
     public TicketDomainService(
@@ -44,19 +47,21 @@ public class TicketDomainService {
             ApplicationEventPublisher eventPublisher,
             ProjectDataOfTicketRepository projectDataOfTicketRepository,
             MembershipDataOfTicketRepository membershipDataOfTicketRepository,
-            PhaseDataOfTicketRepository phaseDataOfTicketRepository
+            PhaseDataOfTicketRepository phaseDataOfTicketRepository,
+            UserDataOfTicketRepository userDataOfTicketRepository
     ) {
         this.ticketRepository = ticketRepository;
         this.eventPublisher = eventPublisher;
         this.projectDataOfTicketRepository = projectDataOfTicketRepository;
         this.membershipDataOfTicketRepository = membershipDataOfTicketRepository;
         this.phaseDataOfTicketRepository = phaseDataOfTicketRepository;
+        this.userDataOfTicketRepository = userDataOfTicketRepository;
     }
 
 
     // create
 
-    public Ticket addTicket(Ticket ticket, UUID postingUserId) throws NoProjectFoundException, InvalidProjectMembersException {
+    public Ticket addTicket(Ticket ticket, EmailAddress postingUserEmail) throws NoProjectFoundException, InvalidProjectMembersException {
         if (!projectDataOfTicketRepository.existsByProjectId(ticket.getProjectId())) {
             throw new NoProjectFoundException("could not find project with id: " + ticket.getProjectId());
         }
@@ -65,6 +70,7 @@ public class TicketDomainService {
                     "not all assignees are part of the project with id: " + ticket.getProjectId()
             );
         }
+        UUID postingUserId = getUserIdByUserEmailAddress(postingUserEmail);
 
         // set phaseId of ticket
         UUID firstPhaseOfProjectId =
@@ -77,6 +83,14 @@ public class TicketDomainService {
         Ticket initializedTicket = ticketRepository.save(ticket);
         eventPublisher.publishEvent(new TicketCreatedEvent(initializedTicket.getId(), initializedTicket.getProjectId(), postingUserId));
         return initializedTicket;
+    }
+
+    private UUID getUserIdByUserEmailAddress(EmailAddress emailAddress) {
+        List<UserDataOfTicket> userData = userDataOfTicketRepository.findByUserEmailEquals(emailAddress);
+        if (userData.isEmpty()) {
+            throw new ImpossibleException("no user data found for user: " + emailAddress.toString());
+        }
+        return userData.get(0).getUserId();
     }
 
     private Boolean allAssigneesAreProjectMembers(UUID projectId, List<UUID> assigneeIds) {
@@ -302,5 +316,24 @@ public class TicketDomainService {
     @Async
     public void handlePhaseDeletedEvent(PhaseDeletedEvent phaseDeletedEvent) {
         phaseDataOfTicketRepository.deleteByPhaseId(phaseDeletedEvent.getPhaseId());
+    }
+
+    @EventListener
+    @Async
+    public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
+        userDataOfTicketRepository.save(new UserDataOfTicket(userCreatedEvent.getUserId(), userCreatedEvent.getEmailAddress()));
+    }
+
+    @EventListener
+    @Async
+    public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
+        userDataOfTicketRepository.deleteByUserId(userPatchedEvent.getUserId());
+        userDataOfTicketRepository.save(new UserDataOfTicket(userPatchedEvent.getUserId(), userPatchedEvent.getEmailAddress()));
+    }
+
+    @EventListener
+    @Async
+    public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
+        userDataOfTicketRepository.deleteByUserId(userDeletedEvent.getUserId());
     }
 }
