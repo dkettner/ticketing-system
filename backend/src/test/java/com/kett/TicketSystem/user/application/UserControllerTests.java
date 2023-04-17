@@ -8,6 +8,7 @@ import com.kett.TicketSystem.common.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.application.dto.UserPatchDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.domain.User;
+import com.kett.TicketSystem.user.domain.UserDomainService;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
@@ -41,7 +42,7 @@ public class UserControllerTests {
     private final MockMvc mockMvc;
     private final ObjectMapper objectMapper;
     private final UserRepository userRepository;
-    private final UserService userService;
+    private final UserDomainService userDomainService;
     private final EventCatcher eventCatcher;
 
     private String name0;
@@ -72,13 +73,13 @@ public class UserControllerTests {
             MockMvc mockMvc,
             ObjectMapper objectMapper,
             UserRepository userRepository,
-            UserService userService,
+            UserDomainService userDomainService,
             EventCatcher eventCatcher
     ) {
         this.mockMvc = mockMvc;
         this.objectMapper = objectMapper;
         this.userRepository = userRepository;
-        this.userService = userService;
+        this.userDomainService = userDomainService;
         this.eventCatcher = eventCatcher;
     }
 
@@ -178,7 +179,7 @@ public class UserControllerTests {
         // test instance
         String response0 = result0.getResponse().getContentAsString();
         String tempId0 = JsonPath.parse(response0).read("$.id");
-        User user0 = userService.getUserById(UUID.fromString(tempId0));
+        User user0 = userDomainService.getUserById(UUID.fromString(tempId0));
         assertEquals(user0.getName(), validUser0PostDto.getName());
         assertEquals(user0.getEmail(), EmailAddress.fromString(validUser0PostDto.getEmail()));
 
@@ -206,7 +207,7 @@ public class UserControllerTests {
         // test instance
         String response1 = result1.getResponse().getContentAsString();
         String tempId1 = JsonPath.parse(response1).read("$.id");
-        User user1 = userService.getUserById(UUID.fromString(tempId1));
+        User user1 = userDomainService.getUserById(UUID.fromString(tempId1));
         assertEquals(user1.getName(), validUser1PostDto.getName());
         assertEquals(user1.getEmail(), EmailAddress.fromString(validUser1PostDto.getEmail()));
 
@@ -375,7 +376,7 @@ public class UserControllerTests {
                         .andReturn();
 
         // test instance
-        User user4 = userService.getUserById(UUID.fromString(id4));
+        User user4 = userDomainService.getUserById(UUID.fromString(id4));
         assertEquals(user4.getName(), userPatchDto.getName());
         assertEquals(user4.getEmail().toString(), email4);
 
@@ -401,7 +402,7 @@ public class UserControllerTests {
                         .andReturn();
 
         // test instance
-        User user4 = userService.getUserById(UUID.fromString(id4));
+        User user4 = userDomainService.getUserById(UUID.fromString(id4));
         assertEquals(user4.getName(), name4);
         assertEquals(user4.getEmail().toString(), userPatchDto.getEmail());
 
@@ -427,7 +428,7 @@ public class UserControllerTests {
                         .andReturn();
 
         // test instance
-        User user4 = userService.getUserById(UUID.fromString(id4));
+        User user4 = userDomainService.getUserById(UUID.fromString(id4));
         assertEquals(user4.getName(), userPatchDto.getName());
         assertEquals(user4.getEmail(), EmailAddress.fromString(userPatchDto.getEmail()));
 
@@ -524,7 +525,7 @@ public class UserControllerTests {
                         .andReturn();
 
         // test instance
-        assertThrows(NoUserFoundException.class, () -> userService.getUserById(UUID.fromString(id4)));
+        assertThrows(NoUserFoundException.class, () -> userDomainService.getUserById(UUID.fromString(id4)));
 
         // test UserDeletedEvent
         await().until(eventCatcher::hasCaughtEvent);
@@ -544,7 +545,7 @@ public class UserControllerTests {
                         .andReturn();
 
         // test instance
-        User user = userService.getUserById(UUID.fromString(id4));
+        User user = userDomainService.getUserById(UUID.fromString(id4));
 
         // test if UserDeletedEvent was thrown
         try {

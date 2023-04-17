@@ -1,6 +1,5 @@
 package com.kett.TicketSystem.user.application;
 
-import com.kett.TicketSystem.application.TicketSystemService;
 import com.kett.TicketSystem.common.exceptions.NoParametersException;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.application.dto.UserPatchDto;
@@ -21,17 +20,17 @@ import java.util.UUID;
 @CrossOrigin(origins = {"http://127.0.0.1:5173"}, allowCredentials = "true")
 @RequestMapping("/users")
 public class UserController {
-    private final TicketSystemService ticketSystemService;
+    private final UserApplicationService userApplicationService;
 
     @Autowired
-    public UserController(TicketSystemService ticketSystemService) {
-        this.ticketSystemService = ticketSystemService;
+    public UserController(UserApplicationService userApplicationService) {
+        this.userApplicationService = userApplicationService;
     }
 
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable UUID id) {
-        UserResponseDto userResponseDto = ticketSystemService.getUserById(id);
+        UserResponseDto userResponseDto = userApplicationService.getUserById(id);
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 
@@ -42,13 +41,13 @@ public class UserController {
         if (email == null) {
             throw new NoParametersException("cannot query if no parameters are specified");
         }
-        UserResponseDto userResponseDto = ticketSystemService.getByEMailAddress(EmailAddress.fromString(email));
+        UserResponseDto userResponseDto = userApplicationService.getByEMailAddress(EmailAddress.fromString(email));
         return new ResponseEntity<>(userResponseDto, HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<UserResponseDto> createUser(@RequestBody UserPostDto userPostDto) {
-        UserResponseDto userResponseDto = ticketSystemService.addUser(userPostDto);
+        UserResponseDto userResponseDto = userApplicationService.addUser(userPostDto);
         URI returnURI = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
@@ -62,13 +61,13 @@ public class UserController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<?> patchUserById(@PathVariable UUID id, @RequestBody UserPatchDto userPatchDto) {
-        ticketSystemService.patchUserById(id, userPatchDto);
+        userApplicationService.patchUserById(id, userPatchDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteUser(@PathVariable UUID id) {
-        ticketSystemService.deleteUserById(id);
+        userApplicationService.deleteUserById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

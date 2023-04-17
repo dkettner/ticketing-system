@@ -1,7 +1,8 @@
-package com.kett.TicketSystem.application;
+package com.kett.TicketSystem.user.application;
 
+import com.kett.TicketSystem.application.DtoMapper;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.user.application.UserService;
+import com.kett.TicketSystem.user.domain.UserDomainService;
 import com.kett.TicketSystem.user.application.dto.UserPatchDto;
 import com.kett.TicketSystem.user.application.dto.UserPostDto;
 import com.kett.TicketSystem.user.application.dto.UserResponseDto;
@@ -13,33 +14,33 @@ import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
-public class TicketSystemService {
-    private final UserService userService;
+public class UserApplicationService {
+    private final UserDomainService userDomainService;
     private final DtoMapper dtoMapper;
 
     @Autowired
-    public TicketSystemService (
-            UserService userService,
+    public UserApplicationService(
+            UserDomainService userDomainService,
             DtoMapper dtoMapper
     ) {
-        this.userService = userService;
+        this.userDomainService = userDomainService;
         this.dtoMapper = dtoMapper;
     }
 
     // user
 
     public UserResponseDto getUserById(UUID id) {
-        User user = userService.getUserById(id);
+        User user = userDomainService.getUserById(id);
         return dtoMapper.mapUserToUserResponseDto(user);
     }
 
     public UserResponseDto getByEMailAddress(EmailAddress eMailAddress) {
-        User user = userService.getUserByEMailAddress(eMailAddress);
+        User user = userDomainService.getUserByEMailAddress(eMailAddress);
         return dtoMapper.mapUserToUserResponseDto(user);
     }
 
     public UserResponseDto addUser(UserPostDto userPostDto) {
-        User user = userService.addUser(
+        User user = userDomainService.addUser(
                 dtoMapper.mapUserPostDtoToUser(userPostDto)
         );
 
@@ -48,7 +49,7 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#id))")
     public void patchUserById(UUID id, UserPatchDto userPatchDto) {
-        userService.patchUserById(
+        userDomainService.patchUserById(
                 id,
                 userPatchDto.getName(),
                 userPatchDto.getEmail()
@@ -57,6 +58,6 @@ public class TicketSystemService {
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(#id))")
     public void deleteUserById(UUID id) {
-        userService.deleteById(id);
+        userDomainService.deleteById(id);
     }
 }

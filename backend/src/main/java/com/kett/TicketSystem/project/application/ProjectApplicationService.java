@@ -7,7 +7,7 @@ import com.kett.TicketSystem.project.application.dto.ProjectPostDto;
 import com.kett.TicketSystem.project.application.dto.ProjectResponseDto;
 import com.kett.TicketSystem.project.domain.Project;
 import com.kett.TicketSystem.project.domain.ProjectDomainService;
-import com.kett.TicketSystem.user.application.UserService;
+import com.kett.TicketSystem.user.domain.UserDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,17 +17,17 @@ import java.util.UUID;
 @Service
 public class ProjectApplicationService {
     private final ProjectDomainService projectDomainService;
-    private final UserService userService; // TODO: remove UserService dependency
+    private final UserDomainService userDomainService; // TODO: remove UserDomainService dependency
     private final DtoMapper dtoMapper;
 
     @Autowired
     public ProjectApplicationService(
             ProjectDomainService projectDomainService,
-            UserService userService, // TODO: remove UserService dependency
+            UserDomainService userDomainService, // TODO: remove UserDomainService dependency
             DtoMapper dtoMapper
     ) {
         this.projectDomainService = projectDomainService;
-        this.userService = userService;
+        this.userDomainService = userDomainService;
         this.dtoMapper = dtoMapper;
     }
 
@@ -48,7 +48,7 @@ public class ProjectApplicationService {
     }
 
     public ProjectResponseDto addProject(ProjectPostDto projectPostDto, EmailAddress postingUserEmail) {
-        UUID userId = userService.getUserIdByEmail(postingUserEmail);
+        UUID userId = userDomainService.getUserIdByEmail(postingUserEmail);
         return this.addProject(projectPostDto, userId);
     }
 

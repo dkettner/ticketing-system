@@ -6,7 +6,7 @@ import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsRea
 import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.domain.NotificationDomainService;
-import com.kett.TicketSystem.user.application.UserService;
+import com.kett.TicketSystem.user.domain.UserDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -17,17 +17,17 @@ import java.util.UUID;
 @Service
 public class NotificationApplicationService {
     private final NotificationDomainService notificationDomainService;
-    private final UserService userService;
+    private final UserDomainService userDomainService;
     private final DtoMapper dtoMapper;
 
     @Autowired
     public NotificationApplicationService(
             NotificationDomainService notificationDomainService,
-            UserService userService, // TODO: remove UserService Dependency
+            UserDomainService userDomainService, // TODO: remove UserDomainService Dependency
             DtoMapper dtoMapper
     ) {
         this.notificationDomainService = notificationDomainService;
-        this.userService = userService;
+        this.userDomainService = userDomainService;
         this.dtoMapper = dtoMapper;
     }
 
@@ -43,9 +43,9 @@ public class NotificationApplicationService {
         return dtoMapper.mapNotificationListToNotificationResponseDtoList(notifications);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userService.getUserIdByEmail(#email)))")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userDomainService.getUserIdByEmail(#email)))")
     public List<NotificationResponseDto> getNotificationsByEmail(EmailAddress email) {
-        UUID recipientId = userService.getUserIdByEmail(email);
+        UUID recipientId = userDomainService.getUserIdByEmail(email);
         return this.getNotificationsByRecipientId(recipientId);
     }
 

@@ -1,6 +1,6 @@
 package com.kett.TicketSystem.authentication.domain.jwt;
 
-import com.kett.TicketSystem.user.application.UserService;
+import com.kett.TicketSystem.user.domain.UserDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,7 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private JwtTokenProvider jwtTokenProvider;
 
     @Autowired
-    private UserService userService;
+    private UserDomainService userDomainService;
 
     @Override
     protected void doFilterInternal(
@@ -35,7 +35,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(jwt) && jwtTokenProvider.validateToken(jwt)) {
             String email = jwtTokenProvider.getEmailFromToken(jwt);
-            UserDetails userDetails = userService.loadUserByUsername(email);
+            UserDetails userDetails = userDomainService.loadUserByUsername(email);
             UsernamePasswordAuthenticationToken authenticationToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 

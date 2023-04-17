@@ -1,10 +1,9 @@
-package com.kett.TicketSystem.user.application;
+package com.kett.TicketSystem.user.domain;
 
 import com.kett.TicketSystem.membership.domain.MembershipDomainService;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.user.domain.User;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.common.exceptions.NoUserFoundException;
 import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
@@ -28,14 +27,14 @@ import java.util.UUID;
 
 @Service
 @Transactional
-public class UserService implements UserDetailsService {
+public class UserDomainService implements UserDetailsService {
     private final UserRepository userRepository;
     private final MembershipDomainService membershipDomainService;
     private final PasswordEncoder passwordEncoder;
     private final ApplicationEventPublisher eventPublisher;
 
     @Autowired
-    public UserService(
+    public UserDomainService(
             UserRepository userRepository,
             MembershipDomainService membershipDomainService,
             PasswordEncoder passwordEncoder,

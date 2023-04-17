@@ -9,7 +9,7 @@ import com.kett.TicketSystem.membership.application.dto.MembershipPutStateDto;
 import com.kett.TicketSystem.membership.application.dto.MembershipResponseDto;
 import com.kett.TicketSystem.membership.domain.Membership;
 import com.kett.TicketSystem.membership.domain.MembershipDomainService;
-import com.kett.TicketSystem.user.application.UserService;
+import com.kett.TicketSystem.user.domain.UserDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -20,13 +20,13 @@ import java.util.UUID;
 @Service
 public class MembershipApplicationService {
     private final MembershipDomainService membershipDomainService;
-    private final UserService userService;
+    private final UserDomainService userDomainService;
     private final DtoMapper dtoMapper;
 
     @Autowired
-    public MembershipApplicationService(MembershipDomainService membershipDomainService, UserService userService, DtoMapper dtoMapper) {
+    public MembershipApplicationService(MembershipDomainService membershipDomainService, UserDomainService userDomainService, DtoMapper dtoMapper) {
         this.membershipDomainService = membershipDomainService;
-        this.userService = userService; // TODO: get rid of userService dependency
+        this.userDomainService = userDomainService; // TODO: get rid of userService dependency
         this.dtoMapper = dtoMapper;
     }
 
@@ -44,9 +44,9 @@ public class MembershipApplicationService {
         return dtoMapper.mapMembershipListToMembershipResponseDtoList(memberships);
     }
 
-    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userService.getUserIdByEmail(#email)))")
+    @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@userDomainService.getUserIdByEmail(#email)))")
     public List<MembershipResponseDto> getMembershipsByEmail(EmailAddress email) {
-        UUID userId = userService.getUserIdByEmail(email);
+        UUID userId = userDomainService.getUserIdByEmail(email);
         return this.getMembershipsByUserId(userId);
     }
 

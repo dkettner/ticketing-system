@@ -7,7 +7,7 @@ import com.kett.TicketSystem.ticket.application.dto.TicketPostDto;
 import com.kett.TicketSystem.ticket.application.dto.TicketResponseDto;
 import com.kett.TicketSystem.ticket.domain.Ticket;
 import com.kett.TicketSystem.ticket.domain.TicketDomainService;
-import com.kett.TicketSystem.user.application.UserService;
+import com.kett.TicketSystem.user.domain.UserDomainService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -18,17 +18,17 @@ import java.util.UUID;
 @Service
 public class TicketApplicationService {
     private final TicketDomainService ticketDomainService;
-    private final UserService userService;
+    private final UserDomainService userDomainService;
     private final DtoMapper dtoMapper;
 
     @Autowired
     public TicketApplicationService(
             TicketDomainService ticketDomainService,
-            UserService userService, // TODO: remove UserService dependency
+            UserDomainService userDomainService, // TODO: remove UserDomainService dependency
             DtoMapper dtoMapper
     ) {
         this.ticketDomainService = ticketDomainService;
-        this.userService = userService;
+        this.userDomainService = userDomainService;
         this.dtoMapper = dtoMapper;
     }
 
@@ -70,7 +70,7 @@ public class TicketApplicationService {
     public TicketResponseDto addTicket(TicketPostDto ticketPostDto, EmailAddress postingUserEmail) {
         Ticket ticket = ticketDomainService.addTicket(
                 dtoMapper.mapTicketPostDtoToTicket(ticketPostDto, null),
-                userService.getUserIdByEmail(postingUserEmail)
+                userDomainService.getUserIdByEmail(postingUserEmail)
         );
         return dtoMapper.mapTicketToTicketResponseDto(ticket);
     }
