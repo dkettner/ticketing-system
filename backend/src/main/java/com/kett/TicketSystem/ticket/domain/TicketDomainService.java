@@ -14,6 +14,7 @@ import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
 import com.kett.TicketSystem.ticket.domain.consumedData.*;
 import com.kett.TicketSystem.ticket.domain.events.*;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
+import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
 import com.kett.TicketSystem.ticket.repository.MembershipDataOfTicketRepository;
 import com.kett.TicketSystem.ticket.repository.PhaseDataOfTicketRepository;
 import com.kett.TicketSystem.ticket.repository.ProjectDataOfTicketRepository;
@@ -121,6 +122,14 @@ public class TicketDomainService {
 
     public UUID getProjectIdByTicketId(UUID ticketId) throws NoTicketFoundException {
         return this.getTicketById(ticketId).getProjectId();
+    }
+
+    public UUID getProjectIdByPhaseIdOfTicket(UUID phaseId) throws NoTicketFoundException {
+        List<PhaseDataOfTicket> phaseData = phaseDataOfTicketRepository.findByPhaseId(phaseId);
+        if (phaseData.isEmpty()) {
+            throw new TicketException("There is no data about a phase with phaseId: " + phaseId);
+        }
+        return phaseData.get(0).getProjectId();
     }
 
 

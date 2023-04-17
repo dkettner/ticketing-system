@@ -43,8 +43,8 @@ public class TicketApplicationService {
     }
 
     @PreAuthorize("hasAnyAuthority(" +
-            "'ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#phaseId)), " + // TODO: remove phase dependency
-            "'ROLE_PROJECT_MEMBER_'.concat(@phaseDomainService.getProjectIdByPhaseId(#phaseId)))")
+            "'ROLE_PROJECT_ADMIN_'.concat(@ticketDomainService.getProjectIdByPhaseIdOfTicket(#phaseId)), " +
+            "'ROLE_PROJECT_MEMBER_'.concat(@ticketDomainService.getProjectIdByPhaseIdOfTicket(#phaseId)))")
     public List<TicketResponseDto> getTicketsByPhaseId(UUID phaseId) {
         List<Ticket> tickets = ticketDomainService.getTicketsByPhaseId(phaseId);
         return dtoMapper.mapTicketListToTicketResponseDtoList(tickets);
