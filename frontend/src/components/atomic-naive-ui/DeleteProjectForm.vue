@@ -48,18 +48,18 @@
     ref="formRef"
     :size="medium"
     label-placement="top"
-    style="min-width: 300px; width: 40%; max-width: 500px; background-color: #EEEEEE; padding: 20px;"
+    style="min-width: 300px; width: 40%; max-width: 500px; background-color: #EEEEEE; padding: 20px; border-radius: 5px;"
   >
     <n-grid :span="24" :x-gap="24" :cols ="1">
       <n-gi :span="24">Do you really want to delete this project?</n-gi>
       <n-gi> &nbsp; </n-gi>
       <n-gi :span="24">
         <div style="display: flex; justify-content: flex-end">
-          <n-button type="strong secondary" @click="handleCancelButtonClick">
+          <n-button style="border-radius: 5px;" type="strong secondary" @click="handleCancelButtonClick">
             Cancel
           </n-button>
           &nbsp;
-          <n-button type="error" @click="handleDeleteButtonClick">
+          <n-button style="border-radius: 5px;" type="error" @click="handleDeleteButtonClick">
             Delete project
           </n-button>
         </div>

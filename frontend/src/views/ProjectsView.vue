@@ -21,7 +21,7 @@
       <div v-for="project in projects">
         <n-col :span="100">
           <RouterLink :to="`/projects/${project.id}`" style="text-decoration: none">
-          <n-card :title="project.name" embedded hoverable style="width: 40vh; height: 25vh;">
+          <n-card :title="project.name" embedded hoverable style="width: 40vh; height: 25vh; border-radius: 5px;">
             <n-ellipsis line-clamp="3" >
               {{project.description}}
               <template #tooltip>

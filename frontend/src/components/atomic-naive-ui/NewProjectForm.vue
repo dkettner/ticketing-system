@@ -66,14 +66,15 @@
     :rules="rules"
     :size="medium"
     label-placement="top"
-    style="min-width: 300px; width: 40%; max-width: 500px; background-color: #EEEEEE; padding: 20px;"
+    style="min-width: 300px; width: 40%; max-width: 500px; background-color: #EEEEEE; padding: 20px; border-radius: 5px;"
   >
     <n-grid :span="24" :x-gap="24" :cols ="1">
       <n-form-item-gi :span="24" label="Project Name" path="name">
-        <n-input v-model:value="projectPostData.name" placeholder="Project Name" />
+        <n-input style="border-radius: 5px;" v-model:value="projectPostData.name" placeholder="Project Name" />
       </n-form-item-gi>
       <n-form-item-gi :span="24" label="Description" path="description">
         <n-input
+          style="border-radius: 5px;"
           v-model:value="projectPostData.description"
           placeholder="Description"
           type="textarea"
@@ -86,11 +87,11 @@
 
       <n-gi :span="24">
         <div style="display: flex; justify-content: flex-end">
-          <n-button type="error" @click="handleCancelButtonClick">
+          <n-button style="border-radius: 5px;" type="error" @click="handleCancelButtonClick">
             Cancel
           </n-button>
           &nbsp;
-          <n-button type="primary" @click="handleCreateButtonClick">
+          <n-button style="border-radius: 5px;" type="primary" @click="handleCreateButtonClick">
             Create New Project
           </n-button>
         </div>

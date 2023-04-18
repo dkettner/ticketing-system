@@ -22,7 +22,7 @@
       />
     </n-modal>
 
-  <n-button @click="handleNewProjectButtonClicked" type="primary" block primary strong style="max-width: 125px">
+  <n-button @click="handleNewProjectButtonClicked" type="primary" block primary strong style="max-width: 125px; border-radius: 5px;">
     + New Project
   </n-button>
 </template>
