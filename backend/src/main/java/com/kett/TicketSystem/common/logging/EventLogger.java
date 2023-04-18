@@ -9,6 +9,7 @@ import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
+import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
 import com.kett.TicketSystem.user.domain.events.UserPatchedEvent;
@@ -21,10 +22,13 @@ import org.springframework.stereotype.Component;
 public class EventLogger {
     Logger logger = LoggerFactory.getLogger(EventLogger.class);
 
+
+    // membership
+
     @EventListener
     public void handleMembershipAcceptedEvent(MembershipAcceptedEvent membershipAcceptedEvent) {
         logger.trace(
-                "accepted membership -> " +
+                "membership accepted -> " +
                 "membershipId:" + membershipAcceptedEvent.getMembershipId() +
                 ", userId:" + membershipAcceptedEvent.getUserId() +
                 ", projectId:" + membershipAcceptedEvent.getProjectId()
@@ -33,7 +37,7 @@ public class EventLogger {
     @EventListener
     public void handleMembershipDeletedEvent(MembershipDeletedEvent membershipDeletedEvent) {
         logger.trace(
-                "deleted membership -> " +
+                "membership deleted -> " +
                 "membershipId:" + membershipDeletedEvent.getMembershipId() +
                 ", userId:" + membershipDeletedEvent.getUserId() +
                 ", projectId:" + membershipDeletedEvent.getProjectId()
@@ -42,7 +46,7 @@ public class EventLogger {
     @EventListener
     public void handleLastProjectMemberDeletedEvents(LastProjectMemberDeletedEvent lastProjectMemberDeletedEvent) {
         logger.trace(
-                "deleted last membership -> " +
+                "last membership deleted -> " +
                 "membershipId:" + lastProjectMemberDeletedEvent.getMembershipId() +
                 ", userId:" + lastProjectMemberDeletedEvent.getUserId() +
                 ", projectId:" + lastProjectMemberDeletedEvent.getProjectId()
@@ -51,12 +55,15 @@ public class EventLogger {
     @EventListener
     public void handleUnacceptedProjectMembershipCreatedEvent(UnacceptedProjectMembershipCreatedEvent unacceptedProjectMembershipCreatedEvent) {
         logger.trace(
-                "unaccepted membership -> " +
+                "unaccepted membership created -> " +
                 "membershipId:" + unacceptedProjectMembershipCreatedEvent.getMembershipId() +
                 ", userId:" + unacceptedProjectMembershipCreatedEvent.getInviteeId() + ", " +
                 ", projectId:" + unacceptedProjectMembershipCreatedEvent.getProjectId()
         );
     }
+
+
+    // phase
 
     @EventListener
     public void handlePhaseCreatedEvent(PhaseCreatedEvent phaseCreatedEvent) {
@@ -66,6 +73,9 @@ public class EventLogger {
     public void handlePhaseDeletedEvent(PhaseDeletedEvent phaseDeletedEvent) {
 
     }
+
+
+    // project
 
     @EventListener
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
@@ -80,10 +90,26 @@ public class EventLogger {
 
     }
 
+
+    // ticket
+
+    @EventListener
+    public void handleTicketCreatedEvent(TicketCreatedEvent ticketCreatedEvent) {
+        logger.trace(
+                "ticket created -> " +
+                "ticketId:" + ticketCreatedEvent.getTicketId() +
+                ", userId:" + ticketCreatedEvent.getUserId() + ", " +
+                "projectId:" + ticketCreatedEvent.getProjectId()
+        );
+    }
+
+
+    // user
+
     @EventListener
     public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
         logger.trace(
-                "created user -> " +
+                "user created -> " +
                 "userId:" + userCreatedEvent.getUserId() +
                 ", name:" + userCreatedEvent.getName() +
                 ", email:" + userCreatedEvent.getEmailAddress()
@@ -92,19 +118,19 @@ public class EventLogger {
     @EventListener
     public void handleUserDeletedEvent(UserDeletedEvent userDeletedEvent) {
         logger.trace(
-                "deleted user -> " +
-                        "userId:" + userDeletedEvent.getUserId() +
-                        ", name:" + userDeletedEvent.getName()+
-                        ", email:" + userDeletedEvent.getEmailAddress()
+                "user deleted -> " +
+                "userId:" + userDeletedEvent.getUserId() +
+                ", name:" + userDeletedEvent.getName()+
+                ", email:" + userDeletedEvent.getEmailAddress()
         );
     }
     @EventListener
     public void handleUserPatchedEvent(UserPatchedEvent userPatchedEvent) {
         logger.trace(
-                "patched user -> " +
-                        "userId:" + userPatchedEvent.getUserId() +
-                        ", name:" + userPatchedEvent.getName()+
-                        ", email:" + userPatchedEvent.getEmailAddress()
+                "user patched -> " +
+                "userId:" + userPatchedEvent.getUserId() +
+                ", name:" + userPatchedEvent.getName()+
+                ", email:" + userPatchedEvent.getEmailAddress()
         );
     }
 }
