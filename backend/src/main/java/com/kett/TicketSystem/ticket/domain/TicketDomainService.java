@@ -255,9 +255,6 @@ public class TicketDomainService {
     @EventListener
     @Async
     public void handleMembershipAcceptedEvent(MembershipAcceptedEvent membershipAcceptedEvent) {
-        if (!projectDataOfTicketRepository.existsByProjectId(membershipAcceptedEvent.getProjectId())){
-            projectDataOfTicketRepository.save(new ProjectDataOfTicket(membershipAcceptedEvent.getProjectId()));
-        }
         membershipDataOfTicketRepository.save(
                 new MembershipDataOfTicket(
                         membershipAcceptedEvent.getMembershipId(),
@@ -270,17 +267,13 @@ public class TicketDomainService {
     @EventListener
     @Async
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-        if (!projectDataOfTicketRepository.existsByProjectId(projectCreatedEvent.getProjectId())){
-            projectDataOfTicketRepository.save(new ProjectDataOfTicket(projectCreatedEvent.getProjectId()));
-        }
+        projectDataOfTicketRepository.save(new ProjectDataOfTicket(projectCreatedEvent.getProjectId()));
     }
 
     @EventListener
     @Async
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-        if (!projectDataOfTicketRepository.existsByProjectId(defaultProjectCreatedEvent.getProjectId())) {
-            projectDataOfTicketRepository.save(new ProjectDataOfTicket(defaultProjectCreatedEvent.getProjectId()));
-        }
+        projectDataOfTicketRepository.save(new ProjectDataOfTicket(defaultProjectCreatedEvent.getProjectId()));
     }
 
 
