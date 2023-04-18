@@ -2,7 +2,6 @@ package com.kett.TicketSystem.user.domain;
 
 import com.kett.TicketSystem.membership.domain.MembershipDomainService;
 import com.kett.TicketSystem.user.domain.events.UserDeletedEvent;
-import com.kett.TicketSystem.common.exceptions.ImpossibleException;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.user.domain.events.UserCreatedEvent;
 import com.kett.TicketSystem.common.exceptions.NoUserFoundException;
@@ -134,17 +133,10 @@ public class UserDomainService implements UserDetailsService {
     // delete
 
     public void deleteById(UUID id) {
-        Long numOfDeletedUsers = userRepository.removeById(id);
-
-        if (numOfDeletedUsers == 0) {
-            throw new NoUserFoundException("could not delete because there was no user with id: " + id);
-        } else if (numOfDeletedUsers > 1) {
-            throw new ImpossibleException(
-                    "!!! This should not happen. " +
-                    "Multiple users were deleted when deleting user with id: " + id
-            );
-        } else {
-            eventPublisher.publishEvent(new UserDeletedEvent(id));
-        }
+        User user = userRepository
+                .findById(id)
+                .orElseThrow(() -> new NoUserFoundException("could not delete because there was no user with id: " + id));
+        userRepository.removeById(id);
+        eventPublisher.publishEvent(new UserDeletedEvent(user.getId(), user.getName(), user.getEmail()));
     }
 }

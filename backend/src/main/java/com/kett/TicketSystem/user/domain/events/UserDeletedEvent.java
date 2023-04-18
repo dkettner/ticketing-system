@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.user.domain.events;
 
 import com.kett.TicketSystem.common.domainprimitives.DomainEvent;
+import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import lombok.Getter;
 
 import java.util.UUID;
@@ -8,9 +9,13 @@ import java.util.UUID;
 @Getter
 public class UserDeletedEvent extends DomainEvent {
     private final UUID userId;
+    private final String name;
+    private final EmailAddress emailAddress;
 
-    public UserDeletedEvent(UUID userId) {
+    public UserDeletedEvent(UUID userId, String name, EmailAddress emailAddress) {
         super();
         this.userId = userId;
+        this.name = name;
+        this.emailAddress = emailAddress;
     }
 }
