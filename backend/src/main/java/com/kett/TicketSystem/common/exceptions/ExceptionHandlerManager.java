@@ -14,6 +14,8 @@ import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
 import com.kett.TicketSystem.user.domain.exceptions.EmailAlreadyInUseException;
 import com.kett.TicketSystem.user.domain.exceptions.UserException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -22,6 +24,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 @ControllerAdvice
 public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
+    Logger logger = LoggerFactory.getLogger(ExceptionHandlerManager.class);
 
     @ExceptionHandler(value = {
             NoParametersException.class,
@@ -35,6 +38,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
             EmailAddressException.class
     })
     public ResponseEntity<String> handleBadRequestException(RuntimeException runtimeException) {
+        logger.warn("exception -> " + runtimeException.getClass().getSimpleName() + ": " + runtimeException.getMessage());
         return new ResponseEntity<>(runtimeException.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
@@ -47,6 +51,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
             NoUserFoundException.class
     })
     public ResponseEntity<String> handleNotFoundException(RuntimeException runtimeException) {
+        logger.warn("exception -> " + runtimeException.getClass().getSimpleName() + ": " + runtimeException.getMessage());
         return new ResponseEntity<>(runtimeException.getMessage(), HttpStatus.NOT_FOUND);
     }
 
@@ -60,6 +65,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
             EmailAlreadyInUseException.class
     })
     public ResponseEntity<String> handleConflictException(RuntimeException runtimeException) {
+        logger.warn("exception -> " + runtimeException.getClass().getSimpleName() + ": " + runtimeException.getMessage());
         return new ResponseEntity<>(runtimeException.getMessage(), HttpStatus.CONFLICT);
     }
 
@@ -67,6 +73,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
             ImpossibleException.class
     })
     public ResponseEntity<String> handleInternalErrorServerException(ImpossibleException impossibleException) {
+        logger.error("exception -> " + impossibleException.getClass().getSimpleName() + ": " + impossibleException.getMessage());
         return new ResponseEntity<>(impossibleException.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
