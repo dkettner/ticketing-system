@@ -4,7 +4,7 @@
 </script>
 
 <template>
-  <n-space justify="center" style="transform: translateY(+50%);">
+  <n-space justify="center" style="transform:translateY(+40px);">
     <img src="../assets/ticketsystem-logo.png">
     <n-notification-provider>
       <SignInForm />
