@@ -75,6 +75,16 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       return { isSuccessful: false, data: error };
     }
   }
+
+  const deleteProjectById = async (id) => {
+    try {
+      const response = await axios.delete(projectsPath + "/" + id, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
   
 
   // tickets
@@ -122,6 +132,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     postAuthentication,
     getMembershipsByEmail,
     postProject,
+    deleteProjectById,
     getProjectById,
     getMultipleProjectsByIds,
     getUserById,

@@ -19,18 +19,28 @@ export const useProjectStore = defineStore("project", () => {
     }
   }
 
+  const deleteProjectById = async (id) => {
+    const deleteProjectResponse = await fetchAgent.deleteProjectById(id);
+    if (deleteProjectResponse.isSuccessful) {
+      await updateProjectsByAcceptedMemberships();
+      return { isDeleteSuccessful: true, message: "Deleted project with id: " + id };
+    } else {
+      return { isPostSuccessful: false, message: deleteProjectResponse.data.response.data };
+    }
+  }
+
   const updateProjectsByAcceptedMemberships = async () => {
     const projectIds = membershipStore.getAcceptedMembershipsProjectIds();
 
     const newProjects = [];
     for (let index in projectIds) {
+      console.log(projectIds[index]);
       const getProjectResponse = await fetchAgent.getProjectById(projectIds[index]);
       if (getProjectResponse.isSuccessful) {
         newProjects.push(getProjectResponse.data);
       } else {
         console.log("error while updating projects:")
         console.log(getProjectResponse.data.response.data);
-        return;
       }
     }
 
@@ -45,6 +55,7 @@ export const useProjectStore = defineStore("project", () => {
   return {
     projects,
     postNewProject,
+    deleteProjectById,
     updateProjectsByAcceptedMemberships
   };
 });

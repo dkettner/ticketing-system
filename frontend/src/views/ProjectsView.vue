@@ -20,17 +20,21 @@
     <n-row :gutter="[10,10]">
       <div v-for="project in projects">
         <n-col :span="100">
+          <RouterLink :to="`/projects/${project.id}`" style="text-decoration: none">
           <n-card :title="project.name" embedded hoverable style="width: 40vh; height: 25vh;">
             <n-ellipsis line-clamp="3" >
               {{project.description}}
               <template #tooltip>
-                <div style="text-align: center; max-width: 40vh;">
+                <div style="text-align: center; width: 40vh;">
                   {{project.description}}
                 </div>
               </template>
             </n-ellipsis>
-            <p style="font-style: italic;">created at: {{project.creationTime}}</p>
+            <template #footer>
+              <p style="font-style: italic;">created at: {{project.creationTime}}</p>
+            </template>
           </n-card>
+        </RouterLink>
         </n-col>
       </div>
     </n-row>
