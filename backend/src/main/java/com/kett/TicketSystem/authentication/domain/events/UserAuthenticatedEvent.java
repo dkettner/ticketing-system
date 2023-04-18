@@ -4,7 +4,6 @@ import com.kett.TicketSystem.common.domainprimitives.DomainEvent;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import lombok.Getter;
 
-import java.util.UUID;
 
 @Getter
 public class UserAuthenticatedEvent extends DomainEvent {

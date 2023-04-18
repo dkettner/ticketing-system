@@ -1,11 +1,13 @@
 package com.kett.TicketSystem.common.logging;
 
+import com.kett.TicketSystem.authentication.domain.events.UserAuthenticatedEvent;
 import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseCreatedEvent;
 import com.kett.TicketSystem.phase.domain.events.PhaseDeletedEvent;
+import com.kett.TicketSystem.phase.domain.events.PhasePositionUpdatedEvent;
 import com.kett.TicketSystem.project.domain.events.DefaultProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectCreatedEvent;
 import com.kett.TicketSystem.project.domain.events.ProjectDeletedEvent;
@@ -22,9 +24,16 @@ import org.springframework.stereotype.Component;
 public class EventLogger {
     Logger logger = LoggerFactory.getLogger(EventLogger.class);
 
+    // authentication
+    @EventListener
+    public void handleUserAuthenticatedEvent(UserAuthenticatedEvent userAuthenticatedEvent) {
+        logger.trace(
+                "user authenticated -> " +
+                        "email:" + userAuthenticatedEvent.getEmailAddress()
+        );
+    }
 
     // membership
-
     @EventListener
     public void handleMembershipAcceptedEvent(MembershipAcceptedEvent membershipAcceptedEvent) {
         logger.trace(
@@ -62,37 +71,61 @@ public class EventLogger {
         );
     }
 
-
     // phase
-
     @EventListener
     public void handlePhaseCreatedEvent(PhaseCreatedEvent phaseCreatedEvent) {
-
+        logger.trace(
+                "phase created -> " +
+                        "phaseId:" + phaseCreatedEvent.getPhaseId() +
+                        ", previousPhaseId:" + phaseCreatedEvent.getPreviousPhaseId() +
+                        ", projectId:" + phaseCreatedEvent.getProjectId()
+        );
     }
     @EventListener
     public void handlePhaseDeletedEvent(PhaseDeletedEvent phaseDeletedEvent) {
-
+        logger.trace(
+                "phase deleted -> " +
+                        "phaseId:" + phaseDeletedEvent.getPhaseId() +
+                        ", projectId:" + phaseDeletedEvent.getProjectId()
+        );
+    }
+    @EventListener
+    public void handlePhasePositionUpdatedEvent(PhasePositionUpdatedEvent phasePositionUpdatedEvent) {
+        logger.trace(
+                "phase position updated -> " +
+                        "phaseId:" + phasePositionUpdatedEvent.getPhaseId() +
+                        ", previousPhaseId:" + phasePositionUpdatedEvent.getPreviousPhaseId() +
+                        ", projectId:" + phasePositionUpdatedEvent.getProjectId()
+        );
     }
 
-
     // project
-
     @EventListener
     public void handleProjectCreatedEvent(ProjectCreatedEvent projectCreatedEvent) {
-
+        logger.trace(
+                "project created -> " +
+                        "projectId:" + projectCreatedEvent.getProjectId() +
+                        ", userId:" + projectCreatedEvent.getUserId()
+        );
     }
     @EventListener
     public void handleDefaultProjectCreatedEvent(DefaultProjectCreatedEvent defaultProjectCreatedEvent) {
-
+        logger.trace(
+                "default project created -> " +
+                        "projectId:" + defaultProjectCreatedEvent.getProjectId() +
+                        ", userId:" + defaultProjectCreatedEvent.getUserId()
+        );
     }
     @EventListener
     public void handleProjectDeletedEvent(ProjectDeletedEvent projectDeletedEvent) {
-
+        logger.trace(
+                "project deleted -> " +
+                        "projectId:" + projectDeletedEvent.getProjectId()
+        );
     }
 
 
     // ticket
-
     @EventListener
     public void handleTicketCreatedEvent(TicketCreatedEvent ticketCreatedEvent) {
         logger.trace(
@@ -140,9 +173,7 @@ public class EventLogger {
         );
     }
 
-
     // user
-
     @EventListener
     public void handleUserCreatedEvent(UserCreatedEvent userCreatedEvent) {
         logger.trace(
