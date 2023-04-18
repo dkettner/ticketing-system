@@ -248,6 +248,7 @@ public class ProjectControllerTests {
         eventCatcher.catchEventOfType(ProjectDeletedEvent.class);
         eventPublisher.publishEvent(
                 new LastProjectMemberDeletedEvent(
+                        UUID.randomUUID(),
                         userId,
                         buildUpProjectId
                 )

@@ -7,11 +7,13 @@ import java.util.UUID;
 
 @Getter
 public class LastProjectMemberDeletedEvent extends DomainEvent {
+    private final UUID membershipId;
     private final UUID userId;
     private final UUID projectId;
 
-    public LastProjectMemberDeletedEvent(UUID userId, UUID projectId) {
+    public LastProjectMemberDeletedEvent(UUID membershipId, UUID userId, UUID projectId) {
         super();
+        this.membershipId = membershipId;
         this.userId = userId;
         this.projectId = projectId;
     }

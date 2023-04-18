@@ -197,7 +197,13 @@ public class MembershipDomainService {
 
         // handle edge cases
         if (projectHasNoMembers(membership.getProjectId())) {
-            eventPublisher.publishEvent(new LastProjectMemberDeletedEvent(membership.getUserId(), membership.getProjectId()));
+            eventPublisher.publishEvent(
+                    new LastProjectMemberDeletedEvent(
+                            membership.getId(),
+                            membership.getUserId(),
+                            membership.getProjectId()
+                    )
+            );
         } else if (projectHasNoAdmins(membership.getProjectId())) {
             promoteRandomMemberToAdmin(membership.getProjectId());
         }
