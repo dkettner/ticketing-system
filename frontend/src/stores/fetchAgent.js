@@ -39,13 +39,25 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   // phases
   const phasesPath = backendBaseURL + "/phases";
 
+  const getPhasesByProjectId = async (projectId) => {
+    try {
+      const response = await axios.get(phasesPath + '?project-id=' + projectId, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
 
   // projects
   const projectsPath = backendBaseURL + "/projects";
 
   const postProject = async (postProjectData) => {
     try {
-      const response = await axios.post(projectsPath, postProjectData, {withCredentials: true});
+      const response = await axios.post(projectsPath, postProjectData, {withCredentials: true,   headers: {
+        'Content-Type': 'application/json; charset=UTF-8'
+      }});
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -131,6 +143,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   return {
     postAuthentication,
     getMembershipsByEmail,
+    getPhasesByProjectId,
     postProject,
     deleteProjectById,
     getProjectById,
