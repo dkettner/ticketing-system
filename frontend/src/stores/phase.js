@@ -13,8 +13,6 @@ export const usePhaseStore = defineStore("phase", () => {
   }
 
   const getPhasesByProjectId = async (projectId) => {
-    console.log(fuck)
-    console.log(phases.value)
     return phases.value.filter(element => element.projectId == projectId);
   }
 

@@ -5,6 +5,7 @@
   import { useSessionStore } from '../stores/session';
   import { useProjectStore } from '../stores/project';
   import { useMembershipStore } from '../stores/membership';
+  import { usePhaseStore } from '../stores/phase';
   import { NSpace, NLayout, NLayoutHeader, NNotificationProvider } from 'naive-ui';
 
   import SidebarMenuVue from '../components/atomic-naive-ui/SidebarMenu.vue';
@@ -12,7 +13,9 @@
   const sessionStore = useSessionStore();
   const membershipStore = useMembershipStore();
   const projectStore = useProjectStore();
+  const phasestore = usePhaseStore();
   const userStore = useUserStore();
+  const { projects } = storeToRefs(projectStore)
   const { user } = storeToRefs(userStore);
 
   onMounted( async () => {
@@ -20,6 +23,8 @@
     await userStore.updateUserByEmail();
     await membershipStore.updateMembershipsByEmail();
     await projectStore.updateProjectsByAcceptedMemberships();
+    const projectIds = projects.value.map(element => element.id);
+    projectIds.forEach( async (projectId) => await phasestore.updatePhasesByProjectId(projectId))
   });
 </script>
 
