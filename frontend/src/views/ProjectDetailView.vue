@@ -3,6 +3,7 @@
   import { storeToRefs } from 'pinia';
   import { useProjectStore } from '../stores/project';
   import { usePhaseStore } from '../stores/phase';
+  import { useTicketStore } from '../stores/ticktet';
   import { useRoute } from 'vue-router';
   import { NCard, NCol } from 'naive-ui';
   import  draggable  from 'vuedraggable';
@@ -15,8 +16,16 @@
   const project = ref(projects.value.find(element => element.id == route.params.id));
   const phasestore = usePhaseStore();
   const { phases } = storeToRefs(phasestore);
-  const projectPhases = computed(() => sortPhases(phases.value.filter(element => element.projectId == route.params.id)));
-  let list = reactive([{id:1, value: "dich"},{id:2, value:"du"}, {id:3, value:"piss"}, {id:4, value:"huan"}]);
+  const projectPhases = reactive(sortPhases(phases.value.filter(element => element.projectId == route.params.id)));
+  const ticketStore = useTicketStore();
+  const { tickets } = storeToRefs(ticketStore);
+  const projectTickets = ref([]);
+  const getTicketsByPhaseId = (phaseId) => projectTickets.value.filter(ticket => ticket.phaseId == phaseId);
+  
+  async function updateLocalTickets() {
+    await ticketStore.updateTicketsByProjectId(route.params.id);
+    projectTickets.value = ticketStore.getTicketsByProjectId(route.params.id);
+  }
 
   function sortPhases(givenPhases) {
     if (!Array.isArray(givenPhases) || !givenPhases.length) {
@@ -35,6 +44,7 @@
   onMounted(async () => {
     await projectStore.updateProjectsByAcceptedMemberships();
     await phasestore.updatePhasesByProjectId(route.params.id);
+    await updateLocalTickets();
   });
 
 
@@ -53,9 +63,13 @@
     <br>
     
     <div style="padding-left: 45px;">creation time: {{ project.creationTime }}</div>
-    <li v-for="phase in projectPhases">
-      {{ phase.name }}
-    </li>
+
+    <draggable :list="projectPhases" tag="ul">
+      <template #item ="{ element: phase }">
+        <li>{{ phase }}</li>
+      </template>
+    </draggable>
+
 
   </div>
   
