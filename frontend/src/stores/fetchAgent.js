@@ -102,6 +102,28 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   // tickets
   const ticketsPath = backendBaseURL + "/tickets";
 
+  const postTicket = async (postTicketData) => {
+    try {
+      const response = await axios.post(ticketsPath, postTicketData, {withCredentials: true,   headers: {
+        'Content-Type': 'application/json; charset=UTF-8'
+      }});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
+  const getTicketsByProjectId = async (projectId) => {
+    try {
+      const response = await axios.get(ticketsPath + '?project-id=' + projectId, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
 
   // users
   const usersPath = backendBaseURL + "/users";
@@ -148,6 +170,8 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     deleteProjectById,
     getProjectById,
     getMultipleProjectsByIds,
+    getTicketsByProjectId,
+    postTicket,
     getUserById,
     getUserByEmail
   };
