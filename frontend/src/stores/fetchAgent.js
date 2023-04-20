@@ -124,6 +124,16 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     }
   }
 
+  const patchTicket = async (ticketId, patchTicketData) => {
+    try {
+      const response = await axios.patch(ticketsPath + '/' + ticketId, patchTicketData, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
 
   // users
   const usersPath = backendBaseURL + "/users";
@@ -152,10 +162,6 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   async function handleError(error) {
     if (error.response.status == 400 || error.response.status == 401) {
       await sessionStore.logout();
-      notificationAgent.create({
-        title: "Error",
-        content: "You got logged out because of error code: " + error.response.status
-      });
     }
 
     console.log(error);
@@ -172,6 +178,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     getMultipleProjectsByIds,
     getTicketsByProjectId,
     postTicket,
+    patchTicket,
     getUserById,
     getUserByEmail
   };

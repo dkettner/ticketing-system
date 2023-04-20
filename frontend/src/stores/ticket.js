@@ -33,18 +33,24 @@ export const useTicketStore = defineStore("ticket", () => {
   const postTicket = async (postTicketData) => {
     const postTicketResponse = await fetchAgent.postTicket(postTicketData);
     if (postTicketResponse.isSuccessful) {
-      await updateTicketsByProjectId();
-      return { isPostSuccessful: true, message: "Created a new project with name: " + postProjectData.name };
+      await updateTicketsByProjectId(postTicketData.projectId);
+      return { isPostSuccessful: true, message: "Created a new project with title: " + postTicketData.title };
     } else {
       return { isPostSuccessful: false, message: postTicketResponse.data.response.data };
     }
   }
 
-  const patchTicket = async (ticketId, patchTicketData) => {
+  const patchTicket = async (projectId, ticketId, patchTicketData) => {
     const patchTicketResponse = await fetchAgent.patchTicket(ticketId, patchTicketData);
+    if (patchTicketResponse.isSuccessful) {
+      await updateTicketsByProjectId(projectId);
+      return { isPostSuccessful: true, message: "updated ticket with id:" + ticketId};
+    } else {
+      return { isPostSuccessful: false, message: patchTicketResponse.data.response.data };
+    }
   }
 
-  const updateTicketPosition = async (ticketId, newPhaseId) => {
+  const updateTicketPosition = async (projectId, ticketId, newPhaseId) => {
     const ticketPostData = ref({
         title: null,
         description: null,
@@ -52,7 +58,7 @@ export const useTicketStore = defineStore("ticket", () => {
         phaseId: newPhaseId,
         assigneeIds: null
       });
-    await patchTicket(ticketId, ticketPostData.value);
+    await patchTicket(projectId, ticketId, ticketPostData.value);
   }
 
   return {
