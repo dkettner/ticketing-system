@@ -156,7 +156,7 @@ public class EventLogger {
     @EventListener
     public void handleTicketUnassignedEvent(TicketUnassignedEvent ticketUnassignedEvent) {
         logger.trace(
-                "ticket assigned -> " +
+                "ticket unassigned -> " +
                         "ticketId:" + ticketUnassignedEvent.getTicketId() +
                         ", userId:" + ticketUnassignedEvent.getAssigneeId() +
                         ", projectId:" + ticketUnassignedEvent.getProjectId()
@@ -165,7 +165,7 @@ public class EventLogger {
     @EventListener
     public void handleTicketPhaseUpdatedEvent(TicketPhaseUpdatedEvent ticketPhaseUpdatedEvent) {
         logger.trace(
-                "ticket assigned -> " +
+                "ticket phase updated -> " +
                         "ticketId:" + ticketPhaseUpdatedEvent.getTicketId() +
                         ", oldPhaseId:" + ticketPhaseUpdatedEvent.getOldPhaseId() +
                         ", newPhaseId:" + ticketPhaseUpdatedEvent.getNewPhaseId() +
