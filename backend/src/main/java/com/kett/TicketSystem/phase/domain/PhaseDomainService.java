@@ -101,6 +101,7 @@ public class PhaseDomainService {
             nextPhase.get().setPreviousPhase(phase);
 
             phaseRepository.save(nextPhase.get());
+            eventPublisher.publishEvent(new PhasePositionUpdatedEvent(nextPhase.get().getId(), nextPhase.get().getPreviousPhase(), nextPhase.get().getProjectId()));
         }
 
         return phaseRepository.save(phase);
@@ -114,6 +115,7 @@ public class PhaseDomainService {
             phase.setNextPhase(nextPhase);
             nextPhase.setPreviousPhase(phase);
             phaseRepository.save(nextPhase);
+            eventPublisher.publishEvent(new PhasePositionUpdatedEvent(nextPhase.getId(), nextPhase.getPreviousPhase(), nextPhase.getProjectId()));
         } else {
             phase.setNextPhase(null);
         }
