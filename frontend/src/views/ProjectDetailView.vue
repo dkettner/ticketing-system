@@ -1,10 +1,11 @@
 <script setup>
-  import { onBeforeUpdate, onMounted, onUpdated, ref, computed } from 'vue';
+  import { onBeforeUpdate, onMounted, onUpdated, ref, computed, reactive } from 'vue';
   import { storeToRefs } from 'pinia';
   import { useProjectStore } from '../stores/project';
   import { usePhaseStore } from '../stores/phase';
   import { useRoute } from 'vue-router';
   import { NCard, NCol } from 'naive-ui';
+  import  draggable  from 'vuedraggable';
 
   import DeleteProjectButton from '../components/atomic-naive-ui/DeleteProjectButton.vue';
 
@@ -15,6 +16,7 @@
   const phasestore = usePhaseStore();
   const { phases } = storeToRefs(phasestore);
   const projectPhases = computed(() => sortPhases(phases.value.filter(element => element.projectId == route.params.id)));
+  let list = reactive([{id:1, value: "dich"},{id:2, value:"du"}, {id:3, value:"piss"}, {id:4, value:"huan"}]);
 
   function sortPhases(givenPhases) {
     if (!Array.isArray(givenPhases) || !givenPhases.length) {
@@ -49,13 +51,12 @@
     </div>
     <div style="padding-left: 45px;">{{ project.description }}</div>
     <br>
+    
     <div style="padding-left: 45px;">creation time: {{ project.creationTime }}</div>
     <li v-for="phase in projectPhases">
       {{ phase.name }}
     </li>
 
   </div>
-  
-  
   
 </template>
