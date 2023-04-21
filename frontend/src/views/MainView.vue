@@ -6,9 +6,10 @@
   import { useProjectStore } from '../stores/project';
   import { useMembershipStore } from '../stores/membership';
   import { usePhaseStore } from '../stores/phase';
-  import { NSpace, NLayout, NLayoutHeader, NNotificationProvider } from 'naive-ui';
+  import { NSpace, NLayout, NLayoutHeader, NNotificationProvider, NDivider} from 'naive-ui';
 
   import SidebarMenuVue from '../components/atomic-naive-ui/SidebarMenu.vue';
+import UserMenu from '../components/atomic-naive-ui/UserMenu.vue';
 
   const sessionStore = useSessionStore();
   const membershipStore = useMembershipStore();
@@ -29,10 +30,12 @@
 </script>
 
 <template>
+  <div style="padding: 5px 20px 5px 5px; display: flex; justify-content: end; border-bottom: 1px solid #F0F0F0;">
+    <UserMenu />
+  </div>
   <n-notification-provider>
     <n-space vertical>
       <n-layout>
-        <n-layout-header>Hello {{user.name}}! After login this should always be visible.</n-layout-header>
         <n-layout has-sider>
           <SidebarMenuVue />
           <RouterView />

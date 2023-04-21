@@ -71,22 +71,13 @@
 
 <template>
   <div style="width: 100%; padding-left: 25px; overflow-wrap: break-word;">
-    <div >
-      <table style="width: 100%; max-width: calc(100% - 20px);" border="1">
-        <th>
-          <td style="float: left;">
-            
-            <div style="display: block; font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
-              {{ project.name }}
-            </div>
-          </td>
-          <td style="float: right;">
-            <DeleteProjectButton v-if="amIAnAdminOfThisProject()" :project="project" />
-          </td>
-        </th>
-      </table>
-      
-      
+    <div style="display: flex; width: 100%; max-width: calc(100% - 20px);">
+      <div style="font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
+        {{ project.name }}
+      </div>
+    <div style="margin-top: 10px; margin-left: 20px;">
+      <DeleteProjectButton v-if="amIAnAdminOfThisProject()" :project="project" />
+    </div>
     </div>
     <div style="height: 250px">
       <div style="height: 150px;">{{ project.description }}</div>

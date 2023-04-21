@@ -59,12 +59,22 @@
         message: "Please input password"
       }
     },
-    reenteredPassword: {
-      required: true,
-      trigger: ["blur", "input"],
-      message: "Please input password"
-    }
+    reenteredPassword: [
+      {
+        required: true,
+        trigger: ["blur", "input"],
+        message: "Please input password"
+      },
+      {
+        validator: validatePasswordSame,
+        message: "Password is not same as re-entered password!",
+        trigger: ["blur", "password-input"]
+      }
+    ]
   }
+  function validatePasswordSame(rule, value) {
+      return value === signUpFormValue.value.userPostData.password;
+    }
 
   function sendNotification(_title, _content) {
     notificationAgent.create({
@@ -73,35 +83,51 @@
     });
   }
   async function handleSignInClick(clickEvent) {
-    const loginResult = await sessionStore.login(signInFormValue.value.credentials.email, signInFormValue.value.credentials.password);
-    if (loginResult.isLoginSuccessful) {
-      router.push('/dashboard');
-    } else {
-      sendNotification(
-        "Error",
-        loginResult.message
-      )
-    }
+    signInFormRef.value?.validate(
+      async (errors) => {
+        if (!errors) {
+          try {
+            const loginResult = await sessionStore.login(signInFormValue.value.credentials.email, signInFormValue.value.credentials.password);
+            if (loginResult.isLoginSuccessful) {
+              router.push('/dashboard');
+            } else {
+              sendNotification(
+                "Error",
+                loginResult.message
+              )
+            }
+          } catch(error) {
+            console.log(error)
+            sendNotification("Error", error.response.data);
+          }
+        } else {}
+      } 
+    )
   }
   async function handleSignUpClick(clickEvent) {
-    try {
-      const postUserResponse = await axios.post('/users', signUpFormValue.value.userPostData);
+    signUpFormRef.value?.validate(
+      async (errors) => {
+        if (!errors) {
+          try {
+            const postUserResponse = await axios.post('/users', signUpFormValue.value.userPostData);
       
-      sendNotification(
-        "Success", 
-        "Created your new account with E-Mail:\n" + 
-        postUserResponse.data.email + "\n\n" + 
-        "You will now be redirected to Sign In ..."
-      );
-      
-      setTimeout(() => {
-        router.go();
-      }, 5000);
-      
-    } catch(error) {
-      console.log(error)
-      sendNotification("Error", error.response.data);
-    }
+            sendNotification(
+              "Success", 
+              "Created your new account with E-Mail:\n" + 
+              postUserResponse.data.email + "\n\n" + 
+              "You will now be redirected to Sign In ..."
+            );
+            setTimeout(() => {
+              router.go();
+            }, 5000);
+          } catch(error) {
+            console.log(error)
+            sendNotification("Error", error.response.data);
+          }
+        } else { console.log(errors) }
+      }
+    )
+    
   }
 </script>
 

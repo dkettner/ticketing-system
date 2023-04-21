@@ -25,6 +25,6 @@
     </n-modal>
 
   <n-button @click="handleDeleteProjectButtonClicked" type="error" block error strong style="max-width: 125px; border-radius: 5px;">
-    Delete Project
+    X
   </n-button>
 </template>
