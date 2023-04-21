@@ -6,7 +6,7 @@
   const props = defineProps(['projectId']);
   const ticketStore = useTicketStore();
   const notificationAgent = useNotification();
-  const emit = defineEmits(['closeNewTicketForm']);
+  const emit = defineEmits(['closeNewTicketFormSuccesful', 'closeNewTicketFormUnsuccesful']);
   const formRef = ref(null);
   const ticketPostData = ref({
     projectId: props.projectId,
@@ -34,7 +34,7 @@
       if (!errors) {
         const result = await ticketStore.postTicket(ticketPostData.value);
         if (result.isPostSuccessful) {
-          emit('closeNewTicketForm');
+          emit('closeNewTicketFormSuccesful');
           ticketPostData.value.projectId = null;
           ticketPostData.value.title = null;
           ticketPostData.value.description = null;
@@ -50,7 +50,7 @@
     });
   };
   function handleCancelButtonClick(e) {
-    emit('closeNewTicketForm');
+    emit('closeNewTicketFormUnsuccesful');
     ticketPostData.value.projectId = null;
     ticketPostData.value.title = null;
     ticketPostData.value.description = null;

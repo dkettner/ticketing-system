@@ -1,17 +1,22 @@
 <script setup>
-  import { ref, defineProps } from "vue";
+  import { ref, defineProps, defineEmits } from "vue";
   import { NButton, NModal } from 'naive-ui';
   
   import NewTicketForm from "./NewTicketForm.vue";
 
+  const emit = defineEmits(['ticketCreated']);
   const props = defineProps(['projectId']);
   const activateNewTicketForm = ref(false);
-
+  
   function handleNewTicketButtonClicked() {
     activateNewTicketForm.value = true;
   }
   function handleCloseNewTicketForm() {
     activateNewTicketForm.value = false;
+  }
+  function handleCloseNewTicketFormSuccesful() {
+    activateNewTicketForm.value = false;
+    emit('ticketCreated');
   }
 </script>
 
@@ -19,7 +24,7 @@
     <n-modal v-model:show=activateNewTicketForm :trap-focus="false">
       <NewTicketForm
       :projectId="props.projectId"
-        @closeNewTicketForm="handleCloseNewTicketForm" 
+        @closeNewTicketFormUnsuccesful="handleCloseNewTicketForm" @closeNewTicketFormSuccesful="handleCloseNewTicketFormSuccesful" 
       />
     </n-modal>
 

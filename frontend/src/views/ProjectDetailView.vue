@@ -72,7 +72,7 @@
     <div style="padding-left: 25px;">creation time: {{ project.creationTime }}</div>
     <br/>
     <div style="padding-left: 25px;">
-      <NewTicketButton :project-id="route.params.id"/>
+      <NewTicketButton @ticketCreated="updateLocalTickets" :project-id="route.params.id"/>
     </div>
     <br/>
     <div class="kanban" style="padding-left: 25px;">
