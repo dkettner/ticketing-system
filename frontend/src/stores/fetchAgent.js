@@ -36,12 +36,82 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     }
   }
 
+  const getMembershipsByProjectId = async (projectId) => {
+    try {
+      const response = await axios.get(membershipsPath + '?project-id=' + projectId, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
+  const postMembership = async (postMembershipData) => {
+    try {
+      const response = await axios.post(membershipsPath, postMembershipData, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
+  const deleteMembershipById = async (id) => {
+    try {
+      const response = await axios.delete(membershipsPath + "/" + id, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
+  const patchMembershipState = async (membershipId, patchMembershipStateData) => {
+    try {
+      const response = await axios.patch(membershipsPath + '/' + membershipId + '/state', patchMembershipStateData, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
+  const patchMembershipRole = async (membershipId, patchMembershipRoleData) => {
+    try {
+      const response = await axios.patch(membershipsPath + '/' + membershipId + '/role', patchMembershipRoleData, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
   // phases
   const phasesPath = backendBaseURL + "/phases";
 
   const getPhasesByProjectId = async (projectId) => {
     try {
       const response = await axios.get(phasesPath + '?project-id=' + projectId, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
+  const postPhase = async (postPhaseData) => {
+    try {
+      const response = await axios.post(phasesPath, postPhaseData, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
+  const deletePhaseById = async (id) => {
+    try {
+      const response = await axios.delete(phasesPath + "/" + id, {withCredentials: true});
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -82,6 +152,16 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
         projects.push(await axios.get(projectsPath + "/" + projectIds[index],  {withCredentials: true}));
       }
       return { isSuccessful: true, data: projects };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
+  const patchProjectById = async (projectId, patchProjectData) => {
+    try {
+      const response = await axios.patch(projectsPath + '/' + projectId, patchProjectData, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
       return { isSuccessful: false, data: error };
@@ -134,6 +214,16 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     }
   }
 
+  const deleteTicketById = async (id) => {
+    try {
+      const response = await axios.delete(ticketsPath + "/" + id, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
 
   // users
   const usersPath = backendBaseURL + "/users";
@@ -158,6 +248,26 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     }
   }
 
+  const deleteUserById = async (id) => {
+    try {
+      const response = await axios.delete(usersPath + "/" + id, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
+  const patchUserById = async (userId, patchUserData) => {
+    try {
+      const response = await axios.patch(usersPath + '/' + userId, patchUserData, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
 
   async function handleError(error) {
     if (error.response.status == 400 || error.response.status == 401) {
@@ -170,16 +280,32 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   return {
     postAuthentication,
+
+    postMembership,
     getMembershipsByEmail,
+    getMembershipsByProjectId,
+    patchMembershipRole,
+    patchMembershipState,
+    deleteMembershipById,
+    
+    postPhase,
     getPhasesByProjectId,
+    deletePhaseById,
+
     postProject,
-    deleteProjectById,
     getProjectById,
     getMultipleProjectsByIds,
-    getTicketsByProjectId,
+    patchProjectById,
+    deleteProjectById,
+
     postTicket,
+    getTicketsByProjectId,
     patchTicket,
+    deleteTicketById,
+
     getUserById,
-    getUserByEmail
+    getUserByEmail,
+    patchUserById,
+    deleteUserById
   };
 });
