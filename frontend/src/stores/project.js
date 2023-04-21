@@ -34,7 +34,6 @@ export const useProjectStore = defineStore("project", () => {
 
     const newProjects = [];
     for (let index in projectIds) {
-      console.log(projectIds[index]);
       const getProjectResponse = await fetchAgent.getProjectById(projectIds[index]);
       if (getProjectResponse.isSuccessful) {
         newProjects.push(getProjectResponse.data);
@@ -48,7 +47,6 @@ export const useProjectStore = defineStore("project", () => {
     for (let i in newProjects) {
       projects.value.push(newProjects[i]);
     }
-    console.log("updated projects successfully");
     return;
   }
 

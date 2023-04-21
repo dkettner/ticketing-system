@@ -4,14 +4,17 @@
   import { useProjectStore } from '../stores/project';
   import { usePhaseStore } from '../stores/phase';
   import { useTicketStore } from '../stores/ticket';
+  import { useMembershipStore} from '../stores/membership';
   import { useRoute } from 'vue-router';
-  import { NCard, NCol } from 'naive-ui';
+  import { NCard, NDivider } from 'naive-ui';
+  import { useFetchAgent } from '../stores/fetchAgent';
   import  draggable  from 'vuedraggable';
 
   import DeleteProjectButton from '../components/atomic-naive-ui/DeleteProjectButton.vue';
   import NewTicketButton from '../components/atomic-naive-ui/NewTicketButton.vue';
 
   const route = useRoute();
+  const fetchAgent = useFetchAgent();
   const projectStore = useProjectStore();
   const { projects } = storeToRefs(projectStore);
   const project = ref(projects.value.find(element => element.id == route.params.id));
@@ -19,6 +22,8 @@
   const { phases } = storeToRefs(phasestore);
   const ticketStore = useTicketStore();
   const { tickets } = storeToRefs(ticketStore);
+  const membershipStore = useMembershipStore();
+  const { memberships } = storeToRefs(membershipStore);
   const arrayOfPhases = ref([]);
 
   async function updateTicketPhase (item) {
@@ -52,6 +57,11 @@
     return sortedPhases;
   }
 
+  function amIAnAdminOfThisProject() {
+    let myProjectMembership = memberships.value.find(membership => membership.projectId == route.params.id);
+    return myProjectMembership.role == "ADMIN";
+  }
+
   onMounted(async () => {
     await projectStore.updateProjectsByAcceptedMemberships();
     await phasestore.updatePhasesByProjectId(route.params.id);
@@ -60,27 +70,46 @@
 </script>
 
 <template>
-  <div>
-    <div style="display: flex; justify-content: space-between;">
-      <div style="padding-left: 20px; padding-right: 30px; display: block; font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
-        {{ project.name }}
+  <head>
+
+  </head>
+  <div style="width: 100%; padding-left: 25px; overflow-wrap: break-word;">
+    <div >
+      <table style="width: 85%;" border="0">
+        <th>
+          <td style="float: left;">
+            <div style="display: block; font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
+              {{ project.name }}
+            </div>
+          </td>
+          <td style="float: right;">
+            <DeleteProjectButton v-if="amIAnAdminOfThisProject()" :project="project" />
+          </td>
+        </th>
+      </table>
+      
+      
+    </div>
+    <div style="height: 250px">
+      <div style="height: 150px;">{{ project.description }}</div>
+      <br/>
+      <div style="font-style: italic;">creation time: {{ new Date(project.creationTime).toLocaleString() }}</div>
+      
+      <n-divider />
+
+      <div>
+        <NewTicketButton @ticketCreated="updateLocalTickets" :project-id="route.params.id"/>
       </div>
-      <DeleteProjectButton :project="project" />
     </div>
-    <div style="padding-left: 25px;">{{ project.description }}</div>
-    <br/>
-    <div style="padding-left: 25px;">creation time: {{ project.creationTime }}</div>
-    <br/>
-    <div style="padding-left: 25px;">
-      <NewTicketButton @ticketCreated="updateLocalTickets" :project-id="route.params.id"/>
-    </div>
-    <br/>
-    <div class="kanban" style="padding-left: 25px;">
-      <div class="column" style="background-color:whitesmoke;" v-for="phase in arrayOfPhases">
+
+    <br/><br/>
+
+    <div class="kanban">
+      <div class="column" style="" v-for="phase in arrayOfPhases">
         <h4 style="display: flex; justify-content: center;">{{ phase.name }}</h4>
         <draggable class="list-group" :list="phase.tickets" @change="updateTicketPhase" group="phase.id" itemKey="id">
           <template #item="{ element: ticket }">
-            <n-card style="border-radius: 5px;" size="small" hoverable embedded>{{ ticket.title }}</n-card>
+            <n-card style="margin-bottom: 8px; white-space:normal;" :bordered="true" size="small" hoverable>{{ ticket.title }}</n-card>
           </template>
         </draggable>
       </div>
@@ -90,19 +119,19 @@
 </template>
 
 <style>
-  .kanban:after {
-    content: "";
-    display: table;
-    clear: both;
+  .kanban {
+    width: 85%;
+    border: solid 1px red;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 
   .column {
-    float: left;
+    display: inline-block;
     width: 200px;
+    min-height: 300px;
     padding: 10px;
-    height: 300px;
-    border: 1px solid black;
     margin-right: 5px;
-    border-radius: 5px;
+    background-color: #F5F5F5;
   }
 </style>
