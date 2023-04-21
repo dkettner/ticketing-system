@@ -70,14 +70,12 @@
 </script>
 
 <template>
-  <head>
-
-  </head>
   <div style="width: 100%; padding-left: 25px; overflow-wrap: break-word;">
     <div >
-      <table style="width: 85%;" border="0">
+      <table style="width: 100%; max-width: calc(100% - 20px);" border="1">
         <th>
           <td style="float: left;">
+            
             <div style="display: block; font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
               {{ project.name }}
             </div>
@@ -106,7 +104,9 @@
 
     <div class="kanban">
       <div class="column" style="" v-for="phase in arrayOfPhases">
+        <div class="columnHeader">
         <h4 style="display: flex; justify-content: center;">{{ phase.name }}</h4>
+      </div>
         <draggable class="list-group" :list="phase.tickets" @change="updateTicketPhase" group="phase.id" itemKey="id">
           <template #item="{ element: ticket }">
             <n-card style="margin-bottom: 8px; white-space:normal;" :bordered="true" size="small" hoverable>{{ ticket.title }}</n-card>
@@ -120,18 +120,27 @@
 
 <style>
   .kanban {
-    width: 85%;
-    border: solid 1px red;
-    overflow-x: auto;
+    display: flex;
+    width: 100%;
+    max-width: calc(100% - 20px);
+    overflow: auto;
     white-space: nowrap;
   }
 
   .column {
     display: inline-block;
-    width: 200px;
-    min-height: 300px;
+    flex: 0 0 220px;
+    min-height: 380px;
     padding: 10px;
     margin-right: 5px;
+    margin-bottom: 10px;
     background-color: #F5F5F5;
+  }
+
+  .columnHeader {
+    padding: 8px;
+    margin-bottom: 8px;
+    background-color: #A8B8D0;
+    border-radius: 5px;
   }
 </style>
