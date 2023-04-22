@@ -285,7 +285,6 @@ public class TicketDomainService {
     }
 
     @EventListener
-    @Async
     public void handlePhaseCreatedEvent(PhaseCreatedEvent phaseCreatedEvent) {
         phaseDataOfTicketRepository.save(
                 new PhaseDataOfTicket(
@@ -297,7 +296,6 @@ public class TicketDomainService {
     }
 
     @EventListener
-    @Async
     public void handlePhasePositionUpdatedEvent(PhasePositionUpdatedEvent phasePositionUpdatedEvent) {
         List<PhaseDataOfTicket> foundPhaseData = phaseDataOfTicketRepository.findByPhaseId(phasePositionUpdatedEvent.getPhaseId());
         PhaseDataOfTicket phaseDataOfTicket = foundPhaseData.get(0);
