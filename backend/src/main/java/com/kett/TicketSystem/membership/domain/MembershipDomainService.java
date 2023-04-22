@@ -181,7 +181,7 @@ public class MembershipDomainService {
                                 State.ACCEPTED,
                                 Role.ADMIN
                         );
-        if (numOfActiveAdmins < 2 && role.equals(Role.MEMBER)) {
+        if (existingMembership.isAccepted() && numOfActiveAdmins < 2 && role.equals(Role.MEMBER)) {
             throw new AlreadyLastAdminException(
                     "The membership with id: " + existingMembership.getId() + " " +
                     "cannot be degraded to " + role.toString() +
