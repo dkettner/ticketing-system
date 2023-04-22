@@ -7,6 +7,7 @@ import com.kett.TicketSystem.membership.domain.events.LastProjectMemberDeletedEv
 import com.kett.TicketSystem.membership.domain.events.MembershipAcceptedEvent;
 import com.kett.TicketSystem.membership.domain.events.MembershipDeletedEvent;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
+import com.kett.TicketSystem.membership.domain.exceptions.AlreadyLastAdminException;
 import com.kett.TicketSystem.membership.domain.exceptions.MembershipAlreadyExistsException;
 import com.kett.TicketSystem.membership.domain.exceptions.NoMembershipFoundException;
 import com.kett.TicketSystem.membership.repository.MembershipRepository;
@@ -173,6 +174,20 @@ public class MembershipDomainService {
 
     public void updateMembershipRole(UUID id, Role role) throws NoMembershipFoundException {
         Membership existingMembership = this.getMembershipById(id);
+        Integer numOfActiveAdmins =
+                membershipRepository
+                        .countMembershipByProjectIdAndStateEqualsAndRoleEquals(
+                                existingMembership.getProjectId(),
+                                State.ACCEPTED,
+                                Role.ADMIN
+                        );
+        if (numOfActiveAdmins < 2 && role.equals(Role.MEMBER)) {
+            throw new AlreadyLastAdminException(
+                    "The membership with id: " + existingMembership.getId() + " " +
+                    "cannot be degraded to " + role.toString() +
+                    " because it is the last ADMIN of project with id: " + existingMembership.getProjectId()
+            );
+        }
         existingMembership.setRole(role);
         membershipRepository.save(existingMembership);
     }

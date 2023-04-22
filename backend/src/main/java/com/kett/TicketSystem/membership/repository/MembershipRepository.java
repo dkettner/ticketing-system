@@ -1,6 +1,7 @@
 package com.kett.TicketSystem.membership.repository;
 
 import com.kett.TicketSystem.membership.domain.Membership;
+import com.kett.TicketSystem.membership.domain.Role;
 import com.kett.TicketSystem.membership.domain.State;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -14,6 +15,8 @@ public interface MembershipRepository extends JpaRepository<Membership, UUID> {
     List<Membership> findByUserIdAndStateEquals(UUID userId, State state);
 
     Boolean existsByUserIdAndProjectId(UUID userId, UUID projectId);
+
+    Integer countMembershipByProjectIdAndStateEqualsAndRoleEquals(UUID projectId, State state, Role role);
 
     Long removeById(UUID id);
     List<Membership> deleteByProjectId(UUID projectId);

@@ -57,6 +57,7 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(value = {
             MembershipAlreadyExistsException.class,
+            AlreadyLastAdminException.class,
             IllegalStateUpdateException.class,
             PhaseIsNotEmptyException.class,
             NoPhaseInProjectException.class,
