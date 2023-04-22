@@ -6,7 +6,7 @@ import { useSessionStore } from "./session";
 
 export const useFetchAgent = defineStore("fetchAgent", () => {
   const sessionStore = useSessionStore();
-  const notificationAgent = useNotification();
+  
 
   const backendBaseURL = "https://localhost:8080";
   
@@ -52,7 +52,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return { isSuccessful: false, data: error };
+      return { isSuccessful: false, data: error.response.data };
     }
   }
 
@@ -67,22 +67,24 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   }
 
   const patchMembershipState = async (membershipId, patchMembershipStateData) => {
+    let response;
     try {
-      const response = await axios.patch(membershipsPath + '/' + membershipId + '/state', patchMembershipStateData, {withCredentials: true});
+      response = await axios.patch(membershipsPath + '/' + membershipId + '/state', patchMembershipStateData, {withCredentials: true});
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return { isSuccessful: false, data: error };
+      return { isSuccessful: false, data: error.response.data };
     }
   }
 
-  const patchMembershipRole = async (membershipId, patchMembershipRoleData) => {
+  const putMembershipRole = async (membershipId, patchMembershipRoleData) => {
+    let response;
     try {
-      const response = await axios.patch(membershipsPath + '/' + membershipId + '/role', patchMembershipRoleData, {withCredentials: true});
+      response = await axios.put(membershipsPath + '/' + membershipId + '/role', patchMembershipRoleData, {withCredentials: true});
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return { isSuccessful: false, data: error };
+      return { isSuccessful: false, data: error.response.data };
     }
   }
 
@@ -244,7 +246,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return { isSuccessful: false, data: error };
+      return { isSuccessful: false, data: error.response.data };
     }
   }
 
@@ -270,7 +272,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
 
   async function handleError(error) {
-    if (error.response.status == 400 || error.response.status == 401) {
+    if (error.response.status == 401) {
       await sessionStore.logout();
     }
 
@@ -284,7 +286,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     postMembership,
     getMembershipsByEmail,
     getMembershipsByProjectId,
-    patchMembershipRole,
+    putMembershipRole,
     patchMembershipState,
     deleteMembershipById,
     

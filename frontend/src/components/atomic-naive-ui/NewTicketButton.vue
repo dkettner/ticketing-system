@@ -28,7 +28,7 @@
       />
     </n-modal>
 
-  <n-button @click="handleNewTicketButtonClicked" type="primary" block primary strong style="max-width: 125px; border-radius: 5px;">
+  <n-button @click="handleNewTicketButtonClicked" type="primary" block primary strong style="max-width: 125px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;">
     + New Ticket
   </n-button>
 </template>

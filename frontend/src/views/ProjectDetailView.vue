@@ -71,8 +71,8 @@
 </script>
 
 <template>
-  <div style="width: 100%; padding-left: 25px; overflow-wrap: break-word; border: 1px solid green;">
-    <div style="display: flex; width: 100%; max-width: calc(100% - 20px); border: 1px solid red;">
+  <div style="width: 100%; padding-left: 25px; overflow-wrap: break-word;">
+    <div style="display: flex; width: 100%; max-width: calc(100% - 20px);">
       <div style="padding-top: 4px; font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
         {{ project.name }}
       </div>
@@ -82,13 +82,16 @@
     </div>
     <div style="display: flex;">
     <div style="height: 200px;  width: 60%;">
-      <div style="height: 170px; font-size: 1.4em;">{{ project.description }}</div>
+      <div style="height: 160px; font-size: 1.4em;">{{ project.description }}</div>
       <br/>
       <div style="font-style: italic; font-size: 1.1em;">creation time: {{ new Date(project.creationTime).toLocaleString() }}</div>
     </div>
-    <div style="height: 200px;  width: 40%; max-width: calc(40% - 60px); border: 1px solid orange; padding-left: 20px; padding-right: 20px">
-      <div style="font-weight: bold; font-size: 1.4em;">Members</div>
-      <div style="padding-top: 12px;">
+    <div style="height: 200px;  width: 40%; max-width: calc(40% - 80px); border-left: 1px solid #F0F0F0; padding-left: 40px; padding-right: 20px">
+      <div style="font-weight: bold; font-size: 1.4em;">
+        Members
+      </div>
+      <br/>
+      <div style="margin-top: 5px;">
         <MembersSection :project-id="route.params.id"/>
       </div>
     </div>

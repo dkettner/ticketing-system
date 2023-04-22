@@ -22,8 +22,8 @@ export const useSessionStore = defineStore("session", () => {
     // TODO: delete jwt in cookies -> delete call on backend
 
     deleteEmail();
-    const router = useRouter();
-    router.push('/');
+    
+    window.location.reload(true);
   };
   function isLoggedIn() {
     return (Cookies.get("email") !== undefined);

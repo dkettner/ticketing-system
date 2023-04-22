@@ -6,26 +6,30 @@
 
 <script setup>
   import { useUserStore } from '../../stores/user';
-import { h } from "vue";
-import { NIcon, NDropdown, NAvatar } from "naive-ui";
-import {
-  PersonCircleOutline as UserIcon,
-  Pencil as EditIcon,
-  LogOutOutline as LogoutIcon
-} from "@vicons/ionicons5";
-import { storeToRefs } from 'pinia';
+  import { useSessionStore } from '../../stores/session';
+  import { h } from "vue";
+  import { NIcon, NDropdown, NAvatar } from "naive-ui";
+  import {
+    PersonCircleOutline as UserIcon,
+    Pencil as EditIcon,
+    LogOutOutline as LogoutIcon
+  } from "@vicons/ionicons5";
+  import { storeToRefs } from 'pinia';
 
-const renderIcon = (icon) => {
-  return () => {
-    return h(NIcon, null, {
-      default: () => h(icon)
-    });
-  };
-};
   const userStore = useUserStore();
   const { user } = storeToRefs(userStore);
+  const sessionStorage = useSessionStore();
 
-const options = [
+  const renderIcon = (icon) => {
+    return () => {
+      return h(NIcon, null, {
+        default: () => h(icon)
+      });
+    };
+  };
+  
+
+  const options = [
         {
           label: "Profile",
           key: "profile",
@@ -37,7 +41,9 @@ const options = [
           icon: renderIcon(EditIcon)
         },
         {
-          label: "Logout",
+          label: () => h(
+            "div", { onClick: () => sessionStorage.logout() }, "Logout"
+          ),
           key: "logout",
           icon: renderIcon(LogoutIcon)
         }

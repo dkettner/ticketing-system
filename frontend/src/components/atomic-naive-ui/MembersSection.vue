@@ -1,6 +1,8 @@
 <template>
+  <div>
+    <div>
     <n-avatar-group style="padding-left: 15px;" v-if="membersWithUserData.value !== 'undefined'" :options="membersWithUserData" :size="48" :max="8">
-    <template #avatar="{ option: { id, name, email, role, state } }">
+    <template #avatar="{ option: { id, membershipId, name, email, role, state } }">
       <n-tooltip>
         <template #trigger>
           <n-avatar :style="{backgroundColor: '#3E6E6E'}">{{ Array.from(name)[0] }}</n-avatar>
@@ -9,13 +11,11 @@
           <div>
             {{ name }}
           </div>
-          &nbsp;
           <div style="font-style: italic;" v-if="role == 'ADMIN'">
-            (Admin)
+            &nbsp;(Admin)
           </div>
-          &nbsp;
-          <div  v-if="state == 'OPEN'">
-            &#8594; pending
+          <div v-if="state == 'OPEN'">
+            &nbsp;&#8594; pending
           </div>
         </div>
       </n-tooltip>
@@ -26,29 +26,47 @@
       </n-dropdown>
     </template>
   </n-avatar-group>
+  </div>
+  <br/>
+  <div v-if="amIAnAdminOfThisProject()" style="margin-top: 10px;">
+    <EditMembersButton @updateMembers="updateProjectMembers()" :projectMembers="membersWithUserData"/>
+  </div>
+
+  </div>
 </template>
 
 <script setup>
   import { NAvatar, NTooltip, NAvatarGroup, NDropdown } from 'naive-ui';
   import { useFetchAgent } from '../../stores/fetchAgent';
   import { defineProps, onMounted, ref } from 'vue';
+  import EditMembersButton from './EditMembersButton.vue';
+  import { storeToRefs } from 'pinia';
+  import { useMembershipStore } from '../../stores/membership';
+  import { useRoute } from 'vue-router';
 
   const fetchAgent = useFetchAgent();
+  const route = useRoute();
   const props = defineProps(['projectId']);
   const membersWithUserData = ref([]);
   const projectMemberships = ref([]);
+  const membershipStore = useMembershipStore();
+  const { memberships } = storeToRefs(membershipStore);
+
+  function amIAnAdminOfThisProject() {
+    let myProjectMembership = memberships.value.find(membership => membership.projectId == route.params.id);
+    return myProjectMembership.role == "ADMIN";
+  }
 
   const updateProjectMembers = async () => {
     const response = await fetchAgent.getMembershipsByProjectId(props.projectId);
     if (response.isSuccessful) {
-      projectMemberships.value = response.data.map((membership) => ({ userId: membership.userId, role: membership.role, state:membership.state}));
-
+      projectMemberships.value = response.data.map((membership) => ({ membershipId: membership.id, userId: membership.userId, role: membership.role, state:membership.state}));
       let tempMembers = ref([]);
       for (let membership of projectMemberships.value) {
         const getUserResponse = await fetchAgent.getUserById(membership.userId);
         if (getUserResponse.isSuccessful) {
-          let user = getUserResponse.data
-          tempMembers.value.push({id: user.id, name: user.name, email: user.email, role: membership.role, state: membership.state});
+          let user = getUserResponse.data;
+          tempMembers.value.push({id: user.id, membershipId: membership.membershipId, name: user.name, email: user.email, role: membership.role, state: membership.state});
         }
       }
 
@@ -64,7 +82,7 @@
 
   });
 
-  const createDropdownOptions =  (options) => options.map((option) => ({
+  const createDropdownOptions = (options) => options.map((option) => ({
     key: option.id,
     label: option.name
   }))
