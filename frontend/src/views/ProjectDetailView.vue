@@ -12,6 +12,7 @@
 
   import DeleteProjectButton from '../components/atomic-naive-ui/DeleteProjectButton.vue';
   import NewTicketButton from '../components/atomic-naive-ui/NewTicketButton.vue';
+  import MembersSection from '../components/atomic-naive-ui/MembersSection.vue';
 
   const route = useRoute();
   const fetchAgent = useFetchAgent();
@@ -70,33 +71,38 @@
 </script>
 
 <template>
-  <div style="width: 100%; padding-left: 25px; overflow-wrap: break-word;">
-    <div style="display: flex; width: 100%; max-width: calc(100% - 20px);">
-      <div style="font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
+  <div style="width: 100%; padding-left: 25px; overflow-wrap: break-word; border: 1px solid green;">
+    <div style="display: flex; width: 100%; max-width: calc(100% - 20px); border: 1px solid red;">
+      <div style="padding-top: 4px; font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
         {{ project.name }}
       </div>
-    <div style="margin-top: 10px; margin-left: 20px;">
-      <DeleteProjectButton v-if="amIAnAdminOfThisProject()" :project="project" />
-    </div>
-    </div>
-    <div style="height: 250px">
-      <div style="height: 150px;">{{ project.description }}</div>
-      <br/>
-      <div style="font-style: italic;">creation time: {{ new Date(project.creationTime).toLocaleString() }}</div>
-      
-      <n-divider />
-
-      <div>
-        <NewTicketButton @ticketCreated="updateLocalTickets" :project-id="route.params.id"/>
+      <div style="margin-top: 10px; margin-left: 20px;">
+        <DeleteProjectButton v-if="amIAnAdminOfThisProject()" :project="project" />
       </div>
     </div>
-
-    <br/><br/>
+    <div style="display: flex;">
+    <div style="height: 200px;  width: 60%;">
+      <div style="height: 170px; font-size: 1.4em;">{{ project.description }}</div>
+      <br/>
+      <div style="font-style: italic; font-size: 1.1em;">creation time: {{ new Date(project.creationTime).toLocaleString() }}</div>
+    </div>
+    <div style="height: 200px;  width: 40%; max-width: calc(40% - 60px); border: 1px solid orange; padding-left: 20px; padding-right: 20px">
+      <div style="font-weight: bold; font-size: 1.4em;">Members</div>
+      <div style="padding-top: 12px;">
+        <MembersSection :project-id="route.params.id"/>
+      </div>
+    </div>
+  </div>
+    <n-divider />
+    <div>
+        <NewTicketButton @ticketCreated="updateLocalTickets" :project-id="route.params.id"/>
+    </div>
+    <br/>
 
     <div class="kanban">
       <div class="column" style="" v-for="phase in arrayOfPhases">
         <div class="columnHeader">
-        <h4 style="display: flex; justify-content: center;">{{ phase.name }}</h4>
+        <h4 style="display: flex; justify-content: center; ">{{ phase.name }}</h4>
       </div>
         <draggable class="list-group" :list="phase.tickets" @change="updateTicketPhase" group="phase.id" itemKey="id">
           <template #item="{ element: ticket }">
@@ -125,7 +131,7 @@
     padding: 10px;
     margin-right: 5px;
     margin-bottom: 10px;
-    background-color: #F5F5F5;
+    background-color: #e9e9e9;
   }
 
   .columnHeader {
@@ -133,5 +139,6 @@
     margin-bottom: 8px;
     background-color: #A8B8D0;
     border-radius: 5px;
+    box-shadow: 2px 2px 6px rgb(159, 159, 159);
   }
 </style>

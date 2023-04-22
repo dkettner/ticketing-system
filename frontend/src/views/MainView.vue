@@ -9,7 +9,7 @@
   import { NSpace, NLayout, NLayoutHeader, NNotificationProvider, NDivider} from 'naive-ui';
 
   import SidebarMenuVue from '../components/atomic-naive-ui/SidebarMenu.vue';
-import UserMenu from '../components/atomic-naive-ui/UserMenu.vue';
+  import UserMenu from '../components/atomic-naive-ui/UserMenu.vue';
 
   const sessionStore = useSessionStore();
   const membershipStore = useMembershipStore();
@@ -30,8 +30,16 @@ import UserMenu from '../components/atomic-naive-ui/UserMenu.vue';
 </script>
 
 <template>
-  <div style="padding: 5px 20px 5px 5px; display: flex; justify-content: end; border-bottom: 1px solid #F0F0F0;">
-    <UserMenu />
+  <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #F0F0F0;">
+    <div style="display: flex;">
+      <img src="../assets/ticketsystem-logo-no-title.png" alt="logo" style="height: 48px; padding: 10px 5px 5px 40px;">
+      <div style="font-size: 2.6em; font-family:Arial, Helvetica, sans-serif; padding: 5px 20px 0px 16px;">
+        Ticket System
+      </div>
+    </div>
+    <div style="padding: 10px 20px 5px 5px;">
+      <UserMenu />
+    </div>
   </div>
   <n-notification-provider>
     <n-space vertical>
