@@ -1,39 +1,35 @@
 <script setup>
   import { useRouter } from 'vue-router';
   import { ref, defineEmits, defineProps } from "vue";
-  import { useProjectStore } from "../../stores/project";
   import { NForm, NButton, NGi, NInput, NFormItemGi, NGrid, useNotification } from "naive-ui";
+  import { useMembershipStore } from '../../stores/membership';
+import { useFetchAgent } from '../../stores/fetchAgent';
 
   const router = useRouter();
-  const projectStore = useProjectStore();
+  const fetchAgent = useFetchAgent();
+  const membershipStore = useMembershipStore();
   const notificationAgent = useNotification();
-  const emit = defineEmits(['closeProjectForm']);
+  const emit = defineEmits(['closeDeleteMembershipForm']);
   const formRef = ref(null);
-  const projectProp = defineProps(['project']);
+  const props = defineProps(['membershipId']);
 
   async function handleDeleteButtonClick(e) {
     e.preventDefault();
     formRef.value?.validate(async (errors) => {
       if (!errors) {
-        const result = await projectStore.deleteProjectById(projectProp.project.id);
-        if (result.isDeleteSuccessful) {
-          sendNotification(
-            "Success", 
-            "Deleted project: " + projectProp.project.name
-          );
-          emit('closeProjectForm');
-          router.push('/projects/overview');
+        const result = await fetchAgent.deleteMembershipById(props.membershipId)
+        if (result.isSuccessful) {
+          emit('closeDeleteMembershipForm');
         } else {
-          sendNotification("Error", result.message)
+          sendNotification("Error", result.data)
         }
       } else {
         console.log(errors);
-        console.log("could not create new project");
       }
     });
   };
   function handleCancelButtonClick(e) {
-    emit('closeProjectForm');
+    emit('closeDeleteMembershipForm');
   };
   function sendNotification(_title, _content) {
     notificationAgent.create({
@@ -51,7 +47,7 @@
     style="min-width: 300px; width: 40%; max-width: 500px; background-color: #EEEEEE; padding: 20px; border-radius: 5px;"
   >
     <n-grid :span="24" :x-gap="24" :cols ="1">
-      <n-gi :span="24">Do you really want to delete this project?</n-gi>
+      <n-gi :span="24">Do you really want to delete this membership?</n-gi>
       <n-gi> &nbsp; </n-gi>
       <n-gi :span="24">
         <div style="display: flex; justify-content: flex-end">
@@ -60,7 +56,7 @@
           </n-button>
           &nbsp;
           <n-button style="border-radius: 5px;" type="error" @click="handleDeleteButtonClick">
-            Delete project
+            Delete membership
           </n-button>
         </div>
       </n-gi>

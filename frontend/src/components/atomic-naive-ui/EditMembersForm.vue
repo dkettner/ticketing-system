@@ -3,6 +3,7 @@
   import { useFetchAgent } from "../../stores/fetchAgent";
   import { NForm, NButton, NGi, NInput, NFormItemGi, NGrid, useNotification, NCard, NAvatar, NSwitch, NDivider, NFormItem } from "naive-ui";
   import { useRoute } from "vue-router";
+  import DeleteMembershipButton from "./DeleteMembershipButton.vue";
 
   const props = defineProps(['projectMembers']);
   const fetchAgent = useFetchAgent();
@@ -94,6 +95,9 @@
             Member
           </template>
         </n-switch>
+      </div>
+      <div style="margin-top: 8px; padding-left: 60px;">
+        <DeleteMembershipButton @updateMembers="emit('updateMembers')" :membershipId="user.membershipId" />
       </div>
     </div>
   </div>
