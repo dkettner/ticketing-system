@@ -10,6 +10,7 @@
   import { useFetchAgent } from '../stores/fetchAgent';
   import  draggable  from 'vuedraggable';
 
+  import EditProjectButton from '../components/atomic-naive-ui/EditProjectButton.vue';
   import DeleteProjectButton from '../components/atomic-naive-ui/DeleteProjectButton.vue';
   import NewTicketButton from '../components/atomic-naive-ui/NewTicketButton.vue';
   import MembersSection from '../components/atomic-naive-ui/MembersSection.vue';
@@ -18,7 +19,7 @@
   const fetchAgent = useFetchAgent();
   const projectStore = useProjectStore();
   const { projects } = storeToRefs(projectStore);
-  const project = ref(projects.value.find(element => element.id == route.params.id));
+  const project = computed(() => projects.value.find(element => element.id == route.params.id));
   const phasestore = usePhaseStore();
   const { phases } = storeToRefs(phasestore);
   const ticketStore = useTicketStore();
@@ -76,7 +77,10 @@
       <div style="padding-top: 4px; font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
         {{ project.name }}
       </div>
-      <div style="margin-top: 10px; margin-left: 20px;">
+      <div style="margin-top: 10px; margin-left: 40px;">
+        <EditProjectButton v-if="amIAnAdminOfThisProject()" @updateProject="projectStore.updateProjectsByAcceptedMemberships()" :project="project" />
+      </div>
+      <div style="margin-top: 10px; margin-left: 15px;">
         <DeleteProjectButton v-if="amIAnAdminOfThisProject()" :project="project" />
       </div>
     </div>

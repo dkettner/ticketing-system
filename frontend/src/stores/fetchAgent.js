@@ -166,7 +166,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return { isSuccessful: false, data: error };
+      return { isSuccessful: false, data: error.response.data };
     }
   }
 
