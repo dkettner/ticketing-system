@@ -52,7 +52,7 @@
 
 <template>
   <n-card
-      style="width: 1000px"
+      style="width: 70%; max-width: 1000px;"
       title="Edit Members"
       :bordered="false"
       size="huge"

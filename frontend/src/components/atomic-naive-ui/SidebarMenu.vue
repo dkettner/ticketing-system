@@ -58,7 +58,7 @@
     @collapse="collapsed = true"
     @expand="collapsed = false"
   >
-    <div style="padding-right: 10px;">
+    <div style="padding-right: 10px; height: calc(100vh - 80px)">
       <n-scrollbar style="max-height: 80vh;">
         <n-menu
           :value="selectedKey"
