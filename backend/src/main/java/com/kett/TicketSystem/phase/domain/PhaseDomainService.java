@@ -15,7 +15,7 @@ import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
 import com.kett.TicketSystem.common.exceptions.UnrelatedPhaseException;
 import com.kett.TicketSystem.phase.repository.PhaseRepository;
 import com.kett.TicketSystem.common.exceptions.ImpossibleException;
-import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
+import com.kett.TicketSystem.phase.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.ticket.domain.events.TicketCreatedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketDeletedEvent;
 import com.kett.TicketSystem.ticket.domain.events.TicketPhaseUpdatedEvent;
@@ -112,6 +112,7 @@ public class PhaseDomainService {
     }
 
     private void addAfterPrevious(Phase phase, Phase previousPhase) {
+        phaseRepository.save(phase);
         phase.setPreviousPhase(previousPhase); // may be redundant
 
         Phase nextPhase = previousPhase.getNextPhase();
@@ -198,7 +199,7 @@ public class PhaseDomainService {
             );
         }
         if (phase.getTicketCount() != 0) {
-            throw new PhaseIsNotEmptyException("phase with id: \" + id + \" is not empty and can not be deleted");
+            throw new PhaseIsNotEmptyException("phase with id: \"" + id + "\" is not empty and can not be deleted");
         }
 
         this.removePhaseFromCurrentPosition(phase);
@@ -221,13 +222,13 @@ public class PhaseDomainService {
 
         if (previousPhase != null) {
             previousPhase.setNextPhase(nextPhase);
-            phaseRepository.save(previousPhase);
             phase.setPreviousPhase(null);
+            phaseRepository.save(previousPhase);
         }
         if (nextPhase != null) {
             nextPhase.setPreviousPhase(previousPhase);
-            phaseRepository.save(nextPhase);
             phase.setNextPhase(null);
+            phaseRepository.save(nextPhase);
         }
 
         phaseRepository.save(phase);

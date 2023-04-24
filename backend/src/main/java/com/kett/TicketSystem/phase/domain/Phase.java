@@ -26,11 +26,11 @@ public class Phase {
     private String name;
 
     @Getter
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+    @OneToOne(fetch = FetchType.LAZY)
     private Phase previousPhase;
 
     @Getter
-    @OneToOne(fetch = FetchType.LAZY, cascade = {CascadeType.ALL})
+    @OneToOne(fetch = FetchType.LAZY)
     private Phase nextPhase;
 
     @Getter
