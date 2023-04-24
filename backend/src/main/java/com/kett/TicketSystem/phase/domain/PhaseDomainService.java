@@ -86,8 +86,12 @@ public class PhaseDomainService {
         if (previousPhase == null) {
             initializedPhase = addFirst(phase);
         } else {
-            initializedPhase = addAfterPrevious(phase, previousPhase);
+            // get phase this way because of weird transient transaction behaviour regarding IDs
+            addAfterPrevious(phase, previousPhase);
+            Phase updatedPreviousPhase = this.getPhaseById(previousPhaseId);
+            initializedPhase = this.getPhaseById(updatedPreviousPhase.getNextPhase().getId());
         }
+
         return initializedPhase;
     }
 
@@ -107,7 +111,7 @@ public class PhaseDomainService {
         return phaseRepository.save(phase);
     }
 
-    private Phase addAfterPrevious(Phase phase, Phase previousPhase) {
+    private void addAfterPrevious(Phase phase, Phase previousPhase) {
         phase.setPreviousPhase(previousPhase); // may be redundant
 
         Phase nextPhase = previousPhase.getNextPhase();
@@ -123,7 +127,8 @@ public class PhaseDomainService {
         previousPhase.setNextPhase(phase);
         phaseRepository.save(previousPhase);
 
-        return phaseRepository.save(phase);
+        // probably redundant because parent (previous phase) saves all transient children and the second save delivers the wrong id;
+        phaseRepository.save(phase);
     }
 
 
