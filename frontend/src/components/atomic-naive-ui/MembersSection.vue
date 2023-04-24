@@ -1,7 +1,7 @@
 <template>
   <div>
     <div>
-      <n-avatar-group style="padding-left: 15px;" v-if="membersWithUserData.value !== 'undefined'"
+      <n-avatar-group style="padding-left: 5px;" v-if="membersWithUserData.value !== 'undefined'"
         :options="membersWithUserData" :size="48" :max="8">
         <template #avatar="{ option: { id, membershipId, name, email, role, state } }">
           <n-tooltip>

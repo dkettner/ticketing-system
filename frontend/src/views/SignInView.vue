@@ -1,13 +1,27 @@
 <script setup>
-  import { NSpace, NNotificationProvider } from 'naive-ui';
-  import SignInForm from '../components/atomic-naive-ui/SignInForm.vue';
+import { NSpace, NNotificationProvider } from 'naive-ui';
+import SignInForm from '../components/atomic-naive-ui/SignInForm.vue';
 </script>
 
 <template>
-  <n-space justify="center" style="transform:translateY(+40px);">
-    <img src="../assets/ticketsystem-logo.png">
-    <n-notification-provider>
-      <SignInForm />
-    </n-notification-provider>
-  </n-space>
+  <div class="signIn">
+    <div>
+      <n-notification-provider>
+        <div style="width: 300px;">
+          <SignInForm />
+        </div>
+      </n-notification-provider>
+    </div>
+  </div>
 </template>
+
+<style>
+.signIn {
+  position: absolute;
+  width: 280px;
+  margin-left: -150px;
+  margin-top: -280px;
+  left: 50%;
+  top: 50%;
+}
+</style>

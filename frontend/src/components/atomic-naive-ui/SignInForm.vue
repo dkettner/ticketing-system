@@ -132,13 +132,17 @@
 </script>
 
 <template>
-  <n-card>
+  <n-card style="border-radius: 10px; box-shadow: 5px 5px 5px lightgrey;">
+    <div style="margin-left: -20px;">
+      <img width="275" src="../../assets/logo_ticketing.png" />
+    </div>
+    
     <n-tabs
       class="card-tabs"
       default-value="signin"
       size="large"
       animated
-      style="margin: 0 -4px"
+      style="margin: 0 -4px;"
       pane-style="padding-left: 4px; padding-right: 4px; box-sizing: border-box;"
     >
       <n-tab-pane name="signin" tab="Sign in">
