@@ -5,7 +5,7 @@
   import EditProjectForm from "./EditProjectForm.vue";
 
   const projectProps = defineProps(['project']);
-  const emit = defineEmits(['updateProject'])
+  const emit = defineEmits(['updateProject', 'updatePhasesAndTickets'])
   const activateEditForm = ref(false);
 
   function handleEditProjectButtonClicked() {
@@ -23,6 +23,7 @@
         :project="projectProps.project"
         @closeEditProjectForm="handleCloseEditProjectForm"
         @updateProject="emit('updateProject')"
+        @updatePhasesAndTickets="emit('updatePhasesAndTickets')"
       />
     </n-modal>
 

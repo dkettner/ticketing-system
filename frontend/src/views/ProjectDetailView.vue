@@ -35,6 +35,10 @@
       await updateLocalTickets();
     }
   }
+  async function updateArrayOfPhases() {
+    await phasestore.updatePhasesByProjectId(route.params.id);
+    updateLocalTickets();
+  }
   async function updateLocalTickets() {
     await ticketStore.updateTicketsByProjectId(route.params.id);
     arrayOfPhases.value = [];
@@ -73,12 +77,12 @@
 
 <template>
   <div style="width: 100%; padding-left: 25px; overflow-wrap: break-word;">
-    <div style="display: flex; width: 100%; max-width: calc(100% - 20px);">
-      <div style="padding-top: 4px; font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
+    <div style="padding-top: 10px; display: flex; width: 100%; max-width: calc(100% - 20px);">
+      <div style="padding-top: 5px; font-size: 2em; margin-block-start: 0.67__qem; margin-block-end: 0.67em; margin-inline-start: 0; margin-inline-end: 0; font-weight: bold">
         {{ project.name }}
       </div>
-      <div style="margin-top: 10px; margin-left: 40px;">
-        <EditProjectButton v-if="amIAnAdminOfThisProject()" @updateProject="projectStore.updateProjectsByAcceptedMemberships()" :project="project" />
+      <div style="margin-top: 10px; margin-left: 30px;">
+        <EditProjectButton v-if="amIAnAdminOfThisProject()" @updatePhasesAndTickets="updateArrayOfPhases" @updateProject="projectStore.updateProjectsByAcceptedMemberships()" :project="project" />
       </div>
       <div style="margin-top: 10px; margin-left: 15px;">
         <DeleteProjectButton v-if="amIAnAdminOfThisProject()" :project="project" />
@@ -113,7 +117,7 @@
       </div>
         <draggable class="list-group" :list="phase.tickets" @change="updateTicketPhase" group="phase.id" itemKey="id">
           <template #item="{ element: ticket }">
-            <n-card style="margin-bottom: 8px; white-space:normal;" :bordered="true" size="small" hoverable>{{ ticket.title }}</n-card>
+            <n-card style="border-radius: 5px; margin-bottom: 8px; white-space:normal;" :bordered="true" size="small" hoverable>{{ ticket.title }}</n-card>
           </template>
         </draggable>
       </div>
@@ -138,14 +142,15 @@
     padding: 10px;
     margin-right: 5px;
     margin-bottom: 10px;
-    background-color: #e9e9e9;
+    border-radius: 5px;
+    background-color: #ebebeb
   }
 
   .columnHeader {
     padding: 8px;
-    margin-bottom: 8px;
+    margin-bottom: 12px;
     background-color: #A8B8D0;
     border-radius: 5px;
-    box-shadow: 2px 2px 6px rgb(159, 159, 159);
+    box-shadow: 2px 2px 3px rgb(153, 153, 153);
   }
 </style>
