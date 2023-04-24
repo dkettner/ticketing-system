@@ -66,10 +66,10 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     }
   }
 
-  const patchMembershipState = async (membershipId, patchMembershipStateData) => {
+  const putMembershipState = async (membershipId, patchMembershipStateData) => {
     let response;
     try {
-      response = await axios.patch(membershipsPath + '/' + membershipId + '/state', patchMembershipStateData, {withCredentials: true});
+      response = await axios.put(membershipsPath + '/' + membershipId + '/state', patchMembershipStateData, {withCredentials: true});
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -107,7 +107,17 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return { isSuccessful: false, data: error };
+      return { isSuccessful: false, data: error.phase.data };
+    }
+  }
+
+  const patchPhaseNameById = async (phaseId, patchPhaseNameData) => {
+    try {
+      const response = await axios.patch(phasesPath + '/' + phaseId + '/name', patchPhaseNameData, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error.response.data };
     }
   }
 
@@ -117,7 +127,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return { isSuccessful: false, data: error };
+      return { isSuccessful: false, data: error.response.data };
     }
   }
 
@@ -287,11 +297,12 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     getMembershipsByEmail,
     getMembershipsByProjectId,
     putMembershipRole,
-    patchMembershipState,
+    putMembershipState,
     deleteMembershipById,
     
     postPhase,
     getPhasesByProjectId,
+    patchPhaseNameById,
     deletePhaseById,
 
     postProject,
