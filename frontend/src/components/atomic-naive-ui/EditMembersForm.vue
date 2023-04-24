@@ -13,7 +13,7 @@
   const inputEmail = ref(null);
 
   async function handlePatchRoleTriggered(membershipId, role) {
-    const result = await fetchAgent.putMembershipRole(membershipId, {role: role});
+    const result = await fetchAgent.putMembershipRole(membershipId, { role: role });
     if (result.isSuccessful) {
       emit('updateMembers');
     } else {
@@ -24,9 +24,8 @@
   async function handleKeyUp() {
     if (true) {
       const getUserResult = await fetchAgent.getUserByEmail(inputEmail.value);
-      console.log(getUserResult)
       if (getUserResult.isSuccessful) {
-        const postMembershipResult = await fetchAgent.postMembership({projectId: route.params.id, userId: getUserResult.data.id, role: 'MEMBER'});
+        const postMembershipResult = await fetchAgent.postMembership({ projectId: route.params.id, userId: getUserResult.data.id, role: 'MEMBER' });
         if (postMembershipResult.isSuccessful) {
           emit('updateMembers');
           sendNotification("Success", "Sent invitation to user \"" + getUserResult.data.name + "\".");
@@ -51,56 +50,46 @@
 </script>
 
 <template>
-  <n-card
-      style="width: 70%; max-width: 1000px;"
-      title="Edit Members"
-      :bordered="false"
-      size="huge"
-      role="dialog"
-      aria-modal="true"
-    >
-    
+  <n-card style="width: 70%; max-width: 1000px;" title="Edit Members" :bordered="false" size="huge" role="dialog"
+    aria-modal="true">
+
     <div>
       <div style="font-size: 1.1em; ">
         Invite other users by email
       </div>
-      <input class="inputEmail" style="width: 50%; border-radius: 3px ; border: 1px solid #dcdcdc;" id="inputEmail" type="search" v-model="inputEmail" v-on:keyup.enter="handleKeyUp" />
+      <input class="inputEmail" style="width: 50%; border-radius: 3px ; border: 1px solid #dcdcdc;" id="inputEmail"
+        type="search" v-model="inputEmail" v-on:keyup.enter="handleKeyUp" />
     </div>
 
     <n-divider />
-  <div v-for="user in props.projectMembers">
-    <div style="display: flex; font-size: 1.2em;">
-      <div style="width: 10%;">
-        <n-avatar :size='48' round :style="{backgroundColor: '#3E6E6E'}">{{ Array.from(user.name)[0] }}</n-avatar>
-      </div>
-      <div style="width: 30%; margin-top: 10px;">
-        {{ user.name }}
-      </div>
-      
-      <div style="width: 35%; margin-top: 10px;">
-        {{ user.email }}
-      </div>
-      <div style="margin-top: 10px;">
-        <n-switch
-          v-model:value="user.role"
-          size="large"
-          checked-value="ADMIN"
-          unchecked-value="MEMBER"
-          @update:value="handlePatchRoleTriggered(user.membershipId, user.role)"
-        >
-          <template #checked>
-            Admin
-          </template>
-          <template #unchecked>
-            Member
-          </template>
-        </n-switch>
-      </div>
-      <div style="margin-top: 8px; padding-left: 60px;">
-        <DeleteMembershipButton @updateMembers="emit('updateMembers')" :membershipId="user.membershipId" />
+    <div v-for="user in props.projectMembers">
+      <div style="display: flex; font-size: 1.2em;">
+        <div style="width: 10%;">
+          <n-avatar :size='48' round :style="{ backgroundColor: '#3E6E6E' }">{{ Array.from(user.name)[0] }}</n-avatar>
+        </div>
+        <div style="width: 30%; margin-top: 10px;">
+          {{ user.name }}
+        </div>
+
+        <div style="width: 35%; margin-top: 10px;">
+          {{ user.email }}
+        </div>
+        <div style="margin-top: 10px;">
+          <n-switch v-model:value="user.role" size="large" checked-value="ADMIN" unchecked-value="MEMBER"
+            @update:value="handlePatchRoleTriggered(user.membershipId, user.role)">
+            <template #checked>
+              Admin
+            </template>
+            <template #unchecked>
+              Member
+            </template>
+          </n-switch>
+        </div>
+        <div style="margin-top: 8px; padding-left: 60px;">
+          <DeleteMembershipButton @updateMembers="emit('updateMembers')" :membershipId="user.membershipId" />
+        </div>
       </div>
     </div>
-  </div>
   </n-card>
 </template>
 
@@ -108,5 +97,4 @@
   .inputEmail:focus {
     outline: none;
   }
-
 </style>

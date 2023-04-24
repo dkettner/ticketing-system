@@ -30,12 +30,10 @@ onMounted(async () => {
 </script>
 
 <template>
+  <div>
   <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #F0F0F0;">
     <div style="display: flex;">
-      <img src="../assets/ticketsystem-logo-no-title.png" alt="logo" style="height: 48px; padding: 10px 5px 5px 40px;">
-      <div style="font-size: 2.6em; font-family:Arial, Helvetica, sans-serif; padding: 5px 20px 0px 16px;">
-        Ticket System
-      </div>
+      <img src="../assets/logo_ticketing.png" alt="logo" style="height: 60px; padding: 2px 5px 5px 2px;">
     </div>
     <div style="padding: 10px 20px 5px 5px;">
       <UserMenu />
@@ -47,11 +45,11 @@ onMounted(async () => {
         <n-layout>
           <n-layout has-sider>
             <SidebarMenuVue />
-
             <RouterView />
           </n-layout>
         </n-layout>
       </n-space>
     </n-notification-provider>
   </div>
+</div>
 </template>
