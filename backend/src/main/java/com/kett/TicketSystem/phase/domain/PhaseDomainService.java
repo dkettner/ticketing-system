@@ -202,13 +202,18 @@ public class PhaseDomainService {
             throw new PhaseIsNotEmptyException("phase with id: \"" + id + "\" is not empty and can not be deleted");
         }
 
+        UUID nextPhaseId = null;
+        if (!phase.isLast()) {
+            nextPhaseId = phase.getNextPhase().getId();
+        }
+
         this.removePhaseFromCurrentPosition(phase);
         phaseRepository.removeById(id);
         eventPublisher.publishEvent(new PhaseDeletedEvent(phase.getId(), phase.getProjectId()));
-        if (!phase.isLast()) {
+        if (nextPhaseId != null) {
             eventPublisher.publishEvent(
                     new PhasePositionUpdatedEvent(
-                            phase.getNextPhase().getId(),
+                            nextPhaseId,
                             phase.getPreviousPhase(),
                             phase.getProjectId()
                     )
