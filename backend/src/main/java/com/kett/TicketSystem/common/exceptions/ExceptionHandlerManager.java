@@ -8,7 +8,7 @@ import com.kett.TicketSystem.phase.domain.exceptions.LastPhaseException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseFoundException;
 import com.kett.TicketSystem.phase.domain.exceptions.NoPhaseInProjectException;
 import com.kett.TicketSystem.phase.domain.exceptions.PhaseException;
-import com.kett.TicketSystem.project.domain.exceptions.PhaseIsNotEmptyException;
+import com.kett.TicketSystem.phase.domain.exceptions.PhaseIsNotEmptyException;
 import com.kett.TicketSystem.project.domain.exceptions.ProjectException;
 import com.kett.TicketSystem.ticket.domain.exceptions.NoTicketFoundException;
 import com.kett.TicketSystem.ticket.domain.exceptions.TicketException;
