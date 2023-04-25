@@ -54,7 +54,7 @@ const columns = [
   },
   {
     title: 'Assignees',
-    key: 'assigneNames'
+    key: 'assigneeNames'
   }
 ]
 
@@ -67,7 +67,6 @@ async function updateAll() {
   }
 }
 async function compileTableData() {
-  console.log(ticketData)
   const newData = ref([]);
   for (let ticket of tickets.value) {
     const project = projects.value.find(project => project.id == ticket.projectId);
@@ -80,21 +79,22 @@ async function compileTableData() {
       }
     }
 
+    const assigneeNames = assignees.value.map(assignee => assignee.userName);
+
     newData.value.push({
       key: ticket.id, 
       title: ticket.title, 
       description: ticket.description, 
-      dueTime: ticket.dueTime,
-      projectId: project.id, 
+      dueTime: ticket.dueTime == null ? null : new Date(ticket.dueTime).toLocaleString(),
+      projectId: project.id,
       projectName: project.name, 
       phaseName: phase.name, 
-      assigneeNames: assignees.value.map(assignee => assignee.userName),
+      assigneeNames: assigneeNames.toString(),
       assigneeIds: assignees.value.map(assignee => assignee.userId)
     });
   }
 
   ticketData.value = newData.value;
-  console.log(ticketData)
 };
 
 function projectFilterOptions() {
