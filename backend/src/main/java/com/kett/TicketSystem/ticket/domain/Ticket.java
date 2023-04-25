@@ -74,6 +74,7 @@ public class Ticket {
         if (assigneeIds == null) {
             throw new TicketException("assigneeIds must not be null but it may be empty");
         }
+        this.assigneeIds.clear();
         this.assigneeIds.addAll(assigneeIds);
     }
 
