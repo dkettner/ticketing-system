@@ -82,6 +82,9 @@ public class TicketDomainService {
 
         Ticket initializedTicket = ticketRepository.save(ticket);
         eventPublisher.publishEvent(new TicketCreatedEvent(initializedTicket.getId(), initializedTicket.getProjectId(), postingUserId));
+        initializedTicket.getAssigneeIds().forEach(assigneeId -> {
+            eventPublisher.publishEvent(new TicketAssignedEvent(initializedTicket.getId(), initializedTicket.getProjectId(), assigneeId));
+        });
         return initializedTicket;
     }
 
