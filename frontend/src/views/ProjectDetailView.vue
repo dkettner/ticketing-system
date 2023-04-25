@@ -89,8 +89,8 @@
       </div>
     </div>
     <div style="display: flex;">
-    <div style="height: 200px;  width: 60%;">
-      <div style="height: 160px; font-size: 1.4em;">{{ project.description }}</div>
+    <div style="height: 200px;  width: 90%; margin-left: 2px;">
+      <div style="height: 160px; font-size: 1.2em;">{{ project.description }}</div>
       <br/>
       <div style="font-style: italic; font-size: 1.1em;">creation time: {{ new Date(project.creationTime).toLocaleString() }}</div>
     </div>
