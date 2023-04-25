@@ -89,7 +89,7 @@
           try {
             const loginResult = await sessionStore.login(signInFormValue.value.credentials.email, signInFormValue.value.credentials.password);
             if (loginResult.isLoginSuccessful) {
-              router.push('/dashboard');
+              router.push('/projects');
             } else {
               sendNotification(
                 "Error",

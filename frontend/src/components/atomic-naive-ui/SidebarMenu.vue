@@ -15,11 +15,11 @@
     {
       label: () => h(
         RouterLink,
-        { to: { name: "dashboard" } },
-        { default: () => "Dashboard" }
+        { to: { name: "projects" } },
+        { default: () => "Projects" }
       ),
-      key: "dashboard",
-      icon: renderIcon(DashboarIcon)
+      key: "projects",
+      icon: renderIcon(ProjectsIcon)
     },
     {
       label: () => h(
@@ -29,16 +29,7 @@
       ),
       key: "tickets",
       icon: renderIcon(TicketsIcon)
-    },
-    {
-      label: () => h(
-        RouterLink,
-        { to: { name: "projects" } },
-        { default: () => "Projects" }
-      ),
-      key: "projects",
-      icon: renderIcon(ProjectsIcon)
-    }
+    }    
   ];
 
   function renderIcon(icon) {

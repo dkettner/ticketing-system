@@ -13,7 +13,7 @@ const router = createRouter({
     {
       path: '/',
       redirect: to => {
-        return '/dashboard';
+        return '/projects';
       }
     },
     {
@@ -21,16 +21,6 @@ const router = createRouter({
       name: 'main',
       component: () => import('../views/MainView.vue'),
       children: [
-        {
-          path: 'dashboard',
-          name: 'dashboard',
-          component: () => import('../views/DashboardView.vue'),
-        },
-        {
-          path: 'tickets',
-          name: 'tickets',
-          component: () => import('../views/TicketsView.vue'),
-        },
         {
           path: 'projects',
           name: 'projects',
@@ -49,7 +39,13 @@ const router = createRouter({
               component: () => import('../views/ProjectDetailView.vue')
             }
           ]
+        },
+        {
+          path: 'tickets',
+          name: 'tickets',
+          component: () => import('../views/TicketsView.vue'),
         }
+        
       ]
     },
     {
@@ -63,7 +59,7 @@ router.beforeEach( (to, from, next) => {
   const sessionStore = useSessionStore();
 
   if (to.name === 'signin' && sessionStore.isLoggedIn()) {
-    next({ name: 'dashboard' });
+    next({ name: 'projects' });
   } else if (to.name !== 'signin' && !(sessionStore.isLoggedIn())) {
     next({ name: 'signin' });
   } else {
