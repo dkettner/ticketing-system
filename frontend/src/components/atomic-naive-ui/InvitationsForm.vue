@@ -52,7 +52,7 @@
 </script>
 
 <template>
-  <n-card style=" max-width: 1000px;" title="Invitations" :bordered="false" size="huge" role="dialog" aria-modal="true">
+  <n-card style=" max-width: 1000px; border-radius: 5px; background-color: #fdfdfd;" title="Invitations" :bordered="false" size="huge" role="dialog" aria-modal="true">
     <div v-for="invitation in unaccceptedMemberships">
       <div style="display: flex; justify-content: space-around; font-size: 1.2em; padding-bottom: 10px;">
         

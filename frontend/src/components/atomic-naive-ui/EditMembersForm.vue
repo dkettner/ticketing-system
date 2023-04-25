@@ -50,7 +50,7 @@
 </script>
 
 <template>
-  <n-card style="width: 70%; max-width: 1000px;" title="Edit Members" :bordered="false" size="huge" role="dialog"
+  <n-card style="width: 60%; max-width: 1200px; background-color: #fdfdfd; border-radius: 5px;" title="Edit Members" :bordered="false" size="huge" role="dialog"
     aria-modal="true">
 
     <div>

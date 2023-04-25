@@ -66,9 +66,13 @@
     :rules="rules"
     :size="medium"
     label-placement="top"
-    style="min-width: 300px; width: 40%; max-width: 500px; background-color: #EEEEEE; padding: 20px; border-radius: 5px;"
+    style="min-width: 300px; width: 50%; max-width: 600px; background-color: #fdfdfd; padding: 20px; border-radius: 5px;"
   >
     <n-grid :span="24" :x-gap="24" :cols ="1">
+      <n-form-item-gi>
+        <div style="font-size: 1.4em; font-weight: bold; margin-top: -35px;">Create Project</div>
+      </n-form-item-gi>
+
       <n-form-item-gi :span="24" label="Project Name" path="name">
         <n-input style="border-radius: 5px;" v-model:value="projectPostData.name" placeholder="Project Name" />
       </n-form-item-gi>
@@ -87,12 +91,12 @@
 
       <n-gi :span="24">
         <div style="display: flex; justify-content: flex-end">
-          <n-button style="border-radius: 5px;" type="error" @click="handleCancelButtonClick">
+          <n-button type="error" block error strong style="max-width: 125px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;" @click="handleCancelButtonClick">
             Cancel
           </n-button>
-          &nbsp;
-          <n-button style="border-radius: 5px;" type="primary" @click="handleCreateButtonClick">
-            Create New Project
+          &nbsp;&nbsp;
+          <n-button type="primary" block primary strong style="max-width: 125px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;" @click="handleCreateButtonClick">
+            Create Project
           </n-button>
         </div>
       </n-gi>

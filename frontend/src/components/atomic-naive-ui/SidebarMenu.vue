@@ -29,7 +29,7 @@
       ),
       key: "tickets",
       icon: renderIcon(TicketsIcon)
-    }    
+    }
   ];
 
   function renderIcon(icon) {

@@ -50,7 +50,7 @@ async function updateProjects() {
         <div v-for="project in projects">
           <n-col :span="100">
             <RouterLink :to="`/projects/${project.id}`" style="text-decoration: none">
-              <n-card :title="project.name" hoverable style="width: 300px; height: 250px; background-color: #f6f6f6;">
+              <n-card :title="project.name" hoverable style="width: 300px; height: 250px; background-color: #f6f6f6; border-radius: 5px;">
                 <n-ellipsis line-clamp="3">
                   {{ project.description }}
                   <template #tooltip>

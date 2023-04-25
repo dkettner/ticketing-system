@@ -101,7 +101,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <n-card style="width: 50%; max-width: 1000px;" title="Edit Project" :bordered="false" size="huge" role="dialog"
+  <n-card style="width: 50%; max-width: 1000px; background-color: #fdfdfd; border-radius: 5px;" title="Edit Project" :bordered="false" size="huge" role="dialog"
     aria-modal="true">
     <div>
 
@@ -130,7 +130,7 @@ onMounted(async () => {
       </div>
 
       <br />
-      <div style="font-size: 1.4em; font-weight: bold; ">
+      <div style="font-size: 1.3em; font-weight: bold; ">
         Phases
       </div>
 

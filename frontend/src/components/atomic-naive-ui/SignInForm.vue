@@ -132,7 +132,7 @@
 </script>
 
 <template>
-  <n-card style="border-radius: 10px; box-shadow: 5px 5px 5px lightgrey;">
+  <n-card style="border-radius: 10px; box-shadow: 5px 5px 5px lightgrey; background-color: #fdfdfd;">
     <div style="margin-left: -20px;">
       <img width="275" src="../../assets/logo_ticketing.png" />
     </div>
