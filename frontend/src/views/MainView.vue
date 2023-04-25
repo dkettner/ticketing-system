@@ -33,7 +33,7 @@ onMounted(async () => {
   <div>
   <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #F0F0F0;">
     <div style="display: flex;">
-      <img src="../assets/logo_ticketing.png" alt="logo" style="height: 60px; padding: 2px 5px 5px 2px;">
+      <img src="../assets/logo_ticketing.png" alt="logo" style="height: 68px;">
     </div>
     <div style="padding: 10px 20px 5px 5px;">
       <UserMenu />
