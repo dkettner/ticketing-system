@@ -30,9 +30,10 @@
     </div>
     <br />
     <div style="display: flex; margin-top: 10px;">
-      <div v-if="amIAnAdminOfThisProject()" style=" padding-right: 15px;">
+      <div v-if="amIAnAdminOfThisProject()" style=" padding-right: 5px;">
         <EditMembersButton @updateMembers="updateProjectMembers()" :projectMembers="membersWithUserData" />
       </div>
+      &nbsp;&nbsp;
       <div>
         <LeaveProjectButton :membershipId="findMyMembershipOfThisProject().id" />
       </div>
