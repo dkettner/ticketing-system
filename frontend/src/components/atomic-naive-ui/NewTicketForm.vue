@@ -54,6 +54,9 @@ async function handleCreateButtonClick(e) {
       } else {
         ticketPostData.value.dueTime = new Date(ticketPostData.value.dueTime);
       }
+      if (ticketPostData.value.assigneeIds == null) {
+        ticketPostData.value.assigneeIds = [];
+      }
       
       const result = await ticketStore.postTicket(ticketPostData.value);
       if (result.isPostSuccessful) {
@@ -97,8 +100,12 @@ onMounted(async () => {
 
 <template>
   <n-form ref="formRef" :model="ticketPostData" :rules="rules" :size="medium" label-placement="top"
-    style="min-width: 300px; width: 40%; max-width: 500px; background-color: #FFFFFF; padding: 20px; border-radius: 3px;">
+    style="min-width: 300px; width: 50%; max-width: 600px; background-color: #fdfdfd; padding: 20px; border-radius: 5px;">
     <n-grid :span="24" :x-gap="24" :cols="1">
+      <n-form-item-gi>
+        <div style="font-size: 1.4em; font-weight: bold; margin-top: -35px;">Create Ticket</div>
+      </n-form-item-gi>
+
       <n-form-item-gi :span="24" label="Title" path="title">
         <n-input style="border-radius: 5px;" v-model:value="ticketPostData.title" placeholder="Title" />
       </n-form-item-gi>
@@ -113,17 +120,17 @@ onMounted(async () => {
         <n-date-picker v-model:value="ticketPostData.dueTime" type="datetime" />
       </n-form-item-gi>
       <n-form-item-gi label="Assignees" path="assigneeIds">
-        <n-transfer ref="transfer" v-model:value="ticketPostData.assigneeIds" :options="projectMembers" />
+        <n-transfer size="large" virtual-scroll ref="transfer" v-model:value="ticketPostData.assigneeIds" :options="projectMembers" />
       </n-form-item-gi>
 
       <n-gi :span="24">
         <div style="display: flex; justify-content: flex-end">
-          <n-button style="border-radius: 5px;" type="error" @click="handleCancelButtonClick">
+          <n-button type="error" block error strong style="max-width: 125px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;" @click="handleCancelButtonClick">
             Cancel
           </n-button>
-          &nbsp;
-          <n-button style="border-radius: 5px;" type="primary" @click="handleCreateButtonClick">
-            Create New Ticket
+          &nbsp;&nbsp;
+          <n-button type="primary" block primary strong style="max-width: 125px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;" @click="handleCreateButtonClick">
+            Create Ticket
           </n-button>
         </div>
       </n-gi>
