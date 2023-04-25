@@ -51,13 +51,23 @@ const columns = [
   {
     title: 'Due',
     key: 'dueTime',
-    sorter: (row1, row2) => (new Date(row1.dueTime)) < (new Date(row2.dueTime)) ? 1 : -1
+    sorter: (row1, row2) => nullableDateSorter(row1.dueTime, row2.dueTime)
   },
   {
     title: 'Assignees',
     key: 'assigneeNames'
   }
 ]
+
+function nullableDateSorter(dateAlpha, dateOmega) {
+  if (dateAlpha == null) {
+    return 1;
+  }
+  if (dateOmega == null) {
+    return -1;
+  }
+  return new Date(dateAlpha) <= new Date(dateOmega) ? -1 : 1
+}
 
 async function updateAll() {
   await membershipStore.updateMembershipsByEmail();
