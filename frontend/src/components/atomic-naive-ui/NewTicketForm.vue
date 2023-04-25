@@ -49,7 +49,12 @@ async function handleCreateButtonClick(e) {
   e.preventDefault();
   formRef.value?.validate(async (errors) => {
     if (!errors) {
-      ticketPostData.value.dueTime = new Date(ticketPostData.value.dueTime);
+      if (ticketPostData.value.dueTime < 1 || ticketPostData.value.dueTime == null) {
+        ticketPostData.value.dueTime = null;
+      } else {
+        ticketPostData.value.dueTime = new Date(ticketPostData.value.dueTime);
+      }
+      
       const result = await ticketStore.postTicket(ticketPostData.value);
       if (result.isPostSuccessful) {
         console.log(result)
