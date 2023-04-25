@@ -102,7 +102,7 @@ onMounted(async () => {
   const currentTicket = (await fetchAgent.getTicketById(props.ticketId)).data;
   ticketPostData.value.title = currentTicket.title;
   ticketPostData.value.description = currentTicket.description;
-  ticketPostData.value.dueTime = addTwoHoursToDate(new Date(currentTicket.dueTime));
+  ticketPostData.value.dueTime = currentTicket.dueTime == null ? null : addTwoHoursToDate(new Date(currentTicket.dueTime));
   ticketPostData.value.assigneeIds = currentTicket.assigneeIds;
   creationTime.value = new Date(currentTicket.creationTime).toLocaleString();
 })
@@ -135,7 +135,7 @@ onMounted(async () => {
       </n-form-item-gi>
       
       <n-form-item-gi style="border-radius: 5px;" :span="12" label="Due Time" path="dueTime">
-        <n-date-picker v-model:value="ticketPostData.dueTime" type="datetime" />
+        <n-date-picker clearable="true" v-model:value="ticketPostData.dueTime" type="datetime" />
       </n-form-item-gi>
       
       <n-form-item-gi label="Assignees" path="assigneeIds">

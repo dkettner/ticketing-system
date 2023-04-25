@@ -117,7 +117,7 @@ onMounted(async () => {
             }" />
       </n-form-item-gi>
       <n-form-item-gi :span="12" label="Due" path="dueTime">
-        <n-date-picker v-model:value="ticketPostData.dueTime" type="datetime" />
+        <n-date-picker clearable v-model:value="ticketPostData.dueTime" type="datetime" />
       </n-form-item-gi>
       <n-form-item-gi label="Assignees" path="assigneeIds">
         <n-transfer size="large" virtual-scroll ref="transfer" v-model:value="ticketPostData.assigneeIds" :options="projectMembers" />
