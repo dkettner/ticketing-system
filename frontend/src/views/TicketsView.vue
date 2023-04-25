@@ -50,7 +50,8 @@ const columns = [
   },
   {
     title: 'Due',
-    key: 'dueTime'
+    key: 'dueTime',
+    sorter: (row1, row2) => (new Date(row1.dueTime)) < (new Date(row2.dueTime)) ? 1 : -1
   },
   {
     title: 'Assignees',
@@ -116,12 +117,14 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div style="padding-left: 25px; width:85vw;">
+  <div style="background-color: #ffffff; width: 100%;">
+    <div style="padding-left: 25px; width:85vw;">
     <h1>Tickets</h1>
     <n-space vertical :size="20">
       <n-space justify="end">
       </n-space>
       <n-data-table ref="table" :style="{ height: `${tableHeight}px` }"  :columns="columns" :data="ticketData" :single-line="false" :bordered="false" flex-height/>
     </n-space>
+  </div>
   </div>
 </template>
