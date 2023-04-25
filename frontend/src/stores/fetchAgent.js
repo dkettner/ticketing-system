@@ -206,6 +206,16 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     }
   }
 
+  const getTicketById = async (id) => {
+    try {
+      const response = await axios.get(ticketsPath + "/" + id, {withCredentials: true});
+      return { isSuccessful: true, data: response.data };
+    } catch (error) {
+      await handleError(error);
+      return { isSuccessful: false, data: error };
+    }
+  }
+
   const getTicketsByProjectId = async (projectId) => {
     try {
       const response = await axios.get(ticketsPath + '?project-id=' + projectId, {withCredentials: true});
@@ -217,6 +227,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   }
 
   const patchTicket = async (ticketId, patchTicketData) => {
+    console.log(patchTicketData)
     try {
       const response = await axios.patch(ticketsPath + '/' + ticketId, patchTicketData, {withCredentials: true});
       return { isSuccessful: true, data: response.data };
@@ -266,7 +277,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return { isSuccessful: false, data: error };
+      return { isSuccessful: false, data: error.response.data };
     }
   }
 
@@ -312,6 +323,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     deleteProjectById,
 
     postTicket,
+    getTicketById,
     getTicketsByProjectId,
     patchTicket,
     deleteTicketById,
