@@ -36,11 +36,6 @@
           icon: renderIcon(UserIcon)
         },
         {
-          label: "Edit Profile",
-          key: "editProfile",
-          icon: renderIcon(EditIcon)
-        },
-        {
           label: () => h(
             "div", { onClick: () => sessionStorage.logout() }, "Logout"
           ),
