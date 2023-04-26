@@ -1,16 +1,17 @@
 <script setup>
-import { ref, onMounted, computed, reactive } from 'vue';
-import { NSpace, NButton, NDataTable } from 'naive-ui';
+import { ref, onMounted, computed, h } from 'vue';
+import { NSpace, NButton, NDataTable, NModal } from 'naive-ui';
 import { useUserStore } from '../stores/user';
 import { useMembershipStore } from '../stores/membership';
 import { useProjectStore } from '../stores/project';
 import { usePhaseStore } from '../stores/phase';
 import { useTicketStore } from '../stores/ticket';
 import { useFetchAgent } from '../stores/fetchAgent';
-import { useNotification } from 'naive-ui';
 import { storeToRefs } from 'pinia';
+import { RouterLink } from 'vue-router';
 
-const notificationAgent = useNotification();
+import EditTicketForm from '../components/atomic-naive-ui/EditTicketForm.vue';
+
 const fetchAgent = useFetchAgent();
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
@@ -24,12 +25,25 @@ const ticketStore = useTicketStore();
 const { tickets } = storeToRefs(ticketStore);
 const tableRef = ref(null);
 const ticketData = ref([]);
+const selectedTicketId = ref(null);
+const activateEditTicketForm = ref(false);
+const projectIdOfSelectedTicketId = ref(null);
 
-const columns = [
+const columns =  [
   {
     title: 'Title',
     key: 'title',
-    sorter: 'default'
+    sorter: 'default',
+    render(row) {
+      return h(
+        "div",
+        { 
+          onClick: () => openEditTicketForm(row.key, row.projectId), 
+          style: { 'cursor': 'pointer' }
+        },
+        { default: () => row.title }
+      );
+    }
   },
   {
     title: 'Description',
@@ -39,10 +53,20 @@ const columns = [
     title: 'Project',
     key: 'projectName',
     filterOptions: projectFilterOptions(),
-    filter (value, row) {
+    filter(value, row) {
       return ~row.projectName.indexOf(value)
     },
-    sorter: 'default'
+    sorter: 'default',
+    render(row) {
+      return h(
+        RouterLink,
+        { 
+          to: { name: "projectDetails", params: { id: row.projectId } },
+          style: { 'text-decoration': 'none' }  
+        },
+        { default: () => row.projectName }
+      );
+    }
   },
   {
     title: 'Phase',
@@ -55,9 +79,37 @@ const columns = [
   },
   {
     title: 'Assignees',
-    key: 'assigneeNames'
+    key: 'assigneeNames',
+    filterOptions: [
+      {
+        label: 'Assigned To Me',
+        value: 'myUserId'
+      },
+      {
+        label: 'Unassigned',
+        value: 'unassigned'
+      }
+    ],
+    filter (value, row) {
+      if (value == 'myUserId') {
+        return row.assigneeIds.includes(user.value.id);
+      }
+
+      return row.assigneeIds == "";
+    }
   }
 ]
+
+function openEditTicketForm(ticketId, projectId) {
+  selectedTicketId.value = ticketId;
+  projectIdOfSelectedTicketId.value = projectId;
+  activateEditTicketForm.value = true;
+}
+function handleCloseEditTicketForm() {
+  activateEditTicketForm.value = false;
+  selectedTicketId.value = null;
+  projectIdOfSelectedTicketId.value = null;
+}
 
 function nullableDateSorter(dateAlpha, dateOmega) {
   if (dateAlpha == null) {
@@ -93,13 +145,13 @@ async function compileTableData() {
     const assigneeNames = assignees.value.map(assignee => assignee.userName);
 
     newData.value.push({
-      key: ticket.id, 
-      title: ticket.title, 
-      description: ticket.description, 
+      key: ticket.id,
+      title: ticket.title,
+      description: ticket.description,
       dueTime: ticket.dueTime == null ? null : new Date(ticket.dueTime).toLocaleString(),
       projectId: project.id,
-      projectName: project.name, 
-      phaseName: phase.name, 
+      projectName: project.name,
+      phaseName: phase.name,
       assigneeNames: assigneeNames.toString(),
       assigneeIds: assignees.value.map(assignee => assignee.userId)
     });
@@ -112,12 +164,15 @@ function projectFilterOptions() {
   const filterOptions = ref([])
   const projectNames = projects.value.map(project => project.name);
   for (let projectName of projectNames) {
-    filterOptions.value.push({ label: projectName, value: projectName});
+    filterOptions.value.push({ label: projectName, value: projectName });
   }
   return filterOptions.value;
 }
+function reloadPage() {
+  window.location.reload(true);
+}
 
-const tableHeight = computed(() => Math.floor((screen.height * 70)/100));
+const tableHeight = computed(() => Math.floor((screen.height * 70) / 100));
 
 onMounted(async () => {
   await updateAll();
@@ -129,12 +184,17 @@ onMounted(async () => {
 <template>
   <div style="background-color: #ffffff; width: 100%;">
     <div style="padding-left: 25px; width:85vw;">
-    <h1>Tickets</h1>
-    <n-space vertical :size="20">
-      <n-space justify="end">
+      <h1>Tickets</h1>
+      <n-modal v-model:show=activateEditTicketForm :trap-focus="false">
+      <EditTicketForm :ticketId="selectedTicketId" :projectId="projectIdOfSelectedTicketId" @closeEditTicketForm="handleCloseEditTicketForm"
+        @updateTickets="reloadPage" />
+    </n-modal>
+      <n-space vertical :size="20">
+        <n-space justify="end">
+        </n-space>
+        <n-data-table ref="table" :style="{ height: `${tableHeight}px` }" :columns="columns" :data="ticketData"
+          :single-line="false" :bordered="false" flex-height />
       </n-space>
-      <n-data-table ref="table" :style="{ height: `${tableHeight}px` }"  :columns="columns" :data="ticketData" :single-line="false" :bordered="false" flex-height/>
-    </n-space>
-  </div>
+    </div>
   </div>
 </template>
