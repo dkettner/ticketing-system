@@ -96,7 +96,7 @@
         <n-checkbox v-model:checked="thirdCheckBox">
           <div>
             <div>
-              Deleted data is gone and cannot be recovered whatsoever.
+              Deleted data is gone forever and cannot be recovered.
             </div>
             <div>
               Do you understand?
