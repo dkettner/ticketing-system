@@ -57,7 +57,7 @@ async function handleSubmitButtonClick(e) {
       if (ticketPostData.value.assigneeIds == null) {
         ticketPostData.value.assigneeIds = [];
       }
-      
+
       const result = await ticketStore.patchTicket(props.projectId, props.ticketId, ticketPostData.value);
       if (result.isPostSuccessful) {
         emit('closeEditTicketForm');
@@ -75,6 +75,15 @@ async function handleSubmitButtonClick(e) {
       console.log(errors);
     }
   });
+};
+async function handleDeleteTicketButtonClicked(e) {
+  const result = await fetchAgent.deleteTicketById(props.ticketId);
+  if (result.isSuccessful) {
+    emit('closeEditTicketForm');
+    emit('updateTickets')
+  } else {
+    sendNotification("Error", result.message)
+  }
 };
 function handleCloseButtonClick(e) {
   emit('closeEditTicketForm');
@@ -94,7 +103,7 @@ function sendNotification(_title, _content) {
 
 // dirty fix to not decrease due time by two hours on every patch
 function addTwoHoursToDate(date) {
-  return date.setTime(date.getTime() + (2*60*60*1000))
+  return date.setTime(date.getTime() + (2 * 60 * 60 * 1000))
 }
 
 onMounted(async () => {
@@ -109,19 +118,27 @@ onMounted(async () => {
 </script>
 
 <template>
-
   <n-form ref="formRef" :model="ticketPostData" :rules="rules" :size="medium" label-placement="top"
-    style="min-width: 300px; width: 50%; max-width: 600px; background-color: #fdfdfd; padding: 20px; border-radius: 5px;">
+    style="min-width: 300px; width: 50%; max-width: 600px; background-color: #fdfdfd; padding: 25px; border-radius: 5px;">
     <n-grid :span="24" :x-gap="24" :cols="1">
+
+      <n-gi :span="24">
+        <div style="display: flex; justify-content: space-between; font-size: 1.5em; font-weight: bold; padding-top: 10px; padding-bottom: 40px;">
+          <div>Edit Ticket</div>
+          
+          <n-button @click="handleDeleteTicketButtonClicked" type="error" block error strong
+              style="max-width: 75px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;">
+              Delete
+            </n-button>
+        </div>
+      </n-gi>
+
       
-      <n-form-item-gi>
-        <div style="font-size: 1.4em; font-weight: bold; margin-top: -35px;">Edit Ticket</div>
-      </n-form-item-gi>
-      
+
       <n-form-item-gi :span="24" label="Title" path="title">
         <n-input style="border-radius: 5px;" v-model:value="ticketPostData.title" placeholder="Title" />
       </n-form-item-gi>
-      
+
       <n-form-item-gi :span="24" label="Description" path="description">
         <n-input style="border-radius: 5px;" v-model:value="ticketPostData.description" placeholder="Description"
           type="textarea" :autosize="{
@@ -129,26 +146,31 @@ onMounted(async () => {
               maxRows: 10
             }" />
       </n-form-item-gi>
-      
+
       <n-form-item-gi :span="12" label="Creation Time">
         <n-input disabled="true" style="border-radius: 5px;" v-model:value="creationTime" placeholder="creationTime" />
       </n-form-item-gi>
-      
+
       <n-form-item-gi style="border-radius: 5px;" :span="12" label="Due Time" path="dueTime">
         <n-date-picker clearable="true" v-model:value="ticketPostData.dueTime" type="datetime" />
       </n-form-item-gi>
-      
+
       <n-form-item-gi label="Assignees" path="assigneeIds">
-        <n-transfer size="large" virtual-scroll ref="transfer" v-model:value="ticketPostData.assigneeIds" :options="projectMembers" />
+        <n-transfer size="large" virtual-scroll ref="transfer" v-model:value="ticketPostData.assigneeIds"
+          :options="projectMembers" />
       </n-form-item-gi>
 
       <n-gi :span="24">
         <div style="display: flex; justify-content: flex-end">
-          <n-button type="error" block error strong style="max-width: 125px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;" @click="handleCloseButtonClick">
+          <n-button type="error" block error strong
+            style="max-width: 125px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;"
+            @click="handleCloseButtonClick">
             Cancel
           </n-button>
           &nbsp;&nbsp;&nbsp;
-          <n-button type="primary" block primary strong style="max-width: 125px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;" @click="handleSubmitButtonClick">
+          <n-button type="primary" block primary strong
+            style="max-width: 125px; border-radius: 5px; box-shadow: 2px 2px 3px lightgrey;"
+            @click="handleSubmitButtonClick">
             Submit Changes
           </n-button>
         </div>

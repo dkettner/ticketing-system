@@ -100,11 +100,14 @@ onMounted(async () => {
 
 <template>
   <n-form ref="formRef" :model="ticketPostData" :rules="rules" :size="medium" label-placement="top"
-    style="min-width: 300px; width: 50%; max-width: 600px; background-color: #fdfdfd; padding: 20px; border-radius: 5px;">
+    style="min-width: 300px; width: 50%; max-width: 600px; background-color: #fdfdfd; padding: 25px; border-radius: 5px;">
     <n-grid :span="24" :x-gap="24" :cols="1">
-      <n-form-item-gi>
-        <div style="font-size: 1.4em; font-weight: bold; margin-top: -35px;">Create Ticket</div>
-      </n-form-item-gi>
+
+      <n-gi :span="24">
+        <div style="font-size: 1.5em; font-weight: bold; padding-top: 10px; padding-bottom: 40px;">
+          Create Ticket
+        </div>
+      </n-gi>
 
       <n-form-item-gi :span="24" label="Title" path="title">
         <n-input style="border-radius: 5px;" v-model:value="ticketPostData.title" placeholder="Title" />
