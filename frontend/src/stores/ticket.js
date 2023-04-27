@@ -26,6 +26,7 @@ export const useTicketStore = defineStore("ticket", () => {
         }
       return { isSuccessful: true, data: getTicketsResponse.data };
     } else {
+      tickets.value = tickets.value.filter(element => element.projectId != projectId);
       return { isSuccessful: false, data: getTicketsResponse.data.response.data };
     }
   }
