@@ -54,7 +54,7 @@ async function updateProjects() {
                 <n-ellipsis line-clamp="3">
                   {{ project.description }}
                   <template #tooltip>
-                    <div style="text-align: center; max-width: 300px; max-height: 100px;">
+                    <div style="text-align: center; max-width: 300px; max-height: 200px;">
                       {{ project.description }}
                     </div>
                   </template>
