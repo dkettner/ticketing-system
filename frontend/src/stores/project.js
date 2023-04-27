@@ -38,7 +38,6 @@ export const useProjectStore = defineStore("project", () => {
       if (getProjectResponse.isSuccessful) {
         newProjects.push(getProjectResponse.data);
       } else {
-        console.log("error while updating projects:")
         console.log(getProjectResponse.data.response.data);
       }
     }
