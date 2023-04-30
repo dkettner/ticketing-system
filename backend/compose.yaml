@@ -1,0 +1,44 @@
+version: '3.9'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:alpine
+    restart: on-failure
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: SWORDFISH
+      POSTGRES_DB: ticketing_system_db
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-h", "localhost", "-U", "postgres" ]
+      interval: 5s
+      timeout: 3s
+      retries: 15
+    ports:
+      - '5432:5432'
+    networks:
+      - ticketing_system_net
+
+  ticket_system:
+    container_name: ticketing-system-backend
+    image: ticketing-system-backend
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SERVICE_PORT: 8080
+      DB_HOST: postgres:5432
+      DB_NAME: ticketing_system_db
+      DB_USER: postgres
+      DB_PASS: SWORDFISH
+      LOG_LEVEL_ROOT: INFO
+      LOG_LEVEL_APP: TRACE
+    ports:
+      - '8080:8080'
+    networks:
+      - ticketing_system_net
+
+networks:
+  ticketing_system_net:
+    external: false
+    name: ticketing_system_net
