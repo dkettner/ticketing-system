@@ -17,11 +17,11 @@ public class PhaseDataOfTicket {
     @Column(length = 16)
     UUID id;
 
-    @Column(length = 16, unique = true)
+    @Column(length = 16)
     UUID phaseId;
 
     @Setter
-    @Column(length = 16) // maybe set to unique?
+    @Column(length = 16)
     UUID previousPhaseId;
 
     @Column(length = 16)
