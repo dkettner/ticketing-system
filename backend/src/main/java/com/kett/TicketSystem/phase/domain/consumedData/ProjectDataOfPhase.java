@@ -16,7 +16,7 @@ public class ProjectDataOfPhase {
     @Column(length = 16)
     UUID id;
 
-    @Column(length = 16, unique = true)
+    @Column(length = 16)
     UUID projectId;
 
     public ProjectDataOfPhase(@NonNull UUID projectId) {
