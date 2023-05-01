@@ -50,6 +50,16 @@ services:
     networks:
       - ticketing_system_net
 
+  nginx:
+    image: ticketing-system-frontend
+    container_name: nginx
+    ports:
+      - "8081:80"
+    depends_on:
+      - ticket_system
+    networks:
+      - ticketing_system_net
+
 networks:
   ticketing_system_net:
     external: false

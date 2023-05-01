@@ -8,7 +8,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   const sessionStore = useSessionStore();
   
 
-  const backendBaseURL = "https://192.168.2.134:8080";
+  const backendBaseURL = "https://localhost:8080";
   
   // authentication
   const authenticationPath = backendBaseURL + "/authentication";
