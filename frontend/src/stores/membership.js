@@ -2,15 +2,17 @@ import { ref } from "vue";
 import { defineStore } from "pinia";
 import axios from 'axios';
 import { useSessionStore } from "./session";
+import { useFetchAgent } from "./fetchAgent";
 
 export const useMembershipStore = defineStore("membership", () => {
   const membershipsPath = "/memberships";
   const memberships = ref([]);
   const sessionStore = useSessionStore();
+  const fetchAgent = useFetchAgent();
 
   const updateMembershipsByEmail = async (email = sessionStore.email) => {
     try {
-      const getMembershipsResponse = await axios.get(membershipsPath + '?email=' + email, {withCredentials: true});
+      const getMembershipsResponse = await fetchAgent.getMembershipsByEmail(email);
       memberships.value = getMembershipsResponse.data;
     } catch(error) {
       console.log(error);

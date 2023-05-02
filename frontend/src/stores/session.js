@@ -9,8 +9,10 @@ export const useSessionStore = defineStore("session", () => {
 
   const login = async (loginEmail, loginPassword) => {
     const postAuthenticationResponse = await fetchAgent.postAuthentication(loginEmail, loginPassword);
+    console.log(postAuthenticationResponse)
     if (postAuthenticationResponse.isSuccessful) {
       setEmail(loginEmail);
+      localStorage.setItem("jwt", postAuthenticationResponse.data)
       return { isLoginSuccessful: true, message: "Logged in with email: " + loginEmail };
     } else {
       deleteEmail();
@@ -19,8 +21,8 @@ export const useSessionStore = defineStore("session", () => {
   }
 
   const logout = async () => {
-    // TODO: delete jwt in cookies -> delete call on backend
-
+    console.log(localStorage.getItem("jwt"))
+    localStorage.removeItem("jwt");
     deleteEmail();
     
     window.location.reload(true);

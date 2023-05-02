@@ -1,22 +1,31 @@
 import { defineStore } from "pinia";
 import axios from 'axios';
-import { useNotification } from "naive-ui";
 
 import { useSessionStore } from "./session";
 
 export const useFetchAgent = defineStore("fetchAgent", () => {
   const sessionStore = useSessionStore();
+
+  const getBearerToken = () => {
+    return "Bearer " + localStorage.getItem("jwt");
+  }
+
+  const getConfig = () => {
+    return {
+      headers: { Authorization: getBearerToken() }
+    }
+  };
   
   // authentication
   const authenticationPath = "/authentication";
 
   const postAuthentication = async (loginEmail, loginPassword) => {
     try {
-      const response = await axios.post(authenticationPath, {email: loginEmail, password: loginPassword}, {withCredentials: true});
+      const response = await axios.post(authenticationPath, {email: loginEmail, password: loginPassword});
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
-      return { isSuccessful: false, data: error };
+      return { isSuccessful: false, data: error.response.data };
     }
   }
 
@@ -25,7 +34,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const getMembershipsByEmail = async (email) => {
     try {
-      const response = await axios.get(membershipsPath + '?email=' + email, {withCredentials: true});
+      const response = await axios.get(membershipsPath + '?email=' + email, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -35,7 +44,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const getMembershipsByProjectId = async (projectId) => {
     try {
-      const response = await axios.get(membershipsPath + '?project-id=' + projectId, {withCredentials: true});
+      const response = await axios.get(membershipsPath + '?project-id=' + projectId, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -45,7 +54,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const postMembership = async (postMembershipData) => {
     try {
-      const response = await axios.post(membershipsPath, postMembershipData, {withCredentials: true});
+      const response = await axios.post(membershipsPath, postMembershipData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -55,7 +64,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const deleteMembershipById = async (id) => {
     try {
-      const response = await axios.delete(membershipsPath + "/" + id, {withCredentials: true});
+      const response = await axios.delete(membershipsPath + "/" + id, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -66,7 +75,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   const putMembershipState = async (membershipId, patchMembershipStateData) => {
     let response;
     try {
-      response = await axios.put(membershipsPath + '/' + membershipId + '/state', patchMembershipStateData, {withCredentials: true});
+      response = await axios.put(membershipsPath + '/' + membershipId + '/state', patchMembershipStateData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -77,7 +86,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   const putMembershipRole = async (membershipId, patchMembershipRoleData) => {
     let response;
     try {
-      response = await axios.put(membershipsPath + '/' + membershipId + '/role', patchMembershipRoleData, {withCredentials: true});
+      response = await axios.put(membershipsPath + '/' + membershipId + '/role', patchMembershipRoleData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -90,7 +99,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const getPhasesByProjectId = async (projectId) => {
     try {
-      const response = await axios.get(phasesPath + '?project-id=' + projectId, {withCredentials: true});
+      const response = await axios.get(phasesPath + '?project-id=' + projectId, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -100,7 +109,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const postPhase = async (postPhaseData) => {
     try {
-      const response = await axios.post(phasesPath, postPhaseData, {withCredentials: true});
+      const response = await axios.post(phasesPath, postPhaseData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -110,7 +119,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const patchPhaseNameById = async (phaseId, patchPhaseNameData) => {
     try {
-      const response = await axios.patch(phasesPath + '/' + phaseId + '/name', patchPhaseNameData, {withCredentials: true});
+      const response = await axios.patch(phasesPath + '/' + phaseId + '/name', patchPhaseNameData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -120,7 +129,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const deletePhaseById = async (id) => {
     try {
-      const response = await axios.delete(phasesPath + "/" + id, {withCredentials: true});
+      const response = await axios.delete(phasesPath + "/" + id, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -134,9 +143,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const postProject = async (postProjectData) => {
     try {
-      const response = await axios.post(projectsPath, postProjectData, {withCredentials: true,   headers: {
-        'Content-Type': 'application/json; charset=UTF-8'
-      }});
+      const response = await axios.post(projectsPath, postProjectData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -146,7 +153,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const getProjectById = async (id) => {
     try {
-      const response = await axios.get(projectsPath + "/" + id,  {withCredentials: true});
+      const response = await axios.get(projectsPath + "/" + id,  getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -158,7 +165,8 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
     try {
       const projects = [];
       for (let index in projectIds) {
-        projects.push(await axios.get(projectsPath + "/" + projectIds[index],  {withCredentials: true}));
+        projects.push(await axios.get(projectsPath + "/" + projectIds[index],  getConfig()
+));
       }
       return { isSuccessful: true, data: projects };
     } catch (error) {
@@ -169,7 +177,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const patchProjectById = async (projectId, patchProjectData) => {
     try {
-      const response = await axios.patch(projectsPath + '/' + projectId, patchProjectData, {withCredentials: true});
+      const response = await axios.patch(projectsPath + '/' + projectId, patchProjectData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -179,7 +187,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const deleteProjectById = async (id) => {
     try {
-      const response = await axios.delete(projectsPath + "/" + id, {withCredentials: true});
+      const response = await axios.delete(projectsPath + "/" + id, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -193,9 +201,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const postTicket = async (postTicketData) => {
     try {
-      const response = await axios.post(ticketsPath, postTicketData, {withCredentials: true,   headers: {
-        'Content-Type': 'application/json; charset=UTF-8'
-      }});
+      const response = await axios.post(ticketsPath, postTicketData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -205,7 +211,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const getTicketById = async (id) => {
     try {
-      const response = await axios.get(ticketsPath + "/" + id, {withCredentials: true});
+      const response = await axios.get(ticketsPath + "/" + id, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -215,7 +221,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const getTicketsByProjectId = async (projectId) => {
     try {
-      const response = await axios.get(ticketsPath + '?project-id=' + projectId, {withCredentials: true});
+      const response = await axios.get(ticketsPath + '?project-id=' + projectId, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -224,9 +230,8 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   }
 
   const patchTicket = async (ticketId, patchTicketData) => {
-    console.log(patchTicketData)
     try {
-      const response = await axios.patch(ticketsPath + '/' + ticketId, patchTicketData, {withCredentials: true});
+      const response = await axios.patch(ticketsPath + '/' + ticketId, patchTicketData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -236,7 +241,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const deleteTicketById = async (id) => {
     try {
-      const response = await axios.delete(ticketsPath + "/" + id, {withCredentials: true});
+      const response = await axios.delete(ticketsPath + "/" + id, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -250,7 +255,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const getUserById = async (id) => {
     try {
-      const response = await axios.get(usersPath + '/' + id, {withCredentials: true});
+      const response = await axios.get(usersPath + '/' + id, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -260,7 +265,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const getUserByEmail = async (email) => {
     try {
-      const response = await axios.get(usersPath + '?email=' + email, {withCredentials: true});
+      const response = await axios.get(usersPath + '?email=' + email, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -270,7 +275,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const deleteUserById = async (id) => {
     try {
-      const response = await axios.delete(usersPath + "/" + id, {withCredentials: true});
+      const response = await axios.delete(usersPath + "/" + id, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -280,7 +285,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const patchUserById = async (userId, patchUserData) => {
     try {
-      const response = await axios.patch(usersPath + '/' + userId, patchUserData, {withCredentials: true});
+      const response = await axios.patch(usersPath + '/' + userId, patchUserData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
@@ -290,11 +295,10 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
 
   async function handleError(error) {
+    console.log(error)
     if (error.response.status == 401) {
       await sessionStore.logout();
     }
-
-    console.log(error);
   }
 
 
