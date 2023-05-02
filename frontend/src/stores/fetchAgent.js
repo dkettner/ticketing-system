@@ -7,11 +7,8 @@ import { useSessionStore } from "./session";
 export const useFetchAgent = defineStore("fetchAgent", () => {
   const sessionStore = useSessionStore();
   
-
-  const backendBaseURL = "https://localhost:8080";
-  
   // authentication
-  const authenticationPath = backendBaseURL + "/authentication";
+  const authenticationPath = "/authentication";
 
   const postAuthentication = async (loginEmail, loginPassword) => {
     try {
@@ -24,7 +21,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   }
 
   // memberships
-  const membershipsPath = backendBaseURL + "/memberships";
+  const membershipsPath = "/memberships";
 
   const getMembershipsByEmail = async (email) => {
     try {
@@ -89,7 +86,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   }
 
   // phases
-  const phasesPath = backendBaseURL + "/phases";
+  const phasesPath = "/phases";
 
   const getPhasesByProjectId = async (projectId) => {
     try {
@@ -133,7 +130,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
 
   // projects
-  const projectsPath = backendBaseURL + "/projects";
+  const projectsPath = "/projects";
 
   const postProject = async (postProjectData) => {
     try {
@@ -192,7 +189,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   
 
   // tickets
-  const ticketsPath = backendBaseURL + "/tickets";
+  const ticketsPath = "/tickets";
 
   const postTicket = async (postTicketData) => {
     try {
@@ -249,7 +246,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
 
   // users
-  const usersPath = backendBaseURL + "/users";
+  const usersPath = "/users";
 
   const getUserById = async (id) => {
     try {
