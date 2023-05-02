@@ -6,6 +6,11 @@ WORKDIR /app
 
 # Copy pom.xml and source code to the container
 COPY pom.xml .
+
+# Download dependencies only if pom changed
+RUN mvn dependency:go-offline
+
+# Copy the source code
 COPY src ./src
 
 # Run Maven build
