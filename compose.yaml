@@ -18,7 +18,7 @@ services:
       - ticketing_system_net
 
   backend:
-    container_name: ticketing-system-backend
+    container_name: backend
     image: ticketing-system-backend
     depends_on:
       postgres:
@@ -38,7 +38,7 @@ services:
 
   frontend:
     image: ticketing-system-frontend
-    container_name: nginx
+    container_name: frontend
     depends_on:
       - backend
     ports:
