@@ -9,8 +9,8 @@ services:
       POSTGRES_DB: ticketing_system_db
     healthcheck:
       test: [ "CMD", "pg_isready", "-h", "localhost", "-U", "postgres" ]
-      interval: 5s
-      timeout: 3s
+      interval: 3s
+      timeout: 2s
       retries: 15
     ports:
       - "15432:5432"
@@ -19,7 +19,7 @@ services:
 
   backend:
     container_name: backend
-    image: ticketing-system-backend
+    image: dkettner/ticketing-system-backend
     depends_on:
       postgres:
         condition: service_healthy
@@ -37,7 +37,7 @@ services:
       - ticketing_system_net
 
   frontend:
-    image: ticketing-system-frontend
+    image: dkettner/ticketing-system-frontend
     container_name: frontend
     depends_on:
       - backend
