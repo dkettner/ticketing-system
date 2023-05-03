@@ -3,7 +3,7 @@ An open-source ticketing system to manage projects and tickets alone or in teams
 
 ## Quickstart-Guide
 1. Make sure that you have [Docker](https://www.docker.com/) installed on your hosting machine.
-1. Download *docker-compose.yaml* from the latest release.
+1. Download *docker-compose.yaml* from the [latest release](https://github.com/dkettner/ticketing-system/releases/tag/v0.1.0).
 1. __CHANGE THE PASSWORDS__ in the downloaded compose file.
 1. Open a terminal and navigate to the file.
 1. Start the Ticketing System by running: `docker compose up`
