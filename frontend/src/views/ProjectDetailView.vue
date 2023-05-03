@@ -135,7 +135,7 @@ onMounted(async () => {
         <div class="columnHeader">
           <h4 style="display: flex; justify-content: center; ">{{ phase.name }}</h4>
         </div>
-        <draggable class="list-group" :list="phase.tickets" @change="updateTicketPhase" group="phase.id" itemKey="id">
+        <draggable style="min-height: 100%;" class="list-group" :list="phase.tickets" @change="updateTicketPhase" group="phase.id" itemKey="id">
           <template #item="{ element: ticket }">
             <n-card @click="handleTicketClick(ticket.id)"
               style="border-radius: 5px; margin-bottom: 8px; white-space:normal; cursor: pointer;" :bordered="true" size="small"
