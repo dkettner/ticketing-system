@@ -7,7 +7,7 @@ An open-source ticketing system to manage projects and tickets alone or in teams
 1. __CHANGE THE PASSWORDS__ in the downloaded compose file.
 1. Open a terminal and navigate to the file.
 1. Start the Ticketing System by running: `docker compose up -d`
-1. After a few seconds the Ticketing System will be reachable in your browser under: http://localhost:10000
+1. After a few seconds the Ticketing System will be reachable in your browser: http://localhost:10000
 
 ## Disclaimer
 - This software is a prototype and likely has a lot of bugs. Use at your own risk.
