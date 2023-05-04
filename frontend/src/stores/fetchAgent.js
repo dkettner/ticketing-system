@@ -119,7 +119,7 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
 
   const patchPhaseNameById = async (phaseId, patchPhaseNameData) => {
     try {
-      const response = await axios.patch(phasesPath + '/' + phaseId + '/name', patchPhaseNameData, getConfig());
+      const response = await axios.put(phasesPath + '/' + phaseId + '/name', patchPhaseNameData, getConfig());
       return { isSuccessful: true, data: response.data };
     } catch (error) {
       await handleError(error);
