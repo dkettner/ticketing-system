@@ -1,8 +1,8 @@
 package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.common.DtoMapper;
-import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
-import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
+import com.kett.TicketSystem.phase.application.dto.PhasePutNameDto;
+import com.kett.TicketSystem.phase.application.dto.PhasePutPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import com.kett.TicketSystem.phase.domain.Phase;
@@ -51,13 +51,13 @@ public class PhaseApplicationService {
 
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
-    public void patchPhaseName(UUID id, PhasePatchNameDto phasePatchNameDto) {
-        phaseDomainService.patchPhaseName(id, phasePatchNameDto.getName());
+    public void patchPhaseName(UUID id, PhasePutNameDto phasePutNameDto) {
+        phaseDomainService.patchPhaseName(id, phasePutNameDto.getName());
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")
-    public void patchPhasePosition(UUID id, PhasePatchPositionDto phasePatchPositionDto) {
-        phaseDomainService.patchPhasePosition(id, phasePatchPositionDto.getPreviousPhase());
+    public void patchPhasePosition(UUID id, PhasePutPositionDto phasePutPositionDto) {
+        phaseDomainService.patchPhasePosition(id, phasePutPositionDto.getPreviousPhase());
     }
 
     @PreAuthorize("hasAuthority('ROLE_PROJECT_ADMIN_'.concat(@phaseDomainService.getProjectIdByPhaseId(#id)))")

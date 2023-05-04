@@ -1,8 +1,8 @@
 package com.kett.TicketSystem.phase.application;
 
 import com.kett.TicketSystem.common.exceptions.NoParametersException;
-import com.kett.TicketSystem.phase.application.dto.PhasePatchNameDto;
-import com.kett.TicketSystem.phase.application.dto.PhasePatchPositionDto;
+import com.kett.TicketSystem.phase.application.dto.PhasePutNameDto;
+import com.kett.TicketSystem.phase.application.dto.PhasePutPositionDto;
 import com.kett.TicketSystem.phase.application.dto.PhasePostDto;
 import com.kett.TicketSystem.phase.application.dto.PhaseResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,14 +61,14 @@ public class PhaseController {
     }
 
     @PutMapping("/{id}/name")
-    public ResponseEntity<?> patchPhaseName(@PathVariable UUID id, @RequestBody PhasePatchNameDto phasePatchNameDto) {
-        phaseApplicationService.patchPhaseName(id, phasePatchNameDto);
+    public ResponseEntity<?> patchPhaseName(@PathVariable UUID id, @RequestBody PhasePutNameDto phasePutNameDto) {
+        phaseApplicationService.patchPhaseName(id, phasePutNameDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @PutMapping("/{id}/position")
-    public ResponseEntity<?> patchPhasePosition(@PathVariable UUID id, @RequestBody PhasePatchPositionDto phasePatchPositionDto) {
-        phaseApplicationService.patchPhasePosition(id, phasePatchPositionDto);
+    public ResponseEntity<?> patchPhasePosition(@PathVariable UUID id, @RequestBody PhasePutPositionDto phasePutPositionDto) {
+        phaseApplicationService.patchPhasePosition(id, phasePutPositionDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
