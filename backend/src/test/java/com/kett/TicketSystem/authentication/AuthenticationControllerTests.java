@@ -99,7 +99,7 @@ public class AuthenticationControllerTests {
         AuthenticationPostDto authenticationPostDto0 = new AuthenticationPostDto(email0, password0);
         MvcResult postAuthenticationResult0 =
                 mockMvc.perform(
-                                post("/authentication")
+                                post("/authentications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(authenticationPostDto0)))
                         .andExpect(status().isOk())
@@ -112,7 +112,7 @@ public class AuthenticationControllerTests {
         AuthenticationPostDto authenticationPostDto1 = new AuthenticationPostDto(email1, password1);
         MvcResult postAuthenticationResult1 =
                 mockMvc.perform(
-                                post("/authentication")
+                                post("/authentications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(authenticationPostDto1)))
                         .andExpect(status().isOk())
@@ -128,7 +128,7 @@ public class AuthenticationControllerTests {
         AuthenticationPostDto invalidAuthenticationPostDto0 = new AuthenticationPostDto(email0, password1);
         MvcResult postAuthenticationResult0 =
                 mockMvc.perform(
-                                post("/authentication")
+                                post("/authentications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(invalidAuthenticationPostDto0)))
                         .andExpect(status().isUnauthorized())
@@ -137,7 +137,7 @@ public class AuthenticationControllerTests {
         AuthenticationPostDto invalidAuthenticationPostDto1 = new AuthenticationPostDto(email1, password0);
         MvcResult postAuthenticationResult1 =
                 mockMvc.perform(
-                                post("/authentication")
+                                post("/authentications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(invalidAuthenticationPostDto1)))
                         .andExpect(status().isUnauthorized())
@@ -146,7 +146,7 @@ public class AuthenticationControllerTests {
         AuthenticationPostDto invalidAuthenticationPostDto2 = new AuthenticationPostDto("invalid.email@yahoo.com", password0);
         MvcResult postAuthenticationResult2 =
                 mockMvc.perform(
-                                post("/authentication")
+                                post("/authentications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(invalidAuthenticationPostDto2)))
                         .andExpect(status().isNotFound())

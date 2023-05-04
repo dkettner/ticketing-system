@@ -117,7 +117,7 @@ public class RestRequestHelper {
         AuthenticationPostDto authenticationPostDto4 = new AuthenticationPostDto(userEmail, userPassword);
         MvcResult postAuthenticationResult4 =
                 mockMvc.perform(
-                                post("/authentication")
+                                post("/authentications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(authenticationPostDto4)))
                         .andExpect(status().isOk())

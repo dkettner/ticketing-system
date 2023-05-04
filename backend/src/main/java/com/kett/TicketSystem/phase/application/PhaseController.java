@@ -73,7 +73,7 @@ public class PhaseController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deletePhase(@PathVariable UUID id) {
+    public ResponseEntity<?> deletePhase(@PathVariable UUID id) {
         phaseApplicationService.deletePhaseById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

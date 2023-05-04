@@ -124,7 +124,7 @@ public class UserControllerTests {
         AuthenticationPostDto authenticationPostDto4 = new AuthenticationPostDto(email4, password4);
         MvcResult postAuthenticationResult4 =
                 mockMvc.perform(
-                                post("/authentication")
+                                post("/authentications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(authenticationPostDto4)))
                         .andExpect(status().isOk())
