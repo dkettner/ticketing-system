@@ -60,13 +60,13 @@ public class PhaseController {
                 .body(phaseResponseDto);
     }
 
-    @PatchMapping("/{id}/name")
+    @PutMapping("/{id}/name")
     public ResponseEntity<?> patchPhaseName(@PathVariable UUID id, @RequestBody PhasePatchNameDto phasePatchNameDto) {
         phaseApplicationService.patchPhaseName(id, phasePatchNameDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping("/{id}/position")
+    @PutMapping("/{id}/position")
     public ResponseEntity<?> patchPhasePosition(@PathVariable UUID id, @RequestBody PhasePatchPositionDto phasePatchPositionDto) {
         phaseApplicationService.patchPhasePosition(id, phasePatchPositionDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
