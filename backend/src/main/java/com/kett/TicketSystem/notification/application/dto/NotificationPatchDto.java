@@ -9,6 +9,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class NotificationPatchIsReadDto {
+public class NotificationPatchDto {
     private Boolean isRead;
 }

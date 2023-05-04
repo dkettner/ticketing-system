@@ -3,7 +3,7 @@ package com.kett.TicketSystem.notification.application;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import com.kett.TicketSystem.membership.domain.events.UnacceptedProjectMembershipCreatedEvent;
-import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
+import com.kett.TicketSystem.notification.application.dto.NotificationPatchDto;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.domain.NotificationDomainService;
 import com.kett.TicketSystem.notification.domain.exceptions.NoNotificationFoundException;
@@ -243,12 +243,12 @@ public class NotificationControllerTests {
         UUID notificationId = UUID.fromString(JsonPath.parse(getByRecipientIdResponse).read("$[0].id"));
 
         // test isRead: false -> true (allowed)
-        NotificationPatchIsReadDto notificationPatchIsReadDto = new NotificationPatchIsReadDto(true);
+        NotificationPatchDto notificationPatchDto = new NotificationPatchDto(true);
         MvcResult patchResult =
                 mockMvc.perform(
                         patch("/notifications/" + notificationId + "/is-read")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(notificationPatchIsReadDto))
+                                .content(objectMapper.writeValueAsString(notificationPatchDto))
                                 .cookie(new Cookie("jwt", jwt0)))
                         .andExpect(status().isNoContent())
                         .andReturn();
@@ -258,12 +258,12 @@ public class NotificationControllerTests {
         assertTrue(patchedNotification.getIsRead());
 
         // test isRead: true -> false (not allowed)
-        NotificationPatchIsReadDto conflictingNotificationPatchIsReadDto = new NotificationPatchIsReadDto(false);
+        NotificationPatchDto conflictingNotificationPatchDto = new NotificationPatchDto(false);
         MvcResult conflictingPatchResult =
                 mockMvc.perform(
                                 patch("/notifications/" + notificationId + "/is-read")
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .content(objectMapper.writeValueAsString(conflictingNotificationPatchIsReadDto))
+                                        .content(objectMapper.writeValueAsString(conflictingNotificationPatchDto))
                                         .cookie(new Cookie("jwt", jwt0)))
                         .andExpect(status().isConflict())
                         .andReturn();

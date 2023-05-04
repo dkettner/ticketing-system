@@ -2,7 +2,7 @@ package com.kett.TicketSystem.notification.application;
 
 import com.kett.TicketSystem.common.DtoMapper;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
-import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
+import com.kett.TicketSystem.notification.application.dto.NotificationPatchDto;
 import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
 import com.kett.TicketSystem.notification.domain.Notification;
 import com.kett.TicketSystem.notification.domain.NotificationDomainService;
@@ -46,8 +46,8 @@ public class NotificationApplicationService {
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationDomainService.getGetRecipientIdByNotificationId(#id)))")
-    public void patchNotificationReadState(UUID id, NotificationPatchIsReadDto notificationPatchIsReadDto) {
-        notificationDomainService.patchReadState(id, notificationPatchIsReadDto.getIsRead());
+    public void patchNotification(UUID id, NotificationPatchDto notificationPatchDto) {
+        notificationDomainService.patchById(id, notificationPatchDto.getIsRead());
     }
 
     @PreAuthorize("hasAuthority('ROLE_USER_'.concat(@notificationDomainService.getGetRecipientIdByNotificationId(#id)))")

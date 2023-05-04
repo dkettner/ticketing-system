@@ -80,7 +80,7 @@ public class NotificationDomainService {
         return userData.get(0).getUserId();
     }
 
-    public void patchReadState(UUID id, Boolean isRead) throws NoNotificationFoundException, NotificationException, IllegalStateUpdateException {
+    public void patchById(UUID id, Boolean isRead) throws NoNotificationFoundException, NotificationException, IllegalStateUpdateException {
         Notification notification = this.getNotificationById(id);
         notification.setIsRead(isRead);
         notificationRepository.save(notification);

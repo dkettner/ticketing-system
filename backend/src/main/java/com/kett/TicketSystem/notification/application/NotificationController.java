@@ -3,7 +3,7 @@ package com.kett.TicketSystem.notification.application;
 import com.kett.TicketSystem.common.domainprimitives.EmailAddress;
 import com.kett.TicketSystem.common.exceptions.NoParametersException;
 import com.kett.TicketSystem.common.exceptions.TooManyParametersException;
-import com.kett.TicketSystem.notification.application.dto.NotificationPatchIsReadDto;
+import com.kett.TicketSystem.notification.application.dto.NotificationPatchDto;
 import com.kett.TicketSystem.notification.application.dto.NotificationResponseDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -54,9 +54,9 @@ public class NotificationController {
         return new ResponseEntity<>(notificationResponseDtos, HttpStatus.OK);
     }
 
-    @PatchMapping("/{id}/is-read")
-    public ResponseEntity<?> patchNotificationReadState(@PathVariable UUID id, @RequestBody NotificationPatchIsReadDto notificationPatchIsReadDto) {
-        notificationApplicationService.patchNotificationReadState(id, notificationPatchIsReadDto);
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> patchNotification(@PathVariable UUID id, @RequestBody NotificationPatchDto notificationPatchDto) {
+        notificationApplicationService.patchNotification(id, notificationPatchDto);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
