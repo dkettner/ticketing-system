@@ -93,6 +93,14 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/MembershipResponseDto"
+        "400":
+          description: "Incorrect format of query parameter."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access these memberships. A user may only access their own memberships and the other memberships of a project they are a part of (membership has to be accepted)."
+        "404":
+          description: "Could not find any memberships that match the query."
   /memberships/{id}:
     get:
       summary: "Gets the membership with the specified ID."
@@ -114,8 +122,16 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/MembershipResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this membership. A user may only access their own memberships and the other memberships of a project they are a part of (membership has to be accepted)."
+        "404":
+          description: "Could not find the specified membership."
     delete:
-      summary: "Deletes the membership. Either an admin revokes the membership or the user declines the invitation / leaves the project."
+      summary: "Deletes the membership. Either an admin revokes the membership or the user declines the invitation / leaves the project. Deleting the last membership of a project triggers deletion of project, phases, tickets."
       tags:
         - membership
       security:
@@ -130,6 +146,14 @@ paths:
       responses:
         "204":
           description: "Membership deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this membership. A user may only delete their own memberships and the other memberships of projects in which they hold the Admin role."
+        "404":
+          description: "Could not find any memberships that match the query."
   /memberships/{id}/role:
     put:
       summary: "Updates the role of the membership. May change permissions within a project."
@@ -153,6 +177,16 @@ paths:
       responses:
         "204":
           description: "Updated the role."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to change the role of this membership. Only admins are allowed to change the role of the project members."
+        "404":
+          description: "Could not find the specified membership."
+        "409":
+          description: "A project needs at least one admin. If the user is the last admin they cannot change their role to member."
   /memberships/{id}/state:
     put:
       summary: "Updates the state of the membership. The invited user accepts the invitation to the project. An already accepted membership cannot be set to unaccepted. Delete instead."
@@ -176,6 +210,16 @@ paths:
       responses:
         "204":
           description: "Updated the state of the membership."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to change the state of this membership. Users may only change the state of their own memberships."
+        "404":
+          description: "Could not find the specified membership."
+        "409":
+          description: "The state of an already accepted membership cannot be updated. Delete to revoke the membership."
   /notifications:
     get:
       summary: "Gets notifications that match the specified query."
