@@ -178,7 +178,7 @@ paths:
         "204":
           description: "Updated the role."
         "400":
-          description: "Incorrect format of uuid."
+          description: "Incorrect format of uuid or dto."
         "401":
           description: "User has no valid jwt in authorization header."
         "403":
@@ -211,7 +211,7 @@ paths:
         "204":
           description: "Updated the state of the membership."
         "400":
-          description: "Incorrect format of uuid."
+          description: "Incorrect format of uuid or dto."
         "401":
           description: "User has no valid jwt in authorization header."
         "403":
@@ -248,6 +248,14 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/NotificationResponseDto"
+        "400":
+          description: "Incorrect format of query parameter."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access these notifications. A user may only access their own notifications."
+        "404":
+          description: "Could not find any notifications that match the query."
   /notifications/{id}:
     get:
       summary: "Get the notification with the specified ID."
@@ -269,6 +277,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/NotificationResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this notification. A user may only access their own notifications."
+        "404":
+          description: "Could not find the specified notification."
     patch:
       summary: "Updates the notification. An already read notification cannot be set to unread."
       tags:
@@ -291,6 +307,16 @@ paths:
       responses:
         "204":
           description: "Notification updated."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this notification. A user may only access their own notifications."
+        "404":
+          description: "Could not find the specified notification."
+        "409":
+          description: "An already read notification cannot be set to unread."
     delete:
       summary: "Deletes the notification."
       tags:
@@ -307,6 +333,14 @@ paths:
       responses:
         "204":
           description: "Notification deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this notification. A user may only delete their own notifications."
+        "404":
+          description: "Could not find the specified notification."
   /phases:
     post:
       summary: "Creates a new phase for a project."
