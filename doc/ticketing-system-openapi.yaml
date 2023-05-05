@@ -2,7 +2,7 @@ openapi: "3.0.3"
 info:
   title: "Ticketing System API"
   description: "A RESTful API for the Ticketing System: https://github.com/dkettner/ticketing-system"
-  version: "0.2.0"
+  version: '0.2.0'
 servers:
   - url: "http://localhost:10001"
 paths:
@@ -35,6 +35,8 @@ paths:
       summary: "Creates an unaccepted membership. A user gets invited to a project."
       tags:
         - membership
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
@@ -62,6 +64,8 @@ paths:
       summary: "Gets memberships that match the specified query."
       tags:
         - membership
+      security:
+        - bearerAuth: []
       parameters:
         - name: "user-id"
           in: "query"
@@ -94,6 +98,8 @@ paths:
       summary: "Gets the membership with the specified ID."
       tags:
         - membership
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -112,6 +118,8 @@ paths:
       summary: "Deletes the membership. Either an admin revokes the membership or the user declines the invitation / leaves the project."
       tags:
         - membership
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -127,6 +135,8 @@ paths:
       summary: "Updates the role of the membership. May change permissions within a project."
       tags:
         - membership
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -148,6 +158,8 @@ paths:
       summary: "Updates the state of the membership. The invited user accepts the invitation to the project. An already accepted membership cannot be set to unaccepted. Delete instead."
       tags:
         - membership
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -169,6 +181,8 @@ paths:
       summary: "Gets notifications that match the specified query."
       tags:
         - notification
+      security:
+        - bearerAuth: []
       parameters:
         - name: "recipientId"
           in: "query"
@@ -195,6 +209,8 @@ paths:
       summary: "Get the notification with the specified ID."
       tags:
         - notification
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -213,6 +229,8 @@ paths:
       summary: "Updates the notification. An already read notification cannot be set to unread."
       tags:
         - notification
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -233,6 +251,8 @@ paths:
       summary: "Deletes the notification."
       tags:
         - notification
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -248,6 +268,8 @@ paths:
       summary: "Creates a new phase for a project."
       tags:
         - phase
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
@@ -265,6 +287,8 @@ paths:
       summary: "Gets phases that match the specified query."
       tags:
         - phase
+      security:
+        - bearerAuth: []
       parameters:
         - name: "project-id"
           in: "query"
@@ -286,6 +310,8 @@ paths:
       summary: "Gets the phase with the specified ID."
       tags:
         - phase
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -304,6 +330,8 @@ paths:
       summary: "Deletes the phase. Impossible if it still has tickets of if it is the last remaining phase of the project."
       tags:
         - phase
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -319,6 +347,8 @@ paths:
       summary: "Updates the name of the specified phase."
       tags:
         - phase
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -340,6 +370,8 @@ paths:
       summary: "Updates the position of the specified phase relative to the other phases of the project. The position is the ID of the previous phase. Null means that it shall be the first phase of the project."
       tags:
         - phase
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -361,6 +393,8 @@ paths:
       summary: "Creates a new project. Triggers an accepted admin membership for the posting user."
       tags:
         - project
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
@@ -379,6 +413,8 @@ paths:
       summary: "Gets the project with the specified ID."
       tags:
         - project
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -397,6 +433,8 @@ paths:
       summary: "Updates the project."
       tags:
         - project
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -417,6 +455,8 @@ paths:
       summary: "Deletes the project. Triggers deletion of related memberships, phases, tickets."
       tags:
         - project
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -432,6 +472,8 @@ paths:
       summary: "Creates a new ticket."
       tags:
         - ticket
+      security:
+        - bearerAuth: []
       requestBody:
         content:
           application/json:
@@ -449,6 +491,8 @@ paths:
       summary: "Gets tickets that match the specified query."
       tags:
         - ticket
+      security:
+        - bearerAuth: []
       parameters:
         - name: "phase-id"
           in: "query"
@@ -482,6 +526,8 @@ paths:
       summary: "Gets the ticket with the specified ID."
       tags:
         - ticket
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -500,6 +546,8 @@ paths:
       summary: "Updates the ticket."
       tags:
         - ticket
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -520,6 +568,8 @@ paths:
       summary: "Deletes the ticket."
       tags:
         - ticket
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -552,6 +602,8 @@ paths:
       summary: "Gets users that match the specified query."
       tags:
         - user
+      security:
+        - bearerAuth: []
       parameters:
         - name: "email"
           in: "query"
@@ -570,6 +622,8 @@ paths:
       summary: "Gets the user with the specified ID."
       tags:
         - user
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -588,6 +642,8 @@ paths:
       summary: "Updates the user."
       tags:
         - user
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -608,6 +664,8 @@ paths:
       summary: "Deletes the user. Triggers deletion of related memberships etc."
       tags:
         - user
+      security:
+        - bearerAuth: []
       parameters:
         - name: "id"
           in: "path"
@@ -619,6 +677,11 @@ paths:
         "204":
           description: "User deleted."
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     AuthenticationPostDto:
       type: "object"
