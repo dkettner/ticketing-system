@@ -647,6 +647,16 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/TicketResponseDto"
+        "400":
+          description: "Incorrect format of dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to post a ticket to this project. Only users with accepted memberships are allowed to post tickets."
+        "404":
+          description: "Could not find the specified project."
+        "409":
+          description: "Not all assignees are project members."
     get:
       summary: "Gets tickets that match the specified query."
       tags:
@@ -681,6 +691,14 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/TicketResponseDto"
+        "400":
+          description: "Incorrect format of query parameter. Only one query parameter is allowed."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access these tickets. Users may only access tickets of projects they are members of. Searching for tickets that are assigned to other users is also prohibited (at the moment), even if they are part of the same project."
+        "404":
+          description: "Could not find any tickets that match the query."
   /tickets/{id}:
     get:
       summary: "Gets the ticket with the specified ID."
@@ -702,6 +720,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/TicketResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this ticket. Only users with accepted memberships are allowed to access the tickets of a project."
+        "404":
+          description: "Could not find the specified ticket."
     patch:
       summary: "Updates the ticket."
       tags:
@@ -724,6 +750,16 @@ paths:
       responses:
         "204":
           description: "Ticket updated."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to patch a ticket of this project. Only users with accepted memberships are allowed to patch tickets."
+        "404":
+          description: "Could not find the specified ticket."
+        "409":
+          description: "Not all assignees are project members or the ticket does not belong to the new phase."
     delete:
       summary: "Deletes the ticket."
       tags:
@@ -740,6 +776,14 @@ paths:
       responses:
         "204":
           description: "Ticket deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to delete this ticket. Only project members are allowed to delete tickets."
+        "404":
+          description: "Could not find the specified ticket."
   /users:
     post:
       summary: "Creates a new user. Triggers the creation of a default project."
