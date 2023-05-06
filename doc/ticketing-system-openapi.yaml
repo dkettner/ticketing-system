@@ -4,6 +4,9 @@ info:
   description: "A RESTful API for the Ticketing System: https://github.com/dkettner/ticketing-system"
   version: '0.2.0'
 servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/dkettner/ticketing-system/0.2.0
   - url: "http://localhost:10001"
 paths:
   /authentications:
@@ -361,6 +364,16 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PhaseResponseDto"
+        "400":
+          description: "Incorrect format of dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to post a phase for the specified project. Only project admins may add new phases."
+        "404":
+          description: "Could not find the specified project or previous phase."
+        "409":
+          description: "The previous phase does not belong the roject."
     get:
       summary: "Gets phases that match the specified query."
       tags:
@@ -383,6 +396,14 @@ paths:
                 type: "array"
                 items:
                   $ref: "#/components/schemas/PhaseResponseDto"
+        "400":
+          description: "Incorrect format of query parameter."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access the phases of the specified project. Only users with accepted memberships are allowed to get the phases of a project."
+        "404":
+          description: "Could not find any phases that match the query."
   /phases/{id}:
     get:
       summary: "Gets the phase with the specified ID."
@@ -404,6 +425,14 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/PhaseResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access the phase. Only users with accepted memberships are allowed to get the phases of a project."
+        "404":
+          description: "Could not find the specified phase."
     delete:
       summary: "Deletes the phase. Impossible if it still has tickets of if it is the last remaining phase of the project."
       tags:
@@ -420,6 +449,16 @@ paths:
       responses:
         "204":
           description: "Phase deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to delete the phase. Only project admins are allowed to delete the phases of a project."
+        "404":
+          description: "Could not find the specified phase."
+        "409":
+          description: "The specified phase could not be deleted. It either still has tickets (check ticketCount) or it already is the last phase of its project."
   /phases/{id}/name:
     put:
       summary: "Updates the name of the specified phase."
@@ -443,6 +482,14 @@ paths:
       responses:
         "204":
           description: "Phase name updated."
+        "400":
+          description: "Incorrect format of dto. Names cannot be empty or null."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to modify the phase. Only project admins are allowed to modify the phases of a project."
+        "404":
+          description: "Could not find the specified phase."
   /phases/{id}/position:
     put:
       summary: "Updates the position of the specified phase relative to the other phases of the project. The position is the ID of the previous phase. Null means that it shall be the first phase of the project."
@@ -466,6 +513,16 @@ paths:
       responses:
         "204":
           description: "Phase position updated."
+        "400":
+          description: "Incorrect format of dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to modify the phase. Only project admins are allowed to modify the phases of a project."
+        "404":
+          description: "Could not find the specified phase."
+        "409":
+          description: "The \"new\" previous Phase does not belong to the same project."
   /projects:
     post:
       summary: "Creates a new project. Triggers an accepted admin membership for the posting user."
