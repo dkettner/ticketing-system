@@ -171,6 +171,7 @@ public class TicketDomainService {
         if (dueTime != null) {
             ticket.setDueTime(dueTime);
         }
+        UUID oldPhaseId = null;
         if (phaseId != null) {
             if (!phaseBelongsToProject(phaseId, ticket.getProjectId())) {
                 throw new UnrelatedPhaseException(
@@ -181,9 +182,8 @@ public class TicketDomainService {
                 );
             }
 
-            UUID oldPhaseId = ticket.getPhaseId();
+            oldPhaseId = ticket.getPhaseId();
             ticket.setPhaseId(phaseId);
-            eventPublisher.publishEvent(new TicketPhaseUpdatedEvent(ticket.getId(), ticket.getProjectId(), oldPhaseId, phaseId));
         }
         if (assigneeIds != null) {
             if (!allAssigneesAreProjectMembers(ticket.getProjectId(), assigneeIds)) {
@@ -196,6 +196,9 @@ public class TicketDomainService {
         }
 
         ticketRepository.save(ticket);
+        if (phaseId != null) {
+            eventPublisher.publishEvent(new TicketPhaseUpdatedEvent(ticket.getId(), ticket.getProjectId(), oldPhaseId, phaseId));
+        }
     }
 
     private Boolean phaseBelongsToProject(UUID phaseId, UUID projectIdCandidate) {
