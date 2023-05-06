@@ -63,7 +63,8 @@ public class ExceptionHandlerManager extends ResponseEntityExceptionHandler {
             NoPhaseInProjectException.class,
             LastPhaseException.class,
             InvalidProjectMembersException.class,
-            EmailAlreadyInUseException.class
+            EmailAlreadyInUseException.class,
+            UnrelatedPhaseException.class
     })
     public ResponseEntity<String> handleConflictException(RuntimeException runtimeException) {
         logger.warn("exception -> " + runtimeException.getClass().getSimpleName() + ": " + runtimeException.getMessage());
