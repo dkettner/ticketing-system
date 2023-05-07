@@ -802,6 +802,10 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponseDto"
+        "400":
+          description: "Incorrect format of dto."
+        "409":
+          description: "The email is already in use."
     get:
       summary: "Gets users that match the specified query."
       tags:
@@ -821,6 +825,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponseDto"
+        "400":
+          description: "Incorrect format of query parameter. Only one parameter is allowed."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "404":
+          description: "Could not find any users that match the query."
   /users/{id}:
     get:
       summary: "Gets the user with the specified ID."
@@ -842,6 +852,12 @@ paths:
             '*/*':
               schema:
                 $ref: "#/components/schemas/UserResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "404":
+          description: "Could not find the specified user."
     patch:
       summary: "Updates the user."
       tags:
@@ -864,6 +880,16 @@ paths:
       responses:
         "204":
           description: "Updated the user."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "Users are only allowed to patch their own information."
+        "404":
+          description: "Could not find the specified user."
+        "409":
+          description: "The new email is already in use."
     delete:
       summary: "Deletes the user. Triggers deletion of related memberships etc."
       tags:
@@ -880,6 +906,14 @@ paths:
       responses:
         "204":
           description: "User deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "Users are only allowed to delete their own accounts."
+        "404":
+          description: "Could not find the specified user."
 components:
   securitySchemes:
     bearerAuth:
