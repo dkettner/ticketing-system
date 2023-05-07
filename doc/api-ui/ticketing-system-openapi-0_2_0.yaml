@@ -1,0 +1,1161 @@
+openapi: "3.0.3"
+info:
+  title: "Ticketing System API"
+  description: "A RESTful API for the Ticketing System: https://github.com/dkettner/ticketing-system"
+  version: '0.2.0'
+servers:
+  - url: "http://localhost:10001"
+paths:
+  /authentications:
+    post:
+      summary: "Authenticates a user by providing a JWT."
+      tags:
+        - authentication
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthenticationPostDto"
+        required: true
+      responses:
+        "200":
+          description: "User authenticated."
+          content:
+            '*/*':
+              schema:
+                type: "string"
+        "400":
+          description: "Incorrect format of dto. Possibly invalid format of email address."
+        "401":
+          description: "Incorrect password but user exists."
+        "404":
+          description: "User with this email does not exist."
+  /memberships:
+    post:
+      summary: "Creates an unaccepted membership. A user gets invited to a project."
+      tags:
+        - membership
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MembershipPostDto"
+        required: true
+      responses:
+        "201":
+          description: "Unacccepted membership created. The invited user may put ACCEPTED as the new state to accept or delete to decline."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MembershipResponseDto"
+        "400":
+          description: "Incorrect format of dto. Check if role is spelled correctly."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to post a membership for this project. Only admins have permission to invite other users."
+        "404":
+          description: "Could not find the specified user or project."
+        "409":
+          description: "The user already has a membership for this project."
+    get:
+      summary: "Gets memberships that match the specified query."
+      tags:
+        - membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "user-id"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "project-id"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "email"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Found memberships that match the specified query."
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/MembershipResponseDto"
+        "400":
+          description: "Incorrect format of query parameter."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access these memberships. A user may only access their own memberships and the other memberships of a project they are a part of (membership has to be accepted)."
+        "404":
+          description: "Could not find any memberships that match the query."
+  /memberships/{id}:
+    get:
+      summary: "Gets the membership with the specified ID."
+      tags:
+        - membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Found the specified membership."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/MembershipResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this membership. A user may only access their own memberships and the other memberships of a project they are a part of (membership has to be accepted)."
+        "404":
+          description: "Could not find the specified membership."
+    delete:
+      summary: "Deletes the membership. Either an admin revokes the membership or the user declines the invitation / leaves the project. Deleting the last membership of a project triggers deletion of project, phases, tickets."
+      tags:
+        - membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "204":
+          description: "Membership deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this membership. A user may only delete their own memberships and the other memberships of projects in which they hold the Admin role."
+        "404":
+          description: "Could not find any memberships that match the query."
+  /memberships/{id}/role:
+    put:
+      summary: "Updates the role of the membership. May change permissions within a project."
+      tags:
+        - membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MembershipPutRoleDto"
+        required: true
+      responses:
+        "204":
+          description: "Updated the role."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to change the role of this membership. Only admins are allowed to change the role of the project members."
+        "404":
+          description: "Could not find the specified membership."
+        "409":
+          description: "A project needs at least one admin. If the user is the last admin they cannot change their role to member."
+  /memberships/{id}/state:
+    put:
+      summary: "Updates the state of the membership. The invited user accepts the invitation to the project. An already accepted membership cannot be set to unaccepted. Delete instead."
+      tags:
+        - membership
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MembershipPutStateDto"
+        required: true
+      responses:
+        "204":
+          description: "Updated the state of the membership."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to change the state of this membership. Users may only change the state of their own memberships."
+        "404":
+          description: "Could not find the specified membership."
+        "409":
+          description: "The state of an already accepted membership cannot be updated. Delete to revoke the membership."
+  /notifications:
+    get:
+      summary: "Gets notifications that match the specified query."
+      tags:
+        - notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "recipientId"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "email"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Found notifications that match the specified query."
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/NotificationResponseDto"
+        "400":
+          description: "Incorrect format of query parameter."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access these notifications. A user may only access their own notifications."
+        "404":
+          description: "Could not find any notifications that match the query."
+  /notifications/{id}:
+    get:
+      summary: "Get the notification with the specified ID."
+      tags:
+        - notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Found the specified notification."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/NotificationResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this notification. A user may only access their own notifications."
+        "404":
+          description: "Could not find the specified notification."
+    patch:
+      summary: "Updates the notification. An already read notification cannot be set to unread."
+      tags:
+        - notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NotificationPatchDto"
+        required: true
+      responses:
+        "204":
+          description: "Notification updated."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this notification. A user may only access their own notifications."
+        "404":
+          description: "Could not find the specified notification."
+        "409":
+          description: "An already read notification cannot be set to unread."
+    delete:
+      summary: "Deletes the notification."
+      tags:
+        - notification
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "204":
+          description: "Notification deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this notification. A user may only delete their own notifications."
+        "404":
+          description: "Could not find the specified notification."
+  /phases:
+    post:
+      summary: "Creates a new phase for a project."
+      tags:
+        - phase
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhasePostDto"
+        required: true
+      responses:
+        "201":
+          description: "Phase created."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PhaseResponseDto"
+        "400":
+          description: "Incorrect format of dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to post a phase for the specified project. Only project admins may add new phases."
+        "404":
+          description: "Could not find the specified project or previous phase."
+        "409":
+          description: "The previous phase does not belong the roject."
+    get:
+      summary: "Gets phases that match the specified query."
+      tags:
+        - phase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "project-id"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Found phases that match the specified query."
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/PhaseResponseDto"
+        "400":
+          description: "Incorrect format of query parameter."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access the phases of the specified project. Only users with accepted memberships are allowed to get the phases of a project."
+        "404":
+          description: "Could not find any phases that match the query."
+  /phases/{id}:
+    get:
+      summary: "Gets the phase with the specified ID."
+      tags:
+        - phase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Found the specified phase."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/PhaseResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access the phase. Only users with accepted memberships are allowed to get the phases of a project."
+        "404":
+          description: "Could not find the specified phase."
+    delete:
+      summary: "Deletes the phase. Impossible if it still has tickets of if it is the last remaining phase of the project."
+      tags:
+        - phase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "204":
+          description: "Phase deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to delete the phase. Only project admins are allowed to delete the phases of a project."
+        "404":
+          description: "Could not find the specified phase."
+        "409":
+          description: "The specified phase could not be deleted. It either still has tickets (check ticketCount) or it already is the last phase of its project."
+  /phases/{id}/name:
+    put:
+      summary: "Updates the name of the specified phase."
+      tags:
+        - phase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhasePutNameDto"
+        required: true
+      responses:
+        "204":
+          description: "Phase name updated."
+        "400":
+          description: "Incorrect format of uuid or dto. Names cannot be empty or null."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to modify the phase. Only project admins are allowed to modify the phases of a project."
+        "404":
+          description: "Could not find the specified phase."
+  /phases/{id}/position:
+    put:
+      summary: "Updates the position of the specified phase relative to the other phases of the project. The position is the ID of the previous phase. Null means that it shall be the first phase of the project."
+      tags:
+        - phase
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PhasePutPositionDto"
+        required: true
+      responses:
+        "204":
+          description: "Phase position updated."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to modify the phase. Only project admins are allowed to modify the phases of a project."
+        "404":
+          description: "Could not find the specified phase."
+        "409":
+          description: "The \"new\" previous phase does not belong to the same project."
+  /projects:
+    post:
+      summary: "Creates a new project. Triggers an accepted admin membership for the posting user."
+      tags:
+        - project
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectPostDto"
+        required: true
+      responses:
+        "201":
+          description: "Project created."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProjectResponseDto"
+        "400":
+          description: "Incorrect format of dto. Name and Description cannot be null or empty."
+        "401":
+          description: "User has no valid jwt in authorization header."
+  /projects/{id}:
+    get:
+      summary: "Gets the project with the specified ID."
+      tags:
+        - project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Found the specified project."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/ProjectResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access the project. Only project members are allowed to get it. Check if the membership has already been accepted."
+        "404":
+          description: "Could not find the specified project."
+    patch:
+      summary: "Updates the project."
+      tags:
+        - project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectPatchDto"
+        required: true
+      responses:
+        "204":
+          description: "Project updated."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to modify the project. Only project admins are allowed to modify the project."
+        "404":
+          description: "Could not find the specified project."
+    delete:
+      summary: "Deletes the project. Triggers deletion of related memberships, phases, tickets."
+      tags:
+        - project
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "204":
+          description: "Project deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to delete the project. Only project admins are allowed to delete the project."
+        "404":
+          description: "Could not find the specified project."
+  /tickets:
+    post:
+      summary: "Creates a new ticket."
+      tags:
+        - ticket
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketPostDto"
+        required: true
+      responses:
+        "201":
+          description: "Ticket created."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TicketResponseDto"
+        "400":
+          description: "Incorrect format of dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to post a ticket to this project. Only users with accepted memberships are allowed to post tickets."
+        "404":
+          description: "Could not find the specified project."
+        "409":
+          description: "Not all assignees are project members."
+    get:
+      summary: "Gets tickets that match the specified query."
+      tags:
+        - ticket
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "phase-id"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "assignee-id"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+        - name: "project-id"
+          in: "query"
+          required: false
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Found tickets that match the specified query."
+          content:
+            '*/*':
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/TicketResponseDto"
+        "400":
+          description: "Incorrect format of query parameter. Only one query parameter is allowed."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access these tickets. Users may only access tickets of projects they are members of. Searching for tickets that are assigned to other users is also prohibited (at the moment), even if they are part of the same project."
+        "404":
+          description: "Could not find any tickets that match the query."
+  /tickets/{id}:
+    get:
+      summary: "Gets the ticket with the specified ID."
+      tags:
+        - ticket
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Found the specified ticket."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/TicketResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to access this ticket. Only users with accepted memberships are allowed to access the tickets of a project."
+        "404":
+          description: "Could not find the specified ticket."
+    patch:
+      summary: "Updates the ticket."
+      tags:
+        - ticket
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketPatchDto"
+        required: true
+      responses:
+        "204":
+          description: "Ticket updated."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to patch a ticket of this project. Only users with accepted memberships are allowed to patch tickets."
+        "404":
+          description: "Could not find the specified ticket."
+        "409":
+          description: "Not all assignees are project members or the ticket does not belong to the new phase."
+    delete:
+      summary: "Deletes the ticket."
+      tags:
+        - ticket
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "204":
+          description: "Ticket deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "User is not allowed to delete this ticket. Only project members are allowed to delete tickets."
+        "404":
+          description: "Could not find the specified ticket."
+  /users:
+    post:
+      summary: "Creates a new user. Triggers the creation of a default project."
+      tags:
+        - user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPostDto"
+        required: true
+      responses:
+        "201":
+          description: "User created."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDto"
+        "400":
+          description: "Incorrect format of dto."
+        "409":
+          description: "The email is already in use."
+    get:
+      summary: "Gets users that match the specified query."
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "email"
+          in: "query"
+          required: true
+          schema:
+            type: "string"
+      responses:
+        "200":
+          description: "Found users that match the specified query."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDto"
+        "400":
+          description: "Incorrect format of query parameter. Only one parameter is allowed."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "404":
+          description: "Could not find any users that match the query."
+  /users/{id}:
+    get:
+      summary: "Gets the user with the specified ID."
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "200":
+          description: "Found the specified user."
+          content:
+            '*/*':
+              schema:
+                $ref: "#/components/schemas/UserResponseDto"
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "404":
+          description: "Could not find the specified user."
+    patch:
+      summary: "Updates the user."
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserPatchDto"
+        required: true
+      responses:
+        "204":
+          description: "Updated the user."
+        "400":
+          description: "Incorrect format of uuid or dto."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "Users are only allowed to patch their own information."
+        "404":
+          description: "Could not find the specified user."
+        "409":
+          description: "The new email is already in use."
+    delete:
+      summary: "Deletes the user. Triggers deletion of related memberships etc."
+      tags:
+        - user
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          schema:
+            type: "string"
+            format: "uuid"
+      responses:
+        "204":
+          description: "User deleted."
+        "400":
+          description: "Incorrect format of uuid."
+        "401":
+          description: "User has no valid jwt in authorization header."
+        "403":
+          description: "Users are only allowed to delete their own accounts."
+        "404":
+          description: "Could not find the specified user."
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    AuthenticationPostDto:
+      type: "object"
+      properties:
+        email:
+          type: "string"
+        password:
+          type: "string"
+    MembershipPostDto:
+      type: "object"
+      properties:
+        projectId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        role:
+          type: "string"
+          enum:
+            - "MEMBER"
+            - "ADMIN"
+    MembershipResponseDto:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        projectId:
+          type: "string"
+          format: "uuid"
+        userId:
+          type: "string"
+          format: "uuid"
+        role:
+          type: "string"
+          enum:
+            - "MEMBER"
+            - "ADMIN"
+        state:
+          type: "string"
+          enum:
+            - "OPEN"
+            - "ACCEPTED"
+    MembershipPutRoleDto:
+      type: "object"
+      properties:
+        role:
+          type: "string"
+          enum:
+            - "MEMBER"
+            - "ADMIN"
+    MembershipPutStateDto:
+      type: "object"
+      properties:
+        state:
+          type: "string"
+          enum:
+            - "OPEN"
+            - "ACCEPTED"
+    NotificationResponseDto:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        creationTime:
+          type: "string"
+          format: "date-time"
+        recipientId:
+          type: "string"
+          format: "uuid"
+        isRead:
+          type: "boolean"
+        content:
+          type: "string"
+    NotificationPatchDto:
+      type: "object"
+      properties:
+        isRead:
+          type: "boolean"
+    PhasePostDto:
+      type: "object"
+      properties:
+        projectId:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        previousPhaseId:
+          type: "string"
+          format: "uuid"
+    PhaseResponseDto:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        projectId:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        previousPhaseId:
+          type: "string"
+          format: "uuid"
+        nextPhaseId:
+          type: "string"
+          format: "uuid"
+        ticketCount:
+          type: "integer"
+          format: "int32"
+    PhasePutNameDto:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+    PhasePutPositionDto:
+      type: "object"
+      properties:
+        previousPhase:
+          type: "string"
+          format: "uuid"
+    ProjectPostDto:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        description:
+          type: "string"
+    ProjectResponseDto:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        description:
+          type: "string"
+        creationTime:
+          type: "string"
+          format: "date-time"
+    ProjectPatchDto:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        description:
+          type: "string"
+    TicketPostDto:
+      type: "object"
+      properties:
+        projectId:
+          type: "string"
+          format: "uuid"
+        title:
+          type: "string"
+        description:
+          type: "string"
+        dueTime:
+          type: "string"
+          format: "date-time"
+        assigneeIds:
+          type: "array"
+          items:
+            type: "string"
+            format: "uuid"
+    TicketResponseDto:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        title:
+          type: "string"
+        description:
+          type: "string"
+        creationTime:
+          type: "string"
+          format: "date-time"
+        dueTime:
+          type: "string"
+          format: "date-time"
+        phaseId:
+          type: "string"
+          format: "uuid"
+        projectId:
+          type: "string"
+          format: "uuid"
+        assigneeIds:
+          type: "array"
+          items:
+            type: "string"
+            format: "uuid"
+    TicketPatchDto:
+      type: "object"
+      properties:
+        title:
+          type: "string"
+        description:
+          type: "string"
+        dueTime:
+          type: "string"
+          format: "date-time"
+        phaseId:
+          type: "string"
+          format: "uuid"
+        assigneeIds:
+          type: "array"
+          items:
+            type: "string"
+            format: "uuid"
+    UserPostDto:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        email:
+          type: "string"
+        password:
+          type: "string"
+    UserResponseDto:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          format: "uuid"
+        name:
+          type: "string"
+        email:
+          type: "string"
+    UserPatchDto:
+      type: "object"
+      properties:
+        name:
+          type: "string"
+        email:
+          type: "string"
