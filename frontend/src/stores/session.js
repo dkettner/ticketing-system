@@ -16,7 +16,7 @@ export const useSessionStore = defineStore("session", () => {
       return { isLoginSuccessful: true, message: "Logged in with email: " + loginEmail };
     } else {
       deleteEmail();
-      return { isLoginSuccessful: false, message: postAuthenticationResponse.data.response.data };
+      return { isLoginSuccessful: false, message: postAuthenticationResponse.data };
     }
   }
 
