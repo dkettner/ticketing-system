@@ -17,14 +17,14 @@ export const useFetchAgent = defineStore("fetchAgent", () => {
   };
   
   // authentication
-  const authenticationPath = "/authentication";
+  const authenticationPath = "/authentications";
 
   const postAuthentication = async (loginEmail, loginPassword) => {
     try {
       const response = await axios.post(authenticationPath, {email: loginEmail, password: loginPassword});
       return { isSuccessful: true, data: response.data };
     } catch (error) {
-      await handleError(error);
+      // await handleError(error);
       return { isSuccessful: false, data: error.response.data };
     }
   }
