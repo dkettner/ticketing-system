@@ -26,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles({ "test" })
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
@@ -132,7 +134,7 @@ public class ProjectControllerTests {
                                 post("/projects")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(projectPostDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.id").exists())
                         .andExpect(jsonPath("$.name").value(projectPostDto.getName()))
@@ -160,7 +162,7 @@ public class ProjectControllerTests {
                 mockMvc.perform(
                                 get("/projects/" + buildUpProjectId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.id").value(buildUpProjectId.toString()))
                         .andExpect(jsonPath("$.name").value(buildUpProjectName))
@@ -174,7 +176,7 @@ public class ProjectControllerTests {
                 mockMvc.perform(
                                 get("/projects/" + UUID.randomUUID())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isForbidden())
                         .andReturn();
     }
@@ -186,7 +188,7 @@ public class ProjectControllerTests {
                 mockMvc.perform(
                         delete("/projects/" + buildUpProjectId)
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .cookie(new Cookie("jwt", jwt)))
+                                .header("Authorization", jwt))
                 .andExpect(status().isNoContent())
                 .andReturn();
 
@@ -209,7 +211,7 @@ public class ProjectControllerTests {
                                 patch("/projects/" + buildUpProjectId)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(projectPatchDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
