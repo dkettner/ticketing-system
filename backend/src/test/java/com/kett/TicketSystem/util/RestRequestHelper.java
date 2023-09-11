@@ -43,7 +43,7 @@ public class RestRequestHelper {
                                 post("/phases")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(phasePostDto0))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isCreated())
                         .andReturn();
         String postResponse0 = postResult0.getResponse().getContentAsString();
@@ -55,7 +55,7 @@ public class RestRequestHelper {
                                 get("/phases")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("project-id", projectId.toString())
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isOk())
                         .andReturn();
         return getResult.getResponse().getContentAsString();
@@ -68,7 +68,7 @@ public class RestRequestHelper {
                                 post("/memberships")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPostDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.id").exists())
                         .andExpect(jsonPath("$.projectId").value(membershipPostDto.getProjectId().toString()))
@@ -87,7 +87,7 @@ public class RestRequestHelper {
                                 put("/memberships/" + membershipId + "/state")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPutStateDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
     }
@@ -108,7 +108,7 @@ public class RestRequestHelper {
                 mockMvc.perform(
                                 delete("/users/" + userId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
     }
@@ -122,7 +122,7 @@ public class RestRequestHelper {
                                         .content(objectMapper.writeValueAsString(authenticationPostDto4)))
                         .andExpect(status().isOk())
                         .andReturn();
-        return Objects.requireNonNull(postAuthenticationResult4.getResponse().getCookie("jwt")).getValue();
+        return "Bearer " + Objects.requireNonNull(postAuthenticationResult4.getResponse().getContentAsString());
     }
 
     public UUID postProject(String jwt, String projectName, String projectDescription) throws Exception {
@@ -132,7 +132,7 @@ public class RestRequestHelper {
                                 post("/projects")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(projectPostDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.id").exists())
                         .andExpect(jsonPath("$.name").value(projectPostDto.getName()))
@@ -149,7 +149,7 @@ public class RestRequestHelper {
                                 patch("/projects/" + projectId)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(projectPatchDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
     }
@@ -159,7 +159,7 @@ public class RestRequestHelper {
                 mockMvc.perform(
                                 delete("/projects/" + projectId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
     }
@@ -178,7 +178,7 @@ public class RestRequestHelper {
                                 post("/tickets")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(ticketPostDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isCreated())
                         .andReturn();
         String postResponse = postResult.getResponse().getContentAsString();
@@ -200,7 +200,7 @@ public class RestRequestHelper {
                                 patch("/tickets/" + ticketId)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(ticketPatchDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
     }
