@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import static org.junit.jupiter.api.Assertions.*;
@@ -20,9 +21,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Objects;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles({ "test" })
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class AuthenticationControllerTests {
@@ -103,9 +106,10 @@ public class AuthenticationControllerTests {
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(authenticationPostDto0)))
                         .andExpect(status().isOk())
+                        .andExpect(jsonPath("$").isNotEmpty())
                         .andReturn();
 
-        jwt0 = Objects.requireNonNull(postAuthenticationResult0.getResponse().getCookie("jwt")).getValue();
+        jwt0 = Objects.requireNonNull(postAuthenticationResult0.getResponse().getContentAsString());
         assertEquals(email0, jwtTokenProvider.getEmailFromToken(jwt0));
         assertTrue(jwtTokenProvider.validateToken(jwt0));
 
@@ -118,7 +122,7 @@ public class AuthenticationControllerTests {
                         .andExpect(status().isOk())
                         .andReturn();
 
-        jwt1 = Objects.requireNonNull(postAuthenticationResult1.getResponse().getCookie("jwt")).getValue();
+        jwt1 = Objects.requireNonNull(postAuthenticationResult1.getResponse().getContentAsString());
         assertEquals(email1, jwtTokenProvider.getEmailFromToken(jwt1));
         assertTrue(jwtTokenProvider.validateToken(jwt1));
     }
