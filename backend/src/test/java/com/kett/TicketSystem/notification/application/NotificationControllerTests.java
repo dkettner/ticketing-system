@@ -21,6 +21,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles({ "test" })
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
@@ -134,7 +136,7 @@ public class NotificationControllerTests {
                                 get("/notifications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("recipientId", userId0.toString())
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].id").exists())
                         .andExpect(jsonPath("$[0].recipientId").value(userId0.toString()))
@@ -149,7 +151,7 @@ public class NotificationControllerTests {
                                 get("/notifications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("email", userEmail0)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].id").exists())
                         .andExpect(jsonPath("$[0].recipientId").value(userId0.toString()))
@@ -172,7 +174,7 @@ public class NotificationControllerTests {
                                 get("/notifications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("recipientId", userId0.toString())
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andReturn();
         String getByRecipientIdResponse = getByRecipientIdResult.getResponse().getContentAsString();
@@ -182,7 +184,7 @@ public class NotificationControllerTests {
                 mockMvc.perform(
                                 get("/notifications/" + notificationId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.id").value(notificationId.toString()))
                         .andExpect(jsonPath("$.recipientId").value(userId0.toString()))
@@ -196,7 +198,7 @@ public class NotificationControllerTests {
                 mockMvc.perform(
                                 get("/notifications/" + UUID.randomUUID())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isNotFound())
                         .andReturn();
     }
@@ -211,7 +213,7 @@ public class NotificationControllerTests {
                                 get("/notifications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("recipientId", userId1.toString())
-                                        .cookie(new Cookie("jwt", jwt1)))
+                                        .header("Authorization", jwt1))
                         .andExpect(status().isOk())
                         .andReturn();
         String getByRecipientIdResponse = getByRecipientIdResult.getResponse().getContentAsString();
@@ -221,7 +223,7 @@ public class NotificationControllerTests {
                 mockMvc.perform(
                                 get("/notifications/" + notificationId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isForbidden())
                         .andReturn();
     }
@@ -236,7 +238,7 @@ public class NotificationControllerTests {
                                 get("/notifications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("recipientId", userId0.toString())
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andReturn();
         String getByRecipientIdResponse = getByRecipientIdResult.getResponse().getContentAsString();
@@ -249,7 +251,7 @@ public class NotificationControllerTests {
                         patch("/notifications/" + notificationId + "/is-read")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(notificationPatchDto))
-                                .cookie(new Cookie("jwt", jwt0)))
+                                .header("Authorization", jwt0))
                         .andExpect(status().isNoContent())
                         .andReturn();
         Notification patchedNotification = notificationDomainService.getNotificationById(notificationId);
@@ -264,7 +266,7 @@ public class NotificationControllerTests {
                                 patch("/notifications/" + notificationId + "/is-read")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(conflictingNotificationPatchDto))
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isConflict())
                         .andReturn();
         Notification unpatchedNotification = notificationDomainService.getNotificationById(notificationId);
@@ -281,7 +283,7 @@ public class NotificationControllerTests {
                                 get("/notifications")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("recipientId", userId0.toString())
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andReturn();
         String getByRecipientIdResponse = getByRecipientIdResult.getResponse().getContentAsString();
@@ -292,7 +294,7 @@ public class NotificationControllerTests {
                 mockMvc.perform(
                                 delete("/notifications/" + notificationId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isNoContent())
                         .andReturn();
         assertThrows(NoNotificationFoundException.class, () -> notificationDomainService.getNotificationById(notificationId));
@@ -304,7 +306,7 @@ public class NotificationControllerTests {
                 mockMvc.perform(
                                 delete("/notifications/" + UUID.randomUUID())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isNotFound())
                         .andReturn();
     }
