@@ -248,7 +248,7 @@ public class NotificationControllerTests {
         NotificationPatchDto notificationPatchDto = new NotificationPatchDto(true);
         MvcResult patchResult =
                 mockMvc.perform(
-                        patch("/notifications/" + notificationId + "/is-read")
+                        patch("/notifications/" + notificationId)
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(notificationPatchDto))
                                 .header("Authorization", jwt0))
@@ -263,7 +263,7 @@ public class NotificationControllerTests {
         NotificationPatchDto conflictingNotificationPatchDto = new NotificationPatchDto(false);
         MvcResult conflictingPatchResult =
                 mockMvc.perform(
-                                patch("/notifications/" + notificationId + "/is-read")
+                                patch("/notifications/" + notificationId)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(conflictingNotificationPatchDto))
                                         .header("Authorization", jwt0))
