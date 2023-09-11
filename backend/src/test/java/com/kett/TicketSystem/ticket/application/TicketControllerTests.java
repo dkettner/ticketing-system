@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles({ "test" })
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
@@ -190,7 +192,7 @@ public class TicketControllerTests {
                 mockMvc.perform(
                                 get("/tickets/" + ticketId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.id").value(ticketId.toString()))
                         .andExpect(jsonPath("$.projectId").value(buildUpProjectId.toString()))
@@ -221,7 +223,7 @@ public class TicketControllerTests {
                                 get("/tickets" )
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("phase-id", backlogId.toString())
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$").isArray())
                         .andExpect(jsonPath("$[0].id").value(ticketId0.toString()))
@@ -268,7 +270,7 @@ public class TicketControllerTests {
                                 get("/tickets" )
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("project-id", buildUpProjectId.toString())
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$").isArray())
                         .andExpect(jsonPath("$[0].id").value(ticketId0.toString()))
@@ -316,7 +318,7 @@ public class TicketControllerTests {
                                 get("/tickets" )
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("assignee-id", userId1.toString())
-                                        .cookie(new Cookie("jwt", jwt1)))
+                                        .header("Authorization", jwt1))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$").isArray())
                         .andExpect(jsonPath("$[0].id").value(ticketId0.toString()))
@@ -345,7 +347,7 @@ public class TicketControllerTests {
                                 post("/tickets")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(ticketPostDto))
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.id").exists())
                         .andExpect(jsonPath("$.projectId").value(buildUpProjectId.toString()))
@@ -390,7 +392,7 @@ public class TicketControllerTests {
                                 patch("/tickets/" + ticketId)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(ticketPatchDto))
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -418,7 +420,7 @@ public class TicketControllerTests {
                                 patch("/tickets/" + ticketId)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(ticketPatchDto))
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -455,7 +457,7 @@ public class TicketControllerTests {
                                 patch("/tickets/" + ticketId)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(ticketPatchDto))
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -487,7 +489,7 @@ public class TicketControllerTests {
                 mockMvc.perform(
                                 delete("/tickets/" + ticketId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
