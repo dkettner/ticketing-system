@@ -22,6 +22,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -36,6 +37,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
+@ActiveProfiles({ "test" })
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class UserControllerTests {
@@ -129,7 +131,7 @@ public class UserControllerTests {
                                         .content(objectMapper.writeValueAsString(authenticationPostDto4)))
                         .andExpect(status().isOk())
                         .andReturn();
-        jwt4 = Objects.requireNonNull(postAuthenticationResult4.getResponse().getCookie("jwt")).getValue();
+        jwt4 = "Bearer " + Objects.requireNonNull(postAuthenticationResult4.getResponse().getContentAsString());
     }
 
     @AfterEach
@@ -281,7 +283,7 @@ public class UserControllerTests {
                 mockMvc.perform(
                                 get("/users/" + id4)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isOk())
                         .andReturn();
         String response = result.getResponse().getContentAsString();
@@ -297,7 +299,7 @@ public class UserControllerTests {
                 mockMvc.perform(
                                 get("/users/" + UUID.randomUUID())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isNotFound())
                         .andReturn();
     }
@@ -308,7 +310,7 @@ public class UserControllerTests {
                 mockMvc.perform(
                                 get("/users" )
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt4))
+                                        .header("Authorization", jwt4)
                                         .queryParam("email", email4))
                         .andExpect(status().isOk())
                         .andReturn();
@@ -325,7 +327,7 @@ public class UserControllerTests {
                 mockMvc.perform(
                                 get("/users" )
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt4))
+                                        .header("Authorization", jwt4)
                                         .queryParam("email", "hola.quetal@espanol.com"))
                         .andExpect(status().isNotFound())
                         .andReturn();
@@ -351,7 +353,7 @@ public class UserControllerTests {
                 mockMvc.perform(
                                 get("/users" )
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt4))
+                                        .header("Authorization", jwt4)
                                         .queryParam("email", email0))
                         .andExpect(status().isOk())
                         .andReturn();
@@ -371,7 +373,7 @@ public class UserControllerTests {
                                 patch("/users/" + id4 )
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(userPatchDto))
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -397,7 +399,7 @@ public class UserControllerTests {
                                 patch("/users/" + id4 )
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(userPatchDto))
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -423,7 +425,7 @@ public class UserControllerTests {
                                 patch("/users/" + id4 )
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(userPatchDto))
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -446,7 +448,7 @@ public class UserControllerTests {
                 mockMvc.perform(
                                 patch("/users/" + id4)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isBadRequest())
                         .andReturn();
     }
@@ -459,7 +461,7 @@ public class UserControllerTests {
                                 patch("/users/" + id4)
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(userPatchDto))
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isBadRequest())
                         .andReturn();
     }
@@ -486,7 +488,7 @@ public class UserControllerTests {
                                 patch("/users/" + id0) // wrong but existing user
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(userPatchDto))
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isForbidden())
                         .andReturn();
 
@@ -495,7 +497,7 @@ public class UserControllerTests {
                                 patch("/users/" + UUID.randomUUID()) // non-existing user
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(userPatchDto))
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isForbidden())
                         .andReturn();
     }
@@ -520,7 +522,7 @@ public class UserControllerTests {
                 mockMvc.perform(
                                 delete("/users/" + id4)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -564,7 +566,7 @@ public class UserControllerTests {
                 mockMvc.perform(
                                 delete("/users/" + UUID.randomUUID())
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isForbidden())
                         .andReturn();
 
@@ -596,7 +598,7 @@ public class UserControllerTests {
                 mockMvc.perform(
                                 delete("/users/" + id0)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt4)))
+                                        .header("Authorization", jwt4))
                         .andExpect(status().isForbidden())
                         .andReturn();
 
