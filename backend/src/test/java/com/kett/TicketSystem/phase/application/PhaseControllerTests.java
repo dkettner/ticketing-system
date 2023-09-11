@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles({ "test" })
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
@@ -154,7 +156,7 @@ public class PhaseControllerTests {
                 mockMvc.perform(
                                 get("/phases/" + phaseId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.id").value(phaseId.toString()))
                         .andExpect(jsonPath("$.projectId").value(buildUpProjectId.toString()))
@@ -176,7 +178,7 @@ public class PhaseControllerTests {
                                 get("/phases")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("project-id", buildUpProjectId.toString())
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$").isArray())
                         .andExpect(jsonPath("$[0].id").value(phases.get(0).getId().toString()))
@@ -204,7 +206,7 @@ public class PhaseControllerTests {
                                 post("/phases")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(phasePostDto0))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.id").exists())
                         .andExpect(jsonPath("$.projectId").value(buildUpProjectId.toString()))
@@ -239,7 +241,7 @@ public class PhaseControllerTests {
                                 post("/phases")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(phasePostDto1))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.id").exists())
                         .andExpect(jsonPath("$.projectId").value(buildUpProjectId.toString()))
@@ -302,7 +304,7 @@ public class PhaseControllerTests {
                 mockMvc.perform(
                                 delete("/phases/" + phaseId1)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -333,7 +335,7 @@ public class PhaseControllerTests {
                 mockMvc.perform(
                                 delete("/phases/" + backlogId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -361,7 +363,7 @@ public class PhaseControllerTests {
                 mockMvc.perform(
                                 delete("/phases/" + phaseId0)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isConflict())
                         .andReturn();
 
@@ -391,7 +393,7 @@ public class PhaseControllerTests {
                                 put("/phases/" + backlogId + "/name")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(phasePutNameDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -439,7 +441,7 @@ public class PhaseControllerTests {
                                 put("/phases/" + phaseId0 + "/position")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(phasePutPositionDto))
-                                        .cookie(new Cookie("jwt", jwt)))
+                                        .header("Authorization", jwt))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
