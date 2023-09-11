@@ -29,6 +29,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,6 +44,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
+@ActiveProfiles({ "test" })
 @AutoConfigureMockMvc
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @Transactional
@@ -155,7 +157,7 @@ public class MembershipControllerTests {
                 mockMvc.perform(
                                 get("/memberships/" + membershipId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt1)))
+                                        .header("Authorization", jwt1))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.id").value(membershipId.toString()))
                         .andExpect(jsonPath("$.projectId").value(projectId0.toString()))
@@ -177,7 +179,7 @@ public class MembershipControllerTests {
                 mockMvc.perform(
                                 get("/memberships/" + membershipId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.id").value(membershipId.toString()))
                         .andExpect(jsonPath("$.projectId").value(projectId0.toString()))
@@ -198,7 +200,7 @@ public class MembershipControllerTests {
                                 get("/memberships")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("user-id", userId0.toString())
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].id").exists())
                         .andExpect(jsonPath("$[0].userId").value(userId0.toString()))
@@ -216,7 +218,7 @@ public class MembershipControllerTests {
                                 get("/memberships")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("email", userEmail0)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andReturn();
         assertEquals(getByUserIdResult.getResponse().getContentAsString(), getByEmailResult.getResponse().getContentAsString());
@@ -235,7 +237,7 @@ public class MembershipControllerTests {
                                 get("/memberships")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .queryParam("project-id", projectId0.toString())
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].id").exists())
                         .andExpect(jsonPath("$[0].userId").value(userId0.toString()))
@@ -263,7 +265,7 @@ public class MembershipControllerTests {
                                 post("/memberships")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPostDto))
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isCreated())
                         .andExpect(jsonPath("$.id").exists())
                         .andExpect(jsonPath("$.projectId").value(membershipPostDto.getProjectId().toString()))
@@ -307,7 +309,7 @@ public class MembershipControllerTests {
                                 put("/memberships/" + membershipId + "/state")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPutStateDto))
-                                        .cookie(new Cookie("jwt", jwt1)))
+                                        .header("Authorization", jwt1))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -342,7 +344,7 @@ public class MembershipControllerTests {
                                 put("/memberships/" + membershipId + "/state")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPutStateDto0))
-                                        .cookie(new Cookie("jwt", jwt1)))
+                                        .header("Authorization", jwt1))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -353,7 +355,7 @@ public class MembershipControllerTests {
                                 put("/memberships/" + membershipId + "/state")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPutStateDto1))
-                                        .cookie(new Cookie("jwt", jwt1)))
+                                        .header("Authorization", jwt1))
                         .andExpect(status().isConflict())
                         .andReturn();
 
@@ -380,7 +382,7 @@ public class MembershipControllerTests {
                                 put("/memberships/" + membershipId + "/state")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPutStateDto0))
-                                        .cookie(new Cookie("jwt", jwt1)))
+                                        .header("Authorization", jwt1))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -391,7 +393,7 @@ public class MembershipControllerTests {
                                 put("/memberships/" + membershipId + "/state")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPutStateDto1))
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isForbidden())
                         .andReturn();
 
@@ -417,7 +419,7 @@ public class MembershipControllerTests {
                                 put("/memberships/" + membershipId + "/state")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPutStateDto))
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isForbidden())
                         .andReturn();
 
@@ -443,7 +445,7 @@ public class MembershipControllerTests {
                                 put("/memberships/" + membershipId + "/role")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPutStateDto))
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -469,7 +471,7 @@ public class MembershipControllerTests {
                                 put("/memberships/" + membershipId + "/role")
                                         .contentType(MediaType.APPLICATION_JSON)
                                         .content(objectMapper.writeValueAsString(membershipPutStateDto))
-                                        .cookie(new Cookie("jwt", jwt1)))
+                                        .header("Authorization", jwt1))
                         .andExpect(status().isForbidden())
                         .andReturn();
 
@@ -494,7 +496,7 @@ public class MembershipControllerTests {
                 mockMvc.perform(
                                 delete("/memberships/" + membershipId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt0)))
+                                        .header("Authorization", jwt0))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
@@ -521,7 +523,7 @@ public class MembershipControllerTests {
                 mockMvc.perform(
                                 delete("/memberships/" + membershipId)
                                         .contentType(MediaType.APPLICATION_JSON)
-                                        .cookie(new Cookie("jwt", jwt1)))
+                                        .header("Authorization", jwt1))
                         .andExpect(status().isNoContent())
                         .andReturn();
 
