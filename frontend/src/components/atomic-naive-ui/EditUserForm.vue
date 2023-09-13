@@ -20,10 +20,10 @@
   const eleventhCheckBox = ref(false);
   const twelfthCheckBox = ref(false);
   const isDeleteUserButtonDisabled = computed(() => 
-    !firstCheckBox.value || !secondCheckBox.value || !thirdCheckBox.value ||
-    !fourthCheckBox.value || !fithCheckBox.value || !sixthCheckBox.value ||
-    !seventhCheckBox.value || !eighthCheckBox.value || !ninthCheckBox.value ||
-    !tenthCheckBox.value || !eleventhCheckBox.value || !twelfthCheckBox.value
+    !firstCheckBox.value || !secondCheckBox.value || !thirdCheckBox.value 
+    //!fourthCheckBox.value || !fithCheckBox.value || !sixthCheckBox.value ||
+    //!seventhCheckBox.value || !eighthCheckBox.value || !ninthCheckBox.value ||
+    //!tenthCheckBox.value || !eleventhCheckBox.value || !twelfthCheckBox.value
   );
 
   const isNameSubmitButtonDisabled = computed(() => user.value.name == undefined || user.value.name.length == 0);
@@ -104,7 +104,7 @@
           </div>
         </n-checkbox>
       </div>
-      <div v-if="thirdCheckBox">
+      <div v-if="fourthCheckBox">
         <br/>
         <n-checkbox v-model:checked="fourthCheckBox">
           Are you really sure?
