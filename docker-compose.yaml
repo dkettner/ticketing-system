@@ -19,7 +19,7 @@ services:
 
   backend:
     container_name: backend
-    image: dkettner/ticketing-system-backend
+    image: dkettner/ticketing-system-backend:0.2.1
     depends_on:
       postgres:
         condition: service_healthy
@@ -37,7 +37,7 @@ services:
       - ticketing_system_net
 
   frontend:
-    image: dkettner/ticketing-system-frontend
+    image: dkettner/ticketing-system-frontend:0.2.1
     container_name: frontend
     depends_on:
       - backend
